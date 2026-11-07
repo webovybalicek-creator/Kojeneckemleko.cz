@@ -1,6 +1,4 @@
-# Build Astro a nahrání na hosting přes FTP.
-# Zatím jen ruční spuštění (Actions → Deploy → Run workflow). Automatický deploy při pushi
-# zapneš odkomentováním bloku `push` níže.
+# Build Astro a nahrání na hosting přes FTP – automaticky při pushi do main, případně ručně v Actions.
 #
 # Potřebné GitHub Secrets (Settings → Secrets and variables → Actions):
 #   FTP_SERVER       – adresa FTP serveru (např. ftp.example.cz)
@@ -12,9 +10,9 @@
 name: Deploy
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-  # push:
-  #   branches: [main]
 
 concurrency:
   group: deploy

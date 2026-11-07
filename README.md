@@ -13,7 +13,7 @@ npm run build    # výstup v dist/
 
 ## Deploy (FTP)
 
-GitHub Action `.github/workflows/deploy.yml` – build + nahrání `dist/` přes FTP. Spouští se ručně v záložce Actions.
+GitHub Action `.github/workflows/deploy.yml` – build + nahrání `dist/` přes FTP. Spouští se automaticky při pushi do `main`, ručně v záložce Actions.
 
 Secrets (Settings → Secrets and variables → Actions):
 
