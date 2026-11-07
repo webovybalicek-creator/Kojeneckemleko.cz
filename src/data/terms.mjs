@@ -21,6 +21,7 @@ export const terms = {
   HA: { tip: 'Mléko se štěpenou (hydrolyzovanou) bílkovinou kravského mléka. Důkazy o prevenci alergie jsou slabé.', href: '/slovnicek/#ha' },
   AR: { tip: 'Antirefluxní, zahuštěné mléko proti ublinkávání – jen na doporučení lékaře.', href: '/slovnicek/#ar' },
   ABKM: { tip: 'Alergie na bílkovinu kravského mléka.', href: '/slovnicek/#abkm' },
+  AAF: { tip: 'Aminokyselinové mléko – bez bílkoviny kravského mléka, pro těžké případy ABKM.', href: '/slovnicek/#aminokyselinove' },
   DMT: { tip: 'Datum minimální trvanlivosti na obalu.', href: '/slovnicek/#dmt' },
   Comfort: { tip: 'Mléko s částečně štěpenou bílkovinou prodávané proti kolikám a zácpě; důkazy o účinku chybí.', href: '/slovnicek/#comfort' },
   Cronobacter: { tip: 'Bakterie, která se může vyskytnout v sušeném mléce – proto se připravuje vodou alespoň 70 °C.', href: '/slovnicek/#cronobacter' },

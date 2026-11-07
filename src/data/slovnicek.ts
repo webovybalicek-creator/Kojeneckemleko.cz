@@ -19,6 +19,13 @@ export const glossarySources: GlossarySource[] = [
   { title: 'Stahovaná kojenecká výživa: doporučený postup pro rodiče', publisher: 'Ministerstvo zdravotnictví ČR', url: 'https://mzd.gov.cz/?p=227996', year: 2026, kind: 'doporuceni' },
   { title: 'Stahovaná kojenecká mléka: jak ověřit balení a kdy kontaktovat lékaře', publisher: 'Ministerstvo zdravotnictví ČR', url: 'https://mzd.gov.cz/?p=227989', year: 2026, kind: 'doporuceni' },
   { title: 'How to use formula', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/bottle-feeding/how-to-make-up-a-feed/how-to-use-formula/', year: 2025, kind: 'doporuceni' },
+  {
+    title: "An ESPGHAN Position Paper on the Diagnosis, Management, and Prevention of Cow's Milk Allergy",
+    publisher: 'Journal of Pediatric Gastroenterology and Nutrition 78(2): 386–413',
+    url: 'https://air.unimi.it/handle/2434/1027468',
+    year: 2024, kind: 'studie', doi: '10.1097/MPG.0000000000003897',
+    authors: [{ name: 'Yvan Vandenplas' }, { name: 'Ilse Broekaert' }, { name: 'Magnus Domellöf' }, { name: 'a další' }],
+  },
 ];
 
 export type GlossaryGroup = 'typy' | 'specialni' | 'bezpecnost';
@@ -145,6 +152,16 @@ export const glossary: GlossaryTerm[] = [
       'Zkratka pro alergii na bílkovinu kravského mléka. Při potvrzené diagnóze lékař předepisuje mléko s plně štěpenou bílkovinou [1][2]. Mléka comfort, HA s částečně štěpenou bílkovinou ani kozí mléko pro tyto děti vhodná nejsou [1][2].',
     ],
     note: 'Diagnózu a výběr mléka vždy určuje lékař.',
+    link: { label: 'ABKM u kojence: příznaky a co dělat', href: '/krmeni/alergie-na-bilkovinu-kravskeho-mleka/' },
+  },
+  {
+    id: 'aminokyselinove', term: 'Aminokyselinové mléko', aka: 'AAF, amino acid formula', group: 'specialni',
+    short: 'Mléko, v němž je bílkovina zcela nahrazena aminokyselinami; pro těžké případy ABKM.',
+    body: [
+      'Neobsahuje bílkovinu kravského mléka – je v něm nahrazena jednotlivými aminokyselinami. Podle ESPGHAN je určené pro těžké případy alergie na bílkovinu kravského mléka, například po anafylaktické reakci, při neprospívání nebo když příznaky trvají i na extenzivně hydrolyzovaném mléce [8].',
+    ],
+    note: 'Pouze na doporučení lékaře.',
+    link: { label: 'ABKM u kojence: příznaky a co dělat', href: '/krmeni/alergie-na-bilkovinu-kravskeho-mleka/' },
   },
   {
     id: 'tekute-mleko', term: 'Tekuté mléko připravené k podání', aka: 'ready-to-feed', group: 'bezpecnost',
