@@ -73,7 +73,7 @@ function km_salt(PDO $pdo, string $day): string
 function km_is_bot(string $ua): bool
 {
     return $ua === '' || (bool) preg_match(
-        '/bot|crawl|spider|slurp|mediapartners|yandex|baidu|seznambot|facebookexternalhit|preview|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python|httpclient|java\//i',
+        '/bot|crawl|spider|slurp|mediapartners|yandex|baidu|seznambot|facebookexternalhit|preview|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python|httpclient|java\/|claude|anthropic/i',
         $ua
     );
 }

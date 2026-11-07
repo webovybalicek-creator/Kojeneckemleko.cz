@@ -31,6 +31,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if ($password !== '' && hash_equals($password, (string) ($_POST['heslo'] ?? ''))) {
         session_regenerate_id(true);
         $_SESSION['ok'] = true;
+        $_SESSION['nemerit'] = true; // po přihlášení vyřadit prohlížeč z měření
         header('Location: ./');
         exit;
     }
@@ -38,6 +39,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $authed = !empty($_SESSION['ok']) && $password !== '';
+$setNoTrack = $authed && !empty($_SESSION['nemerit']);
+unset($_SESSION['nemerit']);
 
 $range = (int) ($_GET['dni'] ?? 30);
 if (!in_array($range, [7, 30, 90, 365], true)) {
@@ -218,7 +221,29 @@ $fmt = fn (int $n): string => number_format($n, 0, ',', "\u{00A0}");
   <footer class="muted">
     Měření bez cookies, boti jsou vyfiltrovaní. Návštěvník = unikátní kombinace zařízení a prohlížeče během jednoho dne.
     · <a href="?odhlasit=1">Odhlásit</a>
+    <br><span id="nemerit">Tento prohlížeč se nezapočítává do statistik.</span>
+    <a href="#" id="nemerit-toggle">Znovu počítat</a>
   </footer>
+  <script>
+    // Přihlášením se tento prohlížeč vyřadí z měření (značka v localStorage pro celý web).
+    (function () {
+      var k = 'km-nemerit', t = document.getElementById('nemerit'), b = document.getElementById('nemerit-toggle');
+      function show() {
+        var on = localStorage.getItem(k) === '1';
+        t.textContent = on ? 'Tento prohlížeč se nezapočítává do statistik.' : 'Tento prohlížeč se započítává do statistik.';
+        b.textContent = on ? 'Znovu počítat' : 'Nepočítat';
+      }
+      try {
+        <?php if ($setNoTrack): ?>localStorage.setItem(k, '1');<?php endif; ?>
+        show();
+        b.addEventListener('click', function (e) {
+          e.preventDefault();
+          localStorage.getItem(k) === '1' ? localStorage.removeItem(k) : localStorage.setItem(k, '1');
+          show();
+        });
+      } catch (e) { t.textContent = 'Prohlížeč neumožňuje uložit nastavení – použij odkaz s ?nemerit=1.'; b.hidden = true; }
+    })();
+  </script>
 <?php endif; ?>
 </div>
 </body>

@@ -79,6 +79,13 @@ const baseLd = [
           try {
             var h = location.hostname;
             if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl || h === 'localhost' || h === '127.0.0.1') return;
+            // Vlastní návštěvy se nepočítají: ?nemerit=1 (nebo přihlášení na /navstevnost/) uloží značku do localStorage, ?nemerit=0 ji smaže
+            var q = new URLSearchParams(location.search).get('nemerit');
+            try {
+              if (q === '1') localStorage.setItem('km-nemerit', '1');
+              if (q === '0') localStorage.removeItem('km-nemerit');
+              if (localStorage.getItem('km-nemerit') === '1') return;
+            } catch (e) {}
             var d = JSON.stringify({ p: location.pathname, r: document.referrer });
             if (!(navigator.sendBeacon && navigator.sendBeacon('/api/hit.php', d))) {
               fetch('/api/hit.php', { method: 'POST', body: d, keepalive: true }).catch(function () {});
