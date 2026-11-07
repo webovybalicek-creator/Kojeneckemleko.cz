@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Arrow from '../components/Arrow.astro';
+import Illustration from '../components/Illustration.astro';
 ---
 <Base title="Stránka nenalezena" description="Tuto stránku jsme nenašli." noindex>
   <section class="container nf">
@@ -9,11 +10,14 @@ import Arrow from '../components/Arrow.astro';
       <h1>Tuhle stránku jsme nenašli.</h1>
       <p class="lead">Možná se přesunula. Zkuste začít na úvodu nebo u přehledu mlék.</p>
       <p><a href="/" class="btn">Na úvod <Arrow /></a></p>
+      <Illustration name="sprig" class="nf-illu" />
     </div>
   </section>
 </Base>
 
 <style>
   .nf { padding-top: var(--space-6); }
-  .nf .panel { padding-block: var(--space-6); }
+  .nf .panel { position: relative; overflow: hidden; padding-block: var(--space-6); }
+  .nf .panel > :not(:global(.nf-illu)) { position: relative; z-index: 1; }
+  .nf .panel :global(.nf-illu) { position: absolute; right: -1rem; bottom: -1rem; width: 12rem; }
 </style>

@@ -1,0 +1,120 @@
+---
+/**
+ * Vlastní botanické ilustrace webu (SVG, paleta Ease Health).
+ * Záměrně bez miminek a bez idealizace umělé výživy (viz CLAUDE.md – regulace).
+ */
+interface Props {
+  name: 'sprig' | 'mleka' | 'krmeni' | 'prikrmy' | 'zdroje';
+  class?: string;
+}
+const { name, class: className } = Astro.props;
+
+type Tone = 'sage' | 'mint' | 'keylime' | 'cream' | 'slate';
+interface Leaf { x: number; y: number; a: number; l: number; w?: number; t?: Tone }
+
+const leafPath = (l: number, w: number) =>
+  `M0 0 C ${l * 0.22} ${-w}, ${l * 0.72} ${-w}, ${l} 0 C ${l * 0.72} ${w}, ${l * 0.22} ${w}, 0 0 Z`;
+
+const leaves: Record<string, Leaf[]> = {
+  sprig: [
+    { x: 118, y: 168, a: -150, l: 46, t: 'sage' },
+    { x: 121, y: 150, a: -28, l: 52, t: 'mint' },
+    { x: 125, y: 128, a: -158, l: 44, t: 'mint' },
+    { x: 131, y: 108, a: -22, l: 48, t: 'sage' },
+    { x: 139, y: 88, a: -150, l: 40, t: 'sage' },
+    { x: 147, y: 70, a: -30, l: 40, t: 'mint' },
+    { x: 156, y: 52, a: -140, l: 32, t: 'mint' },
+    { x: 163, y: 38, a: -60, l: 30, t: 'sage' },
+  ],
+  mleka: [
+    { x: 58, y: 168, a: -120, l: 46, t: 'sage' },
+    { x: 60, y: 150, a: -160, l: 38, t: 'mint' },
+    { x: 176, y: 172, a: -62, l: 44, t: 'mint' },
+    { x: 180, y: 150, a: -18, l: 36, t: 'sage' },
+  ],
+  krmeni: [
+    { x: 120, y: 176, a: -128, l: 92, w: 36, t: 'sage' },
+    { x: 120, y: 176, a: -52, l: 92, w: 36, t: 'mint' },
+  ],
+  prikrmy: [
+    { x: 108, y: 96, a: -120, l: 40, t: 'sage' },
+    { x: 112, y: 84, a: -62, l: 44, t: 'mint' },
+    { x: 104, y: 70, a: -105, l: 30, t: 'mint' },
+  ],
+  zdroje: [
+    { x: 70, y: 168, a: -50, l: 130, w: 40, t: 'sage' },
+  ],
+};
+const items = leaves[name] ?? [];
+---
+<svg class:list={['illu', `illu--${name}`, className]} viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+  {name === 'mleka' && (
+    <g>
+      <circle cx="120" cy="108" r="74" class="f-keylime" />
+      <path d="M110 46 C110 34 114 26 120 24 C126 26 130 34 130 46 Z" class="f-cream s" />
+      <rect x="101" y="46" width="38" height="14" rx="4" class="f-mint s" />
+      <rect x="94" y="60" width="52" height="108" rx="16" class="f-cream s" />
+      <path d="M94.75 112 H145.25 V152 A15.25 15.25 0 0 1 130 167.25 H110 A15.25 15.25 0 0 1 94.75 152 Z" class="f-mint" />
+      <rect x="94" y="60" width="52" height="108" rx="16" class="s" fill="none" />
+      <path d="M128 82 H138 M131 97 H138 M128 112 H138 M131 127 H138 M128 142 H138" class="s thin" />
+    </g>
+  )}
+
+  {name === 'prikrmy' && (
+    <g>
+      <circle cx="120" cy="112" r="74" class="f-keylime" />
+      <path d="M190 40 L148 104" class="s" />
+      <ellipse cx="194" cy="34" rx="9" ry="13" transform="rotate(34 194 34)" class="f-cream s" />
+      <path d="M64 120 A56 50 0 0 0 176 120 Z" class="f-mint s" />
+      <ellipse cx="120" cy="120" rx="56" ry="9" class="f-cream s" />
+      <circle cx="136" cy="116" r="6" class="f-sage s thin" />
+      <circle cx="148" cy="119" r="5" class="f-sage s thin" />
+      <path d="M86 186 H154" class="s thin" />
+    </g>
+  )}
+
+  {name === 'zdroje' && (
+    <g>
+      <circle cx="120" cy="104" r="74" class="f-keylime" />
+    </g>
+  )}
+
+  {name === 'sprig' && <path d="M116 192 C114 150 126 104 166 30" class="s" fill="none" />}
+  {name === 'mleka' && <path d="M52 186 C56 170 60 160 66 148 M172 188 C176 170 180 158 186 146" class="s" fill="none" />}
+  {name === 'krmeni' && (
+    <g>
+      <circle cx="120" cy="104" r="74" class="f-keylime" />
+      <path d="M120 194 V150" class="s" />
+    </g>
+  )}
+  {name === 'prikrmy' && <path d="M112 112 C110 100 108 88 104 70" class="s" fill="none" />}
+
+  {items.map((lf) => (
+    <g transform={`translate(${lf.x} ${lf.y}) rotate(${lf.a})`}>
+      <path d={leafPath(lf.l, lf.w ?? lf.l * 0.3)} class={`f-${lf.t ?? 'sage'} s`} />
+      <path d={`M${lf.l * 0.12} 0 L${lf.l * 0.82} 0`} class="s thin" />
+    </g>
+  ))}
+
+  {name === 'zdroje' && (
+    <g>
+      <circle cx="146" cy="92" r="34" class="f-cream s" fill-opacity="0.55" />
+      <path d="M170 116 L198 144" class="s thick" />
+    </g>
+  )}
+  {name === 'krmeni' && (
+    <path d="M108 120 C108 112 120 108 120 118 C120 108 132 112 132 120 C132 128 120 134 120 138 C120 134 108 128 108 120 Z" class="f-cream s thin" />
+  )}
+</svg>
+
+<style>
+  .illu { display: block; width: 100%; height: auto; overflow: visible; }
+  .s { stroke: var(--color-forest-ink); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .thin { stroke-width: 1.1; }
+  .thick { stroke-width: 6; }
+  .f-sage { fill: var(--color-sage-mist); }
+  .f-mint { fill: var(--color-mint-veil); }
+  .f-keylime { fill: var(--color-keylime-wash); }
+  .f-cream { fill: var(--color-cream-paper); }
+  .f-slate { fill: var(--color-slate-hush); }
+</style>

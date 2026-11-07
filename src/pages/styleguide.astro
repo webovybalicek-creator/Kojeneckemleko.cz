@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import MilkTable from '../components/MilkTable.astro';
 import SourceList from '../components/SourceList.astro';
 import Arrow from '../components/Arrow.astro';
+import Illustration from '../components/Illustration.astro';
 
 const demo = [
   { name: 'Ukázkové mléko 1', brand: 'Značka A', stage: 'pocatecni', base: 'kravske', types: ['standard'], hmo: true, palmOil: false, pricePer100ml: 9.8 },
@@ -59,6 +60,13 @@ const swatches = [
       <div class="panel panel--slate">Slate</div>
     </div>
 
+    <h2>Ilustrace</h2>
+    <div class="illus">
+      {(['sprig', 'mleka', 'krmeni', 'prikrmy', 'zdroje'] as const).map((n) => (
+        <figure class="panel panel--cream"><Illustration name={n} /><figcaption class="muted">{n}</figcaption></figure>
+      ))}
+    </div>
+
     <h2>Srovnávací tabulka (ukázková data)</h2>
     <MilkTable milks={demo} />
     <h3>Prázdný stav</h3>
@@ -78,6 +86,9 @@ const swatches = [
   .swatches { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-2); }
   .swatches li { display: grid; gap: 4px; font-size: var(--fs-small); }
   .sw { height: 64px; border-radius: var(--radius-card); box-shadow: inset 0 0 0 1px var(--line); }
+  .illus { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-2); }
+  .illus figure { border: 1px solid var(--line); text-align: center; font-size: var(--fs-small); }
+  @media (max-width: 760px) { .illus { grid-template-columns: 1fr 1fr; } }
   .row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
   .panels { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
   @media (max-width: 640px) { .panels { grid-template-columns: 1fr 1fr; } }
