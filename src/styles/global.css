@@ -5,7 +5,7 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 5rem; }
+html { overflow-x: clip; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 5rem; }
 img, svg, video { display: block; max-width: 100%; height: auto; }
 input, button, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -135,6 +135,51 @@ a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 0.
 @media (max-width: 640px) {
   .panel { padding: var(--space-4); }
 }
+
+/* ---------- Tooltip vysvětlivek (zkratky a pojmy) ---------- */
+.term {
+  position: relative;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, var(--ink) 55%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.22em;
+  cursor: help;
+}
+a.term { cursor: pointer; }
+.term--chip { text-decoration: none; }
+.term::after {
+  content: attr(data-tip);
+  position: absolute; z-index: 60;
+  left: 50%; bottom: calc(100% + 8px);
+  width: max-content; max-width: min(17rem, calc(100vw - 2rem));
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: var(--color-forest-ink); color: var(--color-cream-paper);
+  font-family: var(--font-sans); font-size: var(--fs-small); font-weight: 400;
+  line-height: 1.45; letter-spacing: 0; text-align: left; text-transform: none; white-space: normal;
+  pointer-events: none;
+  /* skrytý stav má nulovou velikost, aby tooltip u okraje nerozšiřoval stránku */
+  opacity: 0;
+  transform: translateX(calc(-50% + var(--tip-dx, 0px))) scale(0);
+  transform-origin: 50% 100%;
+  transition: opacity var(--dur-fast) var(--ease-out), transform 0s linear var(--dur-fast);
+}
+.term:focus-visible::after,
+.term:focus::after {
+  opacity: 1;
+  transform: translateX(calc(-50% + var(--tip-dx, 0px))) scale(1);
+  transition: opacity var(--dur-fast) var(--ease-out), transform 0s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .term:hover::after {
+    opacity: 1;
+    transform: translateX(calc(-50% + var(--tip-dx, 0px))) scale(1);
+    transition: opacity var(--dur-fast) var(--ease-out) 180ms, transform 0s 180ms;
+  }
+  .term:hover { text-decoration-color: var(--ink); }
+}
+.term:focus:not(:focus-visible) { outline: none; }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {

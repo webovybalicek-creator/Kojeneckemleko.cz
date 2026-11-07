@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { tagToTerm, termHref } from '../data/slovnicek';
 
 interface Props {
   milks: CollectionEntry<'mleka'>[];
@@ -49,7 +50,9 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
               </th>
               <td>{stageLabel[data.stage]}</td>
               <td>{baseLabel[data.base]}</td>
-              <td><span class="types">{data.types.map((t) => <span class="tag tag--sm tag--soft">{t}</span>)}</span></td>
+              <td><span class="types">{data.types.map((t) => tagToTerm[t]
+                ? <a href={termHref(tagToTerm[t])} class="tag tag--sm tag--soft">{t}</a>
+                : <span class="tag tag--sm tag--soft">{t}</span>)}</span></td>
               <td>{yesNo(data.hmo)}</td>
               <td>{yesNo(data.palmOil)}</td>
               <td>{price(data.pricePer100ml)}</td>

@@ -3,6 +3,9 @@ import Base from '../layouts/Base.astro';
 import Arrow from '../components/Arrow.astro';
 import Marquee from '../components/Marquee.astro';
 import Illustration from '../components/Illustration.astro';
+import { annotate, terms } from '../data/terms.mjs';
+import { tagToTerm, termHref, glossary } from '../data/slovnicek';
+const chipTip = (c: string) => glossary.find((g) => g.id === tagToTerm[c])?.short ?? '';
 
 // Fakta z NHS – ověřeno 7. 11. 2026 (revize stránek NHS 12/2025 a NHS 111 Wales 2021)
 const NHS_FORMULA = 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/bottle-feeding/how-to-make-up-a-feed/how-to-use-formula/';
@@ -119,9 +122,11 @@ const faqLd = {
               {st.fact && (
                 <p class="stage__fact"><span class="serif tabular">{st.fact}</span> <span class="muted">{st.factNote}</span></p>
               )}
-              <p class="muted small">{st.note}</p>
+              <p class="muted small" set:html={annotate(st.note)} />
               {st.chips && (
-                <ul class="stage__chips">{st.chips.map((c) => <li class="tag tag--sm tag--soft">{c}</li>)}</ul>
+                <ul class="stage__chips">{st.chips.map((c) => (
+                  <li><a href={termHref(tagToTerm[c])} class="tag tag--sm tag--soft term term--chip" data-tip={chipTip(c)}>{c}</a></li>
+                ))}</ul>
               )}
               {(st.link || st.sources) && (
                 <p class="stage__foot">
@@ -195,7 +200,7 @@ const faqLd = {
       {faq.map((f) => (
         <div class="faq__row">
           <dt><h3 class="serif">{f.q}</h3></dt>
-          <dd><p>{f.a}</p></dd>
+          <dd><p set:html={annotate(f.a)} /></dd>
         </div>
       ))}
     </dl>
@@ -242,6 +247,8 @@ const faqLd = {
   .stage__fact .serif { font-size: 1.75rem; line-height: 1.1; color: var(--ink); font-weight: 300; }
   .stage__fact .muted { font-size: var(--fs-small); }
   .stage__chips { list-style: none; padding: 0; margin: 0.2rem 0 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .stage__chips a { transition: background-color var(--dur-fast) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .stage__chips a:hover { background: var(--color-sage-mist); } }
   .stage__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-1) var(--space-2); margin-top: 0.35rem; font-size: var(--fs-small); }
   .stage__link { display: inline-flex; align-items: center; gap: 0.35em; text-decoration: none; }
   .stage__link :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }

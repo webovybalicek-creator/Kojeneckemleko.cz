@@ -36,6 +36,11 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 8. Každý fakt i odkaz ověřit fetchnutím zdroje; když zdroj tvrzení neříká, tvrzení vypustit nebo přeformulovat. Observační studie = „souvislost“, ne příčina.
 9. Na začátku článku o mléce krátká poznámka o doporučení WHO ke kojení (bez moralizování).
 
+## Slovníček a tooltipy
+- Slovníček `/slovnicek/` = data v `src/data/slovnicek.ts` (heslo, krátká definice, odstavce s `[n]` odkazy na `glossarySources`). Každá definice musí mít zdroj. Štítky (HA, AR, Comfort, Kozí; typy v tabulce mlék) vedou na `/slovnicek/#id` přes `tagToTerm`.
+- Tooltipy: `src/data/terms.mjs` (zkratky institucí = jen vysvětlivka; pojmy = vysvětlivka + odkaz do slovníčku). V MDX článcích je doplní rehype plugin `src/lib/rehype-terms.mjs` u prvního výskytu; v prostých textech (perexy, FAQ) funkce `annotate()` přes `set:html`. Nový pojem = přidat do `terms.mjs` (a případně do slovníčku).
+- Markdown pluginy vyžadují balíček `@astrojs/markdown-remark` (Astro 7).
+
 ## Regulace (nic nezákonného kolem kojeneckých mlék)
 EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké výživy; v ČR navíc zákon o regulaci reklamy, dozor SZPI. Proto:
 - žádné affiliate odkazy, kupony, vzorky ani reklama na mléka bez právní kontroly,

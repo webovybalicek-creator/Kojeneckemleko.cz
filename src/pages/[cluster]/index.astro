@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Arrow from '../../components/Arrow.astro';
 import Illustration from '../../components/Illustration.astro';
 import { clusterMeta, type Cluster } from '../../data/clusters';
+import { annotate } from '../../data/terms.mjs';
 
 export function getStaticPaths() {
   return (Object.keys(clusterMeta) as Cluster[]).map((cluster) => ({ params: { cluster } }));
@@ -29,7 +30,12 @@ const breadcrumbs = {
       <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <span>{meta.title}</span></nav>
       <h1>{meta.title}</h1>
       <p class="lead">{meta.lead}</p>
-      {cluster === 'mleka' && <a href="/mleka/srovnani/" class="btn">Srovnávací tabulka <Arrow /></a>}
+      {cluster === 'mleka' && (
+        <p class="hub-actions">
+          <a href="/mleka/srovnani/" class="btn">Srovnávací tabulka <Arrow /></a>
+          <a href="/slovnicek/" class="btn btn--ghost">Slovníček pojmů</a>
+        </p>
+      )}
       <Illustration name={cluster} bg="cream" class="hub-illu" />
     </header>
   </section>
@@ -42,7 +48,7 @@ const breadcrumbs = {
           <li>
             <a href={`/${cluster}/${a.id}/`} class="article-row">
               <span class="heading-sm article-row__title">{a.data.title}</span>
-              <span class="muted">{a.data.description}</span>
+              <span class="muted" set:html={annotate(a.data.description)} />
             </a>
           </li>
         ))}
@@ -64,6 +70,7 @@ const breadcrumbs = {
   .hub-head > :not(:global(.hub-illu)) { position: relative; z-index: 1; max-width: 40rem; }
   .hub-head :global(.hub-illu) { position: absolute; right: var(--space-5); bottom: -0.5rem; width: 15rem; pointer-events: none; }
   @media (max-width: 760px) { .hub-head :global(.hub-illu) { position: static; width: 10rem; justify-self: end; margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-6)); } }
+  .hub-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
   .crumbs a { color: var(--text-muted); }
 

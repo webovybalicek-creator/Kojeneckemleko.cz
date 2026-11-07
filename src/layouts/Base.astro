@@ -57,6 +57,21 @@ const baseLd = [
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      // Posun tooltipu .term, aby se vešel do šířky okna
+      (function () {
+        function fit(e) {
+          var el = e.target && e.target.closest ? e.target.closest('.term') : null;
+          if (!el) return;
+          var r = el.getBoundingClientRect(), vw = document.documentElement.clientWidth, pad = 12;
+          var w = Math.min(272, vw - 32), c = r.left + r.width / 2, left = c - w / 2, dx = 0;
+          if (left < pad) dx = pad - left; else if (left + w > vw - pad) dx = vw - pad - (left + w);
+          el.style.setProperty('--tip-dx', Math.round(dx) + 'px');
+        }
+        document.addEventListener('pointerover', fit, { passive: true });
+        document.addEventListener('focusin', fit);
+      })();
+    </script>
     {!noindex && (
       <script is:inline>
         // Měření návštěvnosti bez cookies – viz /ochrana-soukromi/
