@@ -1,0 +1,79 @@
+---
+/**
+ * Nekonečný pás textových položek, který se na okrajích ztrácí do pozadí.
+ * Jen text v našem písmu – žádná loga třetích stran (ochranné známky, regulace propagace).
+ */
+interface Item { label: string; href?: string }
+interface Props {
+  items: Item[];
+  label: string;
+  /** sekundy na jeden průchod */
+  speed?: number;
+}
+const { items, label, speed = Math.max(24, items.length * 4) } = Astro.props;
+---
+<div class="marquee" role="region" aria-label={label} style={`--duration:${speed}s`}>
+  <div class="marquee__track">
+    {[0, 1].map((copy) => (
+      <ul class="marquee__list" aria-hidden={copy === 1 ? 'true' : undefined}>
+        {items.map((item) => (
+          <li>
+            {item.href
+              ? <a href={item.href} rel="noopener" tabindex={copy === 1 ? -1 : undefined}>{item.label}</a>
+              : <span>{item.label}</span>}
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    padding-block: var(--space-4);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    animation: scroll var(--duration) linear infinite;
+  }
+  .marquee__list {
+    display: flex; align-items: center; flex-shrink: 0;
+    list-style: none; padding: 0; margin: 0;
+  }
+  .marquee__list li {
+    display: flex; align-items: center;
+    font-family: var(--font-serif); font-weight: 300;
+    font-size: clamp(1.375rem, 1rem + 1.4vw, 2rem);
+    letter-spacing: -0.01em; white-space: nowrap;
+    color: var(--ink);
+  }
+  .marquee__list li::after {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-sage-mist);
+    margin-inline: clamp(1.5rem, 3vw, 2.75rem);
+  }
+  .marquee__list a { color: inherit; text-decoration: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .marquee:hover .marquee__track { animation-play-state: paused; }
+    .marquee__list a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  }
+  .marquee:focus-within .marquee__track { animation-play-state: paused; }
+
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Bez pohybu: statický zalomený výpis, druhá kopie skrytá */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { -webkit-mask-image: none; mask-image: none; }
+    .marquee__track { animation: none; width: auto; justify-content: center; padding-inline: var(--gutter); }
+    .marquee__list { flex-shrink: 1; flex-wrap: wrap; justify-content: center; row-gap: var(--space-1); }
+    .marquee__list[aria-hidden='true'] { display: none; }
+  }
+</style>

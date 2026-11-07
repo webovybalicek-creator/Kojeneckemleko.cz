@@ -2,11 +2,16 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import MilkTable from '../../components/MilkTable.astro';
+import Marquee from '../../components/Marquee.astro';
 
 const stageOrder = { pocatecni: 0, pokracovaci: 1, batoleci: 2 } as const;
 const milks = (await getCollection('mleka')).sort(
   (a, b) => stageOrder[a.data.stage] - stageOrder[b.data.stage] || a.data.brand.localeCompare(b.data.brand, 'cs'),
 );
+// Faktický výčet značek ve srovnání – jen text, bez log a odkazů. Zobrazí se až s ověřenými daty.
+const brands = [...new Set(milks.map((m) => m.data.brand))]
+  .sort((a, b) => a.localeCompare(b, 'cs'))
+  .map((label) => ({ label }));
 ---
 <Base
   title="Srovnání kojeneckých mlék"
@@ -24,6 +29,13 @@ const milks = (await getCollection('mleka')).sort(
     </p>
   </section>
 
+  {brands.length >= 4 && (
+    <section class="brands" aria-labelledby="znacky">
+      <p class="eyebrow container" id="znacky">Ve srovnání najdete</p>
+      <Marquee items={brands} label="Značky zahrnuté ve srovnání" />
+    </section>
+  )}
+
   <section class="container">
     <MilkTable milks={milks} />
     <p class="muted note">
@@ -37,5 +49,7 @@ const milks = (await getCollection('mleka')).sort(
   .head { display: grid; gap: var(--space-2); padding-block: var(--space-6) var(--space-5); }
   .crumbs { font-size: var(--fs-small); }
   .crumbs a { color: var(--text-muted); }
+  .brands { margin-bottom: var(--space-3); }
+  .brands .eyebrow { display: block; }
   .note { font-size: var(--fs-small); margin-top: var(--space-3); }
 </style>
