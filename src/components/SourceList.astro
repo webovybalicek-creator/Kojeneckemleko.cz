@@ -1,16 +1,35 @@
 ---
-interface Source { title: string; publisher: string; url: string; year?: number }
+interface Author { name: string; url?: string; role?: string }
+interface Source {
+  title: string; publisher: string; url: string; year?: number;
+  kind?: 'studie' | 'doporuceni' | 'legislativa'; doi?: string; authors?: Author[];
+}
 interface Props { sources: Source[]; updated?: Date }
 const { sources, updated } = Astro.props;
 const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+const kindLabel = { studie: 'Studie', doporuceni: 'Doporučení', legislativa: 'Legislativa' } as const;
 ---
 <aside class="sources panel panel--keylime" aria-labelledby="zdroje-nadpis">
   <p class="eyebrow" id="zdroje-nadpis">Zdroje</p>
   <ol>
-    {sources.map((s) => (
-      <li>
+    {sources.map((s, i) => (
+      <li id={`zdroj-${i + 1}`}>
+        <span class="tag tag--sm">{kindLabel[s.kind ?? 'doporuceni']}</span>
         <a href={s.url} rel="noopener">{s.title}</a>
         <span class="muted"> — {s.publisher}{s.year ? `, ${s.year}` : ''}</span>
+        {s.doi && <span class="muted"> · DOI <a href={`https://doi.org/${s.doi}`} rel="noopener">{s.doi}</a></span>}
+        {s.authors && s.authors.length > 0 && (
+          <span class="authors">
+            Autoři:{' '}
+            {s.authors.map((a, j) => (
+              <>
+                {a.url ? <a href={a.url} rel="noopener">{a.name}</a> : <span>{a.name}</span>}
+                {a.role && <span class="muted"> ({a.role})</span>}
+                {j < s.authors!.length - 1 && ', '}
+              </>
+            ))}
+          </span>
+        )}
       </li>
     ))}
   </ol>
@@ -19,6 +38,10 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long'
 
 <style>
   .sources { padding: var(--space-4); }
-  ol { margin-top: var(--space-2); padding-left: 1.25rem; display: grid; gap: var(--space-1); font-size: var(--fs-small); }
-  .small { font-size: var(--fs-caption); margin-top: var(--space-2); }
+  ol { margin-top: var(--space-2); padding-left: 1.5rem; display: grid; gap: var(--space-2); font-size: var(--fs-small); }
+  li { scroll-margin-top: 6rem; }
+  li:target { background: var(--color-cream-paper); border-radius: 8px; outline: 6px solid var(--color-cream-paper); }
+  .tag { margin-right: 0.4em; vertical-align: 1px; }
+  .authors { display: block; margin-top: 2px; color: var(--text); }
+  .small { font-size: var(--fs-caption); margin-top: var(--space-3); }
 </style>

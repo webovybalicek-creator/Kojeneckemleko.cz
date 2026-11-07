@@ -28,9 +28,16 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 4. Kojení = doporučená volba (WHO). O mlécích nestranně, žádné „nejlepší mléko“ bez dat.
 5. Žádné individuální zdravotní rady, u obtíží odkaz na pediatra.
 6. YMYL bez garanta: transparentní metodika (`/jak-tvorime-obsah/`), autor, datum revize, disclaimer.
+7. Citace v textu jako `[[n]](#zdroj-n)` (pořadí podle `sources`). U studií vyplnit `kind: studie`, `doi`, `authors` – u autorů odkaz na oficiální profil (univerzita, WHO, CDC), jen pokud je ověřený.
+8. Každý fakt i odkaz ověřit fetchnutím zdroje; když zdroj tvrzení neříká, tvrzení vypustit nebo přeformulovat. Observační studie = „souvislost“, ne příčina.
+9. Na začátku článku o mléce krátká poznámka o doporučení WHO ke kojení (bez moralizování).
 
-## Regulace
-EU nařízení 2016/127 omezuje propagaci počáteční kojenecké výživy. Žádné affiliate odkazy, kupony ani reklama na mléka bez právní kontroly.
+## Regulace (nic nezákonného kolem kojeneckých mlék)
+EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké výživy; v ČR navíc zákon o regulaci reklamy, dozor SZPI. Proto:
+- žádné affiliate odkazy, kupony, vzorky ani reklama na mléka bez právní kontroly,
+- v obecných článcích nejmenovat značky; značky jen ve faktickém srovnání (složení, cena), bez hodnocení „nejlepší“ a bez propagačního jazyka,
+- žádné obrázky idealizující umělou výživu (miminka na obalech apod.),
+- vždy „připravujte podle návodu na balení“.
 
 ## Příkazy
 `npm run dev` · `npm run build` · `npm run preview`

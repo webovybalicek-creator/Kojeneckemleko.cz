@@ -1,0 +1,150 @@
+---
+title: "Kolik mléka dát miminku? Tabulka podle věku a váhy"
+description: "Kolik ml umělého mléka potřebuje miminko podle věku a hmotnosti, jak často krmit a jak poznat hlad a sytost. Podle AAP, CDC, NHS a UNICEF."
+cluster: mleka
+published: 2026-11-07
+updated: 2026-11-07
+sources:
+  - title: "Amount and Schedule of Baby Formula Feedings"
+    publisher: "American Academy of Pediatrics – HealthyChildren.org"
+    url: "https://healthychildren.org/English/ages-stages/baby/formula-feeding/Pages/Amount-and-Schedule-of-Formula-Feedings.aspx"
+    year: 2022
+    kind: doporuceni
+  - title: "How Much and How Often to Feed Infant Formula"
+    publisher: "Centers for Disease Control and Prevention (CDC)"
+    url: "https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/how-much-and-how-often.html"
+    year: 2026
+    kind: doporuceni
+  - title: "Formula milk: common questions"
+    publisher: "NHS 111 Wales"
+    url: "https://111.wales.nhs.uk/livewell/pregnancy/bottleformulacommonquest/"
+    year: 2021
+    kind: doporuceni
+  - title: "Responsive bottle feeding tips"
+    publisher: "UNICEF UK Baby Friendly Initiative"
+    url: "https://www.unicef.org.uk/babyfriendly/wp-content/uploads/sites/2/2016/08/Baby-Friendly-responsive-bottle-feeding-tips-red-book-p4.pdf"
+    kind: doporuceni
+  - title: "Infant and young child feeding"
+    publisher: "Světová zdravotnická organizace (WHO)"
+    url: "https://www.who.int/westernpacific/health-topics/infant-nutrition"
+    kind: doporuceni
+  - title: "Do Infants Fed From Bottles Lack Self-regulation of Milk Intake Compared With Directly Breastfed Infants?"
+    publisher: "Pediatrics 125(6): e1386–e1393"
+    url: "https://doi.org/10.1542/peds.2009-2549"
+    year: 2010
+    kind: studie
+    doi: "10.1542/peds.2009-2549"
+    authors:
+      - name: "Ruowei Li"
+        role: "CDC"
+      - name: "Sara B. Fein"
+        role: "FDA"
+      - name: "Laurence M. Grummer-Strawn"
+        url: "https://www.who.int/about/people/biography/laurence-grummer-strawn"
+        role: "dnes vedoucí útvaru pro výživu, WHO"
+  - title: "Bottle-Feeding Practices During Early Infancy and Eating Behaviors at 6 Years of Age"
+    publisher: "Pediatrics 134 (Suppl. 1): S70"
+    url: "https://digitalcommons.unl.edu/publichealthresources/504"
+    year: 2014
+    kind: studie
+    doi: "10.1542/peds.2014-0646L"
+    authors:
+      - name: "Ruowei Li"
+      - name: "Kelley S. Scanlon"
+      - name: "Ashleigh May"
+      - name: "Chelsea Rose"
+      - name: "Leann L. Birch"
+  - title: "Infant formula feeding practices associated with rapid weight gain: A systematic review"
+    publisher: "Maternal & Child Nutrition 14(3): e12602"
+    url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6866175/"
+    year: 2018
+    kind: studie
+    doi: "10.1111/mcn.12602"
+    authors:
+      - name: "Jessica Appleton"
+        url: "https://profiles.uts.edu.au/Jessica.Appleton"
+        role: "University of Technology Sydney"
+      - name: "Catherine G. Russell"
+      - name: "Rachel Laws"
+      - name: "Cathrine Fowler"
+      - name: "Karen Campbell"
+      - name: "Elizabeth Denney-Wilson"
+        url: "https://sydney.edu.au/medicine-health/about/our-people/academic-staff/elizabeth.denney-wilson.html"
+        role: "University of Sydney"
+  - title: "Signs Your Child Is Hungry or Full"
+    publisher: "Centers for Disease Control and Prevention (CDC)"
+    url: "https://www.cdc.gov/infant-toddler-nutrition/mealtime/signs-your-child-is-hungry-or-full.html"
+    year: 2026
+    kind: doporuceni
+---
+import MilkCalculator from '../../components/MilkCalculator.astro';
+
+**Krátká odpověď:** v prvních dnech miminko vypije zhruba 30–60 ml na jedno krmení, na konci prvního měsíce kolem 90–120 ml a kolem 6. měsíce obvykle 180–240 ml při 4–5 krmeních denně [[1]](#zdroj-1). Celkově jde přibližně o **150–200 ml na kilogram hmotnosti za den** [[3]](#zdroj-3). Čísla jsou ale jen průměr – důležitější je sledovat, co vám miminko samo ukazuje.
+
+> Světová zdravotnická organizace doporučuje prvních 6 měsíců výhradně kojit a v kojení pokračovat i po zavedení příkrmů [[5]](#zdroj-5). Tento článek je pro rodiče, kteří krmí umělým mlékem částečně nebo úplně – ať už z jakéhokoli důvodu.
+
+## Tabulka: kolik mléka podle věku
+
+| Věk | Množství na 1 krmení | Jak často | Zdroj |
+|---|---|---|---|
+| První dny | 30–60 ml | každé 2–3 hodiny, 8–12× za 24 h | [[1]](#zdroj-1) [[2]](#zdroj-2) |
+| Konec 1. měsíce | 90–120 ml | zhruba každé 3–4 hodiny | [[1]](#zdroj-1) |
+| 2.–5. měsíc | podle hmotnosti, viz výpočet níže | zhruba každé 3–4 hodiny | [[2]](#zdroj-2) [[3]](#zdroj-3) |
+| Kolem 6. měsíce | 180–240 ml | 4–5× za 24 h | [[1]](#zdroj-1) |
+| 6.–12. měsíc | postupně méně | mléko a příkrmy dohromady 5–6× za 24 h | [[2]](#zdroj-2) |
+
+Americká pediatrická akademie (AAP) uvádí, že většina miminek nepotřebuje víc než **asi 960 ml mléka za den**. Pokud miminko dlouhodobě chce výrazně víc nebo méně, je dobré to probrat s pediatrem [[1]](#zdroj-1).
+
+## Výpočet podle hmotnosti
+
+Britská NHS uvádí, že od konce prvního týdne až do 6 měsíců potřebuje většina miminek **150–200 ml na kilogram hmotnosti denně** [[3]](#zdroj-3). AAP počítá velmi podobně: asi 75 ml denně na každých 453 g hmotnosti, tedy zhruba 165 ml na kilogram [[1]](#zdroj-1).
+
+**Příklad:** miminko vážící 5 kg vypije za den přibližně 750–1 000 ml. Když to rozdělíte do 5 krmení, vychází 150–200 ml na jedno krmení.
+
+<MilkCalculator />
+
+Obě instituce zdůrazňují, že se množství den ode dne liší – víc může miminko chtít při růstovém skoku, míň třeba při nemoci nebo prořezávání zoubků [[3]](#zdroj-3).
+
+## Proč jsou čísla jen orientační
+
+U lahve rodič vidí, kolik mléka zbývá, a snadno ho to svádí pobízet miminko k dopití. Výzkumy ukazují, proč je dobré tomu odolat.
+
+- **Studie CDC z roku 2010** sledovala, jak často děti v pozdním kojeneckém věku vyprazdňují lahev. Děti krmené v raném věku víc z lahve ji vyprazdňovaly výrazně častěji než děti kojené přímo z prsu – a platilo to pro umělé i odstříkané mateřské mléko [[6]](#zdroj-6). Autoři z toho vyvozují, že roli hraje samotný způsob krmení, nejen druh mléka.
+- **Navazující studie z roku 2014** sledovala tytéž děti v šesti letech. Pokud matky v kojeneckém věku pobízely k dopití lahve, děti v šesti letech častěji dojídaly všechno na talíři a matky na ně víc tlačily, aby jedly [[7]](#zdroj-7). Jde o observační studii – ukazuje souvislost, ne prokázanou příčinu.
+- **Systematický přehled z roku 2018** shrnul 18 studií o praktikách krmení umělým mlékem. Větší lahve (od zhruba 180 ml) byly spojené s rychlejším přírůstkem hmotnosti. Autoři zároveň upozorňují, že důkazy jsou zatím omezené [[8]](#zdroj-8).
+
+Prakticky z toho plyne jednoduché pravidlo: **neřiďte se tím, jestli je lahev prázdná, ale tím, jestli je miminko spokojené.**
+
+## Jak poznat hlad a sytost
+
+Krmte, když miminko ukazuje známky hladu – ideálně dřív, než začne plakat. Pláč je pozdní signál hladu [[9]](#zdroj-9). Děti obvykle vypijí, kolik potřebují, a přestanou, když jsou syté [[2]](#zdroj-2).
+
+**Známky hladu (0–5 měsíců):** dává si ručičky k pusince, otáčí hlavičku k lahvi nebo prsu, špulí, olizuje nebo mlaská rty, má sevřené pěstičky [[9]](#zdroj-9).
+
+**Známky sytosti:** zavře pusinku, odvrátí hlavičku, uvolní ručičky [[9]](#zdroj-9). Během krmení se může začít vrtět nebo rozptylovat [[1]](#zdroj-1). Když naopak vypije celou lahev a dál cucá rty, může mít ještě hlad [[1]](#zdroj-1).
+
+## Responzivní krmení z lahve
+
+UNICEF UK doporučuje krmit z lahve tak, aby tempo určovalo miminko [[4]](#zdroj-4):
+
+1. Krmení nabídněte při prvních známkách hladu. Pokud je miminko rozrušené, nejdřív ho uklidněte.
+2. Držte ho blízko sebe v mírně vzpřímené poloze, dívejte se na něj a mluvte na něj.
+3. Savičkou jemně přejeďte po horním rtu, aby samo otevřelo pusinku.
+4. Savičku vložte jen do přední části pusy a nechte miminko, ať si ji vtáhne samo.
+5. Lahev držte spíš vodorovně, aby mléko neteklo moc rychle.
+6. Když miminko potřebuje pauzu, savičku jemně vytáhněte nebo lahev skloňte.
+7. **Nenuťte ho dopít.** Miminko ví, kolik potřebuje – nucení je pro něj stresující a může vést k překrmení.
+
+UNICEF také doporučuje, aby v prvních týdnech krmili hlavně rodiče, protože to miminku pomáhá cítit se v bezpečí [[4]](#zdroj-4).
+
+## Po 6. měsíci
+
+S příkrmy množství mléka postupně klesá. Mléko a jídlo dohromady dává miminko zhruba 5–6× za den [[2]](#zdroj-2). Kravské mléko jako hlavní nápoj lze zavádět až po prvních narozeninách [[2]](#zdroj-2).
+
+## Shrnutí
+
+- Orientačně 150–200 ml na kilogram denně, většinou ne víc než asi 960 ml.
+- Tabulky jsou průměry – miminko může mít jeden den větší hlad než jindy.
+- Krmte podle signálů hladu a sytosti, ne podle toho, kolik v lahvi zbývá.
+- Mléko vždy připravujte přesně podle návodu na balení.
+- Pokud si nejste jistí, jestli miminko prospívá, obraťte se na pediatra – ten sleduje jeho růst v čase.

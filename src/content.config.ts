@@ -3,11 +3,22 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /** Zdroj, o který se opírá tvrzení. Preferujeme WHO, ESPGHAN, EFSA, NHS, AAP, Cochrane… */
+const author = z.object({
+  name: z.string(),
+  /** Odkaz na oficiální profil (univerzita, WHO, CDC…) */
+  url: z.url().optional(),
+  role: z.string().optional(),
+});
+
 const source = z.object({
   title: z.string(),
   publisher: z.string(),
   url: z.url(),
   year: z.number().int().optional(),
+  /** studie = recenzovaný článek, doporuceni = oficiální doporučení instituce */
+  kind: z.enum(['studie', 'doporuceni', 'legislativa']).default('doporuceni'),
+  doi: z.string().optional(),
+  authors: z.array(author).optional(),
 });
 
 /** Tematické klastry webu – pořadí odpovídá obsahové strategii. */

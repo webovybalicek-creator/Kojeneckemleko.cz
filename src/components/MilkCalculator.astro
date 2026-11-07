@@ -1,0 +1,60 @@
+---
+// Orientační výpočet denního množství pro kojence do 6 měsíců:
+// NHS: 150–200 ml/kg/den; AAP: nejvýše cca 960 ml/den.
+---
+<div class="calc panel panel--slate">
+  <div class="calc__inner panel panel--cream">
+    <p class="eyebrow">Orientační výpočet · 0–6 měsíců</p>
+    <label for="calc-weight" class="calc__label">Hmotnost miminka</label>
+    <div class="calc__input">
+      <input id="calc-weight" type="number" inputmode="decimal" min="2" max="10" step="0.1" placeholder="např. 4,5" aria-describedby="calc-hint" />
+      <span>kg</span>
+    </div>
+    <p id="calc-hint" class="muted small">Výpočet podle NHS: 150–200 ml na kilogram za den.</p>
+    <output for="calc-weight" class="calc__out" aria-live="polite">
+      <span class="calc__value tabular" data-value>–</span>
+      <span class="muted small" data-note>Zadejte hmotnost v kilogramech.</span>
+    </output>
+  </div>
+</div>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('#calc-weight');
+  const value = document.querySelector<HTMLElement>('[data-value]');
+  const note = document.querySelector<HTMLElement>('[data-note]');
+  const fmt = new Intl.NumberFormat('cs-CZ');
+  const round10 = (n: number) => Math.round(n / 10) * 10;
+
+  input?.addEventListener('input', () => {
+    const kg = parseFloat(input.value.replace(',', '.'));
+    if (!value || !note) return;
+    if (!kg || kg < 2 || kg > 10) {
+      value.textContent = '–';
+      note.textContent = 'Zadejte hmotnost mezi 2 a 10 kg.';
+      return;
+    }
+    const lo = round10(kg * 150);
+    const hi = round10(kg * 200);
+    value.textContent = `${fmt.format(lo)}–${fmt.format(hi)} ml za den`;
+    note.textContent = hi > 960
+      ? 'Americká pediatrická akademie uvádí jako obvyklé maximum asi 960 ml denně. Pokud miminko dlouhodobě chce víc, poraďte se s pediatrem.'
+      : 'Jde o průměr. Miminko může jeden den pít víc a jiný den méně – řiďte se jeho signály.';
+  });
+</script>
+
+<style>
+  .calc { padding: var(--space-3); margin-block: var(--space-4); }
+  .calc__inner { display: grid; gap: var(--space-2); }
+  .calc__label { font-family: var(--font-serif); font-weight: 300; font-size: var(--fs-h3); color: var(--ink); }
+  .calc__input { display: flex; align-items: center; gap: var(--space-2); }
+  .calc__input input {
+    width: 9rem; padding: 0.75rem 1rem; font-size: 1.125rem;
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card);
+    background: var(--color-cream-paper);
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+  .calc__input input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-color: var(--ink); }
+  .calc__out { display: grid; gap: 4px; padding-top: var(--space-2); border-top: 1px solid var(--line); }
+  .calc__value { font-family: var(--font-serif); font-weight: 300; font-size: var(--fs-h2); color: var(--ink); line-height: 1.2; }
+  .small { font-size: var(--fs-small); }
+</style>
