@@ -1,0 +1,198 @@
+---
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+
+const stages = [
+  { label: 'Počáteční', age: 'od narození', note: 'Jediná výživa, pokud dítě není kojené.' },
+  { label: 'Pokračovací', age: 'od 6. měsíce', note: 'Doplněk k příkrmům, ne jejich náhrada.' },
+  { label: 'Speciální', age: 'HA · AR · comfort', note: 'Při konkrétních obtížích, po poradě s pediatrem.' },
+];
+
+const topics = [
+  {
+    href: '/mleka/', tone: 'sage', eyebrow: 'Klastr 1',
+    title: 'Kojenecká mléka',
+    text: 'Typy mlék, složení, značky na českém trhu a srovnávací tabulky.',
+    ready: true,
+  },
+  {
+    href: '/krmeni/', tone: 'mint', eyebrow: 'Klastr 2',
+    title: 'Krmení',
+    text: 'Kojení, kombinované krmení, lahve, sterilizace a běžné obtíže.',
+    ready: false,
+  },
+  {
+    href: '/prikrmy/', tone: 'keylime', eyebrow: 'Klastr 3',
+    title: 'Příkrmy',
+    text: 'Kdy začít, jak na to a co zařadit v jakém věku.',
+    ready: false,
+  },
+];
+
+const sources = ['WHO', 'UNICEF', 'ESPGHAN', 'EFSA', 'NHS', 'AAP', 'Cochrane', 'First Steps Nutrition'];
+
+const faq = [
+  {
+    q: 'Odkud berete informace?',
+    a: 'Především z mezinárodních odborných institucí a přehledových studií – WHO, ESPGHAN, EFSA, britské NHS, americké pediatrické akademie AAP nebo Cochrane. Každý článek má na konci seznam zdrojů.',
+  },
+  {
+    q: 'Doporučujete konkrétní značky?',
+    a: 'Neříkáme, které mléko je „nejlepší“. Srovnáváme fakta ze složení a ceny, aby se rodiče mohli rozhodnout sami – ideálně spolu s pediatrem.',
+  },
+  {
+    q: 'Nahrazuje web lékaře?',
+    a: 'Ne. Pomáhá zorientovat se a položit lékaři správné otázky. Při jakýchkoli obtížích dítěte se vždy obraťte na pediatra.',
+  },
+];
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base
+  title="Kojenecké mléko"
+  description="Nezávislý průvodce kojeneckými mléky a krmením miminka. Typy mlék, složení, srovnávací tabulky a rady opřené o WHO, ESPGHAN a NHS."
+  jsonLd={[faqLd]}
+>
+  <section class="container hero">
+    <div class="hero__copy panel panel--keylime">
+      <p class="eyebrow">Průvodce krmením miminka</p>
+      <h1 class="display">Kojenecké mléko bez zmatku.</h1>
+      <p class="lead">
+        Srozumitelně o typech mlék, jejich složení a o tom, čím se doopravdy liší.
+        Opíráme se o mezinárodní odborné zdroje, ne o reklamu.
+      </p>
+      <div class="hero__actions">
+        <a href="/mleka/" class="btn btn--lg">Začít u mlék <Arrow /></a>
+        <a href="/jak-tvorime-obsah/" class="btn btn--ghost btn--lg">Jak tvoříme obsah</a>
+      </div>
+    </div>
+
+    <div class="hero__visual panel panel--slate" aria-label="Fáze kojeneckých mlék">
+      {stages.map((s, i) => (
+        <article class="stage panel panel--cream" style={`--i:${i}`}>
+          <p class="eyebrow">{s.age}</p>
+          <h2 class="stage__title">{s.label}</h2>
+          <p class="muted small">{s.note}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="temata">
+    <div class="section-head">
+      <p class="eyebrow">Témata</p>
+      <h2 id="temata">Od prvního mléka po první lžičku</h2>
+    </div>
+    <div class="topics">
+      {topics.map((t) => (
+        <a href={t.href} class:list={['topic', 'panel', `panel--${t.tone}`]}>
+          <span class="topic__top">
+            <span class="eyebrow">{t.eyebrow}</span>
+            {!t.ready && <span class="tag tag--sm">Připravujeme</span>}
+          </span>
+          <h3>{t.title}</h3>
+          <p>{t.text}</p>
+          <span class="topic__more">Přejít <Arrow /></span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="container section method" aria-labelledby="metodika">
+    <div class="method__grid">
+      <div class="stack">
+        <p class="eyebrow">Jak pracujeme</p>
+        <h2 id="metodika">Každé tvrzení má svůj zdroj.</h2>
+        <p class="lead">
+          Čerpáme z doporučení mezinárodních zdravotnických institucí a z přehledových studií.
+          České zdroje používáme pro to, co je místní – dostupnost a ceny mlék u nás.
+        </p>
+        <a href="/jak-tvorime-obsah/" class="btn">Naše metodika <Arrow /></a>
+      </div>
+      <div class="panel panel--sage">
+        <p class="eyebrow">Zdroje, ze kterých vycházíme</p>
+        <ul class="source-tags">
+          {sources.map((s) => <li class="tag">{s}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="faq">
+    <p class="eyebrow">Časté otázky</p>
+    <h2 id="faq" class="visually-hidden">Časté otázky</h2>
+    <dl class="faq">
+      {faq.map((f) => (
+        <div class="faq__row">
+          <dt><h3>{f.q}</h3></dt>
+          <dd><p>{f.a}</p></dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-2);
+    padding-top: var(--space-4);
+  }
+  .hero__copy { display: flex; flex-direction: column; justify-content: center; gap: var(--space-3); padding-block: var(--space-6); }
+  .hero__copy h1 { max-width: 11ch; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+
+  .hero__visual { display: grid; gap: var(--space-2); align-content: center; }
+  .stage {
+    display: grid; gap: 0.25rem;
+    animation: rise 500ms var(--ease-out) both;
+    animation-delay: calc(120ms + var(--i) * 70ms);
+  }
+  .stage__title { font-size: var(--fs-h3); }
+  .small { font-size: var(--fs-small); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-head { margin-bottom: var(--space-5); }
+  .section-head h2 { margin-top: var(--space-1); max-width: 20ch; }
+
+  .topics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+  .topic {
+    display: flex; flex-direction: column; gap: var(--space-2);
+    text-decoration: none; color: var(--text); min-height: 17rem;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  .topic__top { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+  .topic h3 { font-size: var(--fs-h2); line-height: 1.15; }
+  .topic__more { margin-top: auto; display: inline-flex; align-items: center; gap: 0.4em; color: var(--ink); font-size: var(--fs-small); }
+  .topic__more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .topic:active { transform: scale(0.99); }
+  @media (hover: hover) and (pointer: fine) {
+    .topic:hover .topic__more :global(svg) { transform: translateX(4px); }
+  }
+
+  .method__grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-5); align-items: center; }
+  .source-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-3); }
+
+  .faq { margin-top: var(--space-3); border-top: 1px solid var(--line); }
+  .faq__row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5);
+    padding-block: var(--space-5); border-bottom: 1px solid var(--line);
+  }
+  .faq h3 { font-size: var(--fs-h2); line-height: 1.2; }
+  .faq dd p { color: var(--color-charcoal); }
+
+  @media (max-width: 960px) {
+    .hero, .method__grid { grid-template-columns: 1fr; }
+    .hero__copy { padding-block: var(--space-5); }
+    .topics { grid-template-columns: 1fr; }
+    .topic { min-height: 0; }
+    .faq__row { grid-template-columns: 1fr; gap: var(--space-2); padding-block: var(--space-4); }
+  }
+</style>

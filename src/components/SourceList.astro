@@ -1,0 +1,24 @@
+---
+interface Source { title: string; publisher: string; url: string; year?: number }
+interface Props { sources: Source[]; updated?: Date }
+const { sources, updated } = Astro.props;
+const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<aside class="sources panel panel--keylime" aria-labelledby="zdroje-nadpis">
+  <p class="eyebrow" id="zdroje-nadpis">Zdroje</p>
+  <ol>
+    {sources.map((s) => (
+      <li>
+        <a href={s.url} rel="noopener">{s.title}</a>
+        <span class="muted"> — {s.publisher}{s.year ? `, ${s.year}` : ''}</span>
+      </li>
+    ))}
+  </ol>
+  {updated && <p class="muted small">Naposledy zkontrolováno {dateFmt.format(updated)}.</p>}
+</aside>
+
+<style>
+  .sources { padding: var(--space-4); }
+  ol { margin-top: var(--space-2); padding-left: 1.25rem; display: grid; gap: var(--space-1); font-size: var(--fs-small); }
+  .small { font-size: var(--fs-caption); margin-top: var(--space-2); }
+</style>

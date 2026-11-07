@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  milks: CollectionEntry<'mleka'>[];
+  caption?: string;
+}
+const { milks, caption = 'Srovnání kojeneckých mlék' } = Astro.props;
+
+const stageLabel = { pocatecni: 'Počáteční', pokracovaci: 'Pokračovací', batoleci: 'Batolecí' } as const;
+const baseLabel = {
+  kravske: 'Kravské', kozi: 'Kozí', sojove: 'Sójové',
+  hydrolyzovane: 'Hydrolyzované', aminokyselinove: 'Aminokyselinové',
+} as const;
+const yesNo = (v?: boolean) => (v === undefined ? '–' : v ? 'Ano' : 'Ne');
+const price = (v?: number) =>
+  v === undefined ? '–' : new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 2 }).format(v);
+const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
+---
+<div class="table-panel panel panel--slate">
+  {milks.length === 0 ? (
+    <div class="empty panel panel--cream">
+      <p class="eyebrow">Připravujeme</p>
+      <p class="serif empty__title">Srovnávací tabulka mlék se právě plní ověřenými daty.</p>
+      <p class="muted">Každý údaj ověřujeme na oficiálním obalu nebo webu výrobce.</p>
+    </div>
+  ) : (
+    <div class="table-scroll" tabindex="0" role="region" aria-label={caption}>
+      <table class="tabular">
+        <caption class="visually-hidden">{caption}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Mléko</th>
+            <th scope="col">Fáze</th>
+            <th scope="col">Základ</th>
+            <th scope="col">Typ</th>
+            <th scope="col">HMO</th>
+            <th scope="col">Palmový olej</th>
+            <th scope="col">Cena / 100 ml</th>
+            <th scope="col">Ověřeno</th>
+          </tr>
+        </thead>
+        <tbody>
+          {milks.map(({ data }) => (
+            <tr>
+              <th scope="row">
+                <span class="brand">{data.brand}</span>
+                <a href={data.officialUrl} rel="noopener nofollow">{data.name}</a>
+              </th>
+              <td>{stageLabel[data.stage]}</td>
+              <td>{baseLabel[data.base]}</td>
+              <td><span class="types">{data.types.map((t) => <span class="tag tag--sm tag--soft">{t}</span>)}</span></td>
+              <td>{yesNo(data.hmo)}</td>
+              <td>{yesNo(data.palmOil)}</td>
+              <td>{price(data.pricePer100ml)}</td>
+              <td class="muted">{dateFmt.format(data.verified)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+<style>
+  .table-panel { padding: var(--space-3); }
+  .table-scroll {
+    overflow-x: auto; border-radius: 10px; background: var(--color-cream-paper);
+    overscroll-behavior-x: contain;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); min-width: 760px; }
+  th, td { text-align: left; padding: 0.875rem 1rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  thead th {
+    font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink); background: var(--color-cream-paper);
+    position: sticky; top: 0;
+  }
+  tbody tr:last-child > * { border-bottom: 0; }
+  tbody th { font-weight: 400; }
+  tbody th a { display: block; text-decoration: none; }
+  .brand { display: block; font-size: var(--fs-caption); color: var(--text-muted); }
+  .types { display: flex; flex-wrap: wrap; gap: 4px; }
+  @media (hover: hover) and (pointer: fine) {
+    tbody tr { transition: background-color var(--dur-fast) var(--ease-out); }
+    tbody tr:hover { background: var(--color-keylime-wash); }
+    tbody th a:hover { text-decoration: underline; }
+  }
+  .empty { text-align: left; }
+  .empty__title { font-size: var(--fs-h3); line-height: 1.3; margin-block: var(--space-1) var(--space-2); max-width: 30ch; }
+</style>

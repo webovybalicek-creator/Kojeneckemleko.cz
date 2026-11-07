@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+
+const sources = [
+  { name: 'Světová zdravotnická organizace (WHO)', url: 'https://www.who.int/', what: 'Globální doporučení k výživě kojenců a malých dětí.' },
+  { name: 'UNICEF', url: 'https://www.unicef.org/', what: 'Podpora kojení a výživa v raném dětství.' },
+  { name: 'ESPGHAN', url: 'https://www.espghan.org/', what: 'Evropská společnost pro dětskou gastroenterologii, hepatologii a výživu – odborná stanoviska ke složení mlék a příkrmům.' },
+  { name: 'EFSA', url: 'https://www.efsa.europa.eu/', what: 'Evropský úřad pro bezpečnost potravin – vědecké posudky ke složení kojenecké výživy.' },
+  { name: 'NHS (Spojené království)', url: 'https://www.nhs.uk/', what: 'Praktické pokyny pro rodiče – příprava mléka, krmení, příkrmy.' },
+  { name: 'American Academy of Pediatrics (HealthyChildren.org)', url: 'https://www.healthychildren.org/', what: 'Doporučení americké pediatrické akademie pro rodiče.' },
+  { name: 'Cochrane', url: 'https://www.cochranelibrary.com/', what: 'Systematické přehledy studií.' },
+  { name: 'First Steps Nutrition Trust', url: 'https://www.firststepsnutrition.org/', what: 'Nezávislé rozbory složení kojeneckých mlék.' },
+];
+---
+<Base
+  title="Jak tvoříme obsah"
+  description="Metodika webu kojeneckemleko.cz – z jakých zdrojů čerpáme, jak ověřujeme údaje o mlécích a jak často obsah aktualizujeme."
+>
+  <article class="container page">
+    <header class="stack">
+      <p class="eyebrow">Metodika</p>
+      <h1>Jak tvoříme obsah</h1>
+      <p class="lead">
+        Krmení miminka je téma, kde na přesnosti záleží. Proto u nás neplatí „slyšela jsem, že…“ –
+        každé tvrzení stojí na doložitelném zdroji.
+      </p>
+    </header>
+
+    <section class="stack block">
+      <h2>Naše zásady</h2>
+      <ol class="principles">
+        <li><strong>Mezinárodní zdroje na prvním místě.</strong> Vycházíme z doporučení odborných institucí a přehledových studií, ne z marketingových materiálů výrobců.</li>
+        <li><strong>Každý článek má seznam zdrojů</strong> a datum poslední kontroly.</li>
+        <li><strong>Údaje o mlécích ověřujeme u výrobce</strong> – na oficiálním obalu nebo webu – a u každého mléka uvádíme datum ověření.</li>
+        <li><strong>Nevyhlašujeme „nejlepší mléko“.</strong> Srovnáváme fakta a vysvětlujeme, co z nich plyne.</li>
+        <li><strong>Kojení respektujeme jako doporučenou volbu.</strong> Informace o mlécích jsou pro rodiče, kteří je potřebují nebo se pro ně rozhodli – bez hodnocení.</li>
+        <li><strong>Nedáváme individuální zdravotní rady.</strong> U zdravotních obtíží vždy odkazujeme na pediatra.</li>
+      </ol>
+    </section>
+
+    <section class="stack block" id="zdroje">
+      <h2>Zdroje, ze kterých čerpáme</h2>
+      <ul class="sources">
+        {sources.map((s) => (
+          <li class="panel panel--keylime">
+            <a href={s.url} rel="noopener" class="serif">{s.name}</a>
+            <p class="muted">{s.what}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="muted">České zdroje (např. SZPI, Státní zdravotní ústav) používáme pro místní informace – legislativu, dostupnost a ceny.</p>
+    </section>
+
+    <section class="stack block">
+      <h2>Aktualizace a opravy</h2>
+      <p>Články pravidelně kontrolujeme proti novým doporučením. Pokud najdete chybu, dejte nám vědět – opravu provedeme a uvedeme nové datum kontroly.</p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-6); }
+  .block { margin-top: var(--space-6); }
+  .principles { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
+  .principles strong { font-weight: 600; color: var(--ink); }
+  .sources { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .sources li { padding: var(--space-4); display: grid; gap: var(--space-1); align-content: start; }
+  .sources a { font-size: var(--fs-h3); line-height: 1.25; text-decoration: none; }
+  .sources p { font-size: var(--fs-small); }
+  @media (hover: hover) and (pointer: fine) { .sources a:hover { text-decoration: underline; } }
+  @media (max-width: 640px) { .sources { grid-template-columns: 1fr; } }
+</style>

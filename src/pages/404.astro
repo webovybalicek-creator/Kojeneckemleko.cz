@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+---
+<Base title="Stránka nenalezena" description="Tuto stránku jsme nenašli." noindex>
+  <section class="container nf">
+    <div class="panel panel--keylime stack">
+      <p class="eyebrow">Chyba 404</p>
+      <h1>Tuhle stránku jsme nenašli.</h1>
+      <p class="lead">Možná se přesunula. Zkuste začít na úvodu nebo u přehledu mlék.</p>
+      <p><a href="/" class="btn">Na úvod <Arrow /></a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding-top: var(--space-6); }
+  .nf .panel { padding-block: var(--space-6); }
+</style>

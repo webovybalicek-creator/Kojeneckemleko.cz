@@ -1,0 +1,58 @@
+/* Design tokeny – vychází z Ease Health („botanický skleník na krémovém papíře“).
+   Viz claude/design-ease-health-reference.md v projektu. */
+:root {
+  /* Barvy */
+  --color-forest-ink: #0f3e17;     /* CTA, nadpisy, odkazy – jediná sytá tmavá */
+  --color-forest-shadow: #0c2f10;  /* hover CTA */
+  --color-sage-mist: #b1dbb8;      /* těžší panely */
+  --color-mint-veil: #cfe7d3;      /* mezivrstva */
+  --color-keylime-wash: #e1f4df;   /* hero, lehké karty */
+  --color-slate-hush: #b6ced5;     /* chladný panel – tabulky, srovnání */
+  --color-cream-paper: #fffefc;    /* pozadí stránky */
+  --color-charcoal: #222222;       /* navigace, sekundární text */
+  --color-border-mist: #efeeeb;    /* hairline linky */
+
+  /* Sémantické role */
+  --bg: var(--color-cream-paper);
+  --ink: var(--color-forest-ink);
+  --text: var(--color-charcoal);
+  --text-muted: #4a514b;           /* AA na cream i keylime */
+  --line: var(--color-border-mist);
+  --focus: var(--color-forest-ink);
+
+  /* Typografie */
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --fs-caption: 0.75rem;
+  --fs-small: 0.875rem;
+  --fs-body: 1.0625rem;
+  --fs-lead: 1.25rem;
+  --fs-h3: 1.4375rem;
+  --fs-h2: clamp(2rem, 1.4rem + 2.4vw, 2.5rem);
+  --fs-h1: clamp(2.5rem, 1.6rem + 3.6vw, 3.5rem);
+  --fs-display: clamp(2.75rem, 1.5rem + 5vw, 4.625rem);
+
+  /* Prostor */
+  --space-1: 0.4375rem;  /*  7 */
+  --space-2: 0.875rem;   /* 14 */
+  --space-3: 1.3125rem;  /* 21 */
+  --space-4: 1.75rem;    /* 28 */
+  --space-5: 2.625rem;   /* 42 */
+  --space-6: 4rem;       /* 64 */
+  --space-7: 6rem;       /* 96 */
+  --section-gap: clamp(var(--space-6), 8vw, var(--space-7));
+  --max-width: 1200px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+
+  /* Tvary */
+  --radius-nav: 7px;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+
+  /* Pohyb – krátké, ease-out, jen transform/opacity (Emil Kowalski) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+}

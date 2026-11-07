@@ -1,0 +1,87 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SourceList from '../../components/SourceList.astro';
+import { clusterMeta } from '../../data/clusters';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft);
+  return articles.map((entry) => ({
+    params: { cluster: entry.data.cluster, slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { data } = entry;
+const meta = clusterMeta[data.cluster];
+const url = new URL(Astro.url.pathname, Astro.site).toString();
+const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: data.title,
+  description: data.description,
+  datePublished: data.published.toISOString(),
+  dateModified: data.updated.toISOString(),
+  author: { '@type': 'Person', name: data.author },
+  inLanguage: 'cs-CZ',
+  mainEntityOfPage: url,
+  citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, publisher: s.publisher })),
+};
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: meta.title, item: new URL(`/${data.cluster}/`, Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: data.title, item: url },
+  ],
+};
+---
+<Base title={data.title} description={data.description} ogType="article" jsonLd={[articleLd, breadcrumbs]} noindex={data.draft}>
+  <article class="container article">
+    <header class="article__head">
+      <nav class="crumbs" aria-label="Drobečková navigace">
+        <a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href={`/${data.cluster}/`}>{meta.title}</a>
+      </nav>
+      <h1>{data.title}</h1>
+      <p class="lead">{data.description}</p>
+      <p class="byline muted">
+        {data.author} · aktualizováno <time datetime={data.updated.toISOString()}>{dateFmt.format(data.updated)}</time>
+        · <a href="/jak-tvorime-obsah/">jak tvoříme obsah</a>
+      </p>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <SourceList sources={data.sources} updated={data.updated} />
+
+    <p class="disclaimer muted">
+      Článek má informativní charakter a nenahrazuje konzultaci s pediatrem. Máte-li o zdraví dítěte obavy, obraťte se na lékaře.
+    </p>
+  </article>
+</Base>
+
+<style>
+  .article { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-5); }
+  .article__head { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .crumbs, .byline { font-size: var(--fs-small); }
+  .crumbs a { color: var(--text-muted); }
+
+  .prose { margin-bottom: var(--space-5); }
+  .prose :global(> * + *) { margin-top: 1.1em; }
+  .prose :global(h2) { margin-top: 1.8em; }
+  .prose :global(h3) { margin-top: 1.5em; }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.25rem; }
+  .prose :global(li + li) { margin-top: 0.35em; }
+  .prose :global(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+  .prose :global(th), .prose :global(td) { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--line); }
+  .prose :global(blockquote) { border-left: 2px solid var(--color-sage-mist); padding-left: var(--space-3); color: var(--text-muted); }
+
+  .disclaimer { font-size: var(--fs-small); margin-top: var(--space-4); }
+</style>

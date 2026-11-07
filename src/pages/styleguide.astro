@@ -1,0 +1,84 @@
+---
+// Interní přehled komponent – noindex, vyřazeno ze sitemapy i robots.txt.
+import type { CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import MilkTable from '../components/MilkTable.astro';
+import SourceList from '../components/SourceList.astro';
+import Arrow from '../components/Arrow.astro';
+
+const demo = [
+  { name: 'Ukázkové mléko 1', brand: 'Značka A', stage: 'pocatecni', base: 'kravske', types: ['standard'], hmo: true, palmOil: false, pricePer100ml: 9.8 },
+  { name: 'Ukázkové mléko HA 1', brand: 'Značka B', stage: 'pocatecni', base: 'hydrolyzovane', types: ['HA'], hmo: false, palmOil: true, pricePer100ml: 11.2 },
+  { name: 'Ukázkové kozí 2', brand: 'Značka C', stage: 'pokracovaci', base: 'kozi', types: ['standard', 'bio'], pricePer100ml: 14.5 },
+].map((d, i) => ({
+  id: `demo-${i}`,
+  collection: 'mleka',
+  data: { ...d, officialUrl: 'https://example.com/', verified: new Date('2026-11-07') },
+})) as unknown as CollectionEntry<'mleka'>[];
+
+const swatches = [
+  ['Forest Ink', '#0f3e17'], ['Forest Shadow', '#0c2f10'], ['Sage Mist', '#b1dbb8'], ['Mint Veil', '#cfe7d3'],
+  ['Keylime Wash', '#e1f4df'], ['Slate Hush', '#b6ced5'], ['Cream Paper', '#fffefc'], ['Charcoal', '#222222'], ['Border Mist', '#efeeeb'],
+];
+---
+<Base title="Styleguide" description="Interní přehled komponent." noindex>
+  <div class="container sg">
+    <p class="eyebrow">Interní</p>
+    <h1>Styleguide</h1>
+
+    <h2>Barvy</h2>
+    <ul class="swatches">
+      {swatches.map(([n, c]) => (
+        <li><span class="sw" style={`background:${c}`}></span><span>{n}</span><code>{c}</code></li>
+      ))}
+    </ul>
+
+    <h2>Typografie</h2>
+    <p class="display serif">Display 74</p>
+    <h1>Nadpis H1 – příliš žluťoučký kůň</h1>
+    <h2>Nadpis H2 – úpěl ďábelské ódy</h2>
+    <h3>Nadpis H3 – Čeština s diakritikou</h3>
+    <p class="lead">Lead – úvodní odstavec stránky v Inter 20 px.</p>
+    <p>Běžný text – Inter 17 px, řádkování 1,6. Kojenecké mléko, pokračovací mléko, příkrmy.</p>
+
+    <h2>Tlačítka a štítky</h2>
+    <div class="row">
+      <a class="btn" href="#">Primární <Arrow /></a>
+      <a class="btn btn--ghost" href="#">Ghost</a>
+      <a class="btn btn--lg" href="#">Velké <Arrow /></a>
+    </div>
+    <div class="row">
+      <span class="tag">Štítek</span><span class="tag tag--soft">Měkký</span><span class="tag tag--sm tag--soft">HA</span>
+    </div>
+
+    <h2>Panely</h2>
+    <div class="panels">
+      <div class="panel panel--keylime">Keylime</div>
+      <div class="panel panel--mint">Mint</div>
+      <div class="panel panel--sage">Sage</div>
+      <div class="panel panel--slate">Slate</div>
+    </div>
+
+    <h2>Srovnávací tabulka (ukázková data)</h2>
+    <MilkTable milks={demo} />
+    <h3>Prázdný stav</h3>
+    <MilkTable milks={[]} />
+
+    <h2>Zdroje</h2>
+    <SourceList
+      sources={[{ title: 'Infant and young child feeding', publisher: 'WHO', url: 'https://www.who.int/', year: 2023 }]}
+      updated={new Date('2026-11-07')}
+    />
+  </div>
+</Base>
+
+<style>
+  .sg { padding-top: var(--space-6); display: grid; gap: var(--space-3); }
+  .sg > h2 { margin-top: var(--space-5); }
+  .swatches { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-2); }
+  .swatches li { display: grid; gap: 4px; font-size: var(--fs-small); }
+  .sw { height: 64px; border-radius: var(--radius-card); box-shadow: inset 0 0 0 1px var(--line); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+  .panels { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+  @media (max-width: 640px) { .panels { grid-template-columns: 1fr 1fr; } }
+</style>

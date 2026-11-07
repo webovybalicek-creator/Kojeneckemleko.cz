@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import MilkTable from '../../components/MilkTable.astro';
+
+const stageOrder = { pocatecni: 0, pokracovaci: 1, batoleci: 2 } as const;
+const milks = (await getCollection('mleka')).sort(
+  (a, b) => stageOrder[a.data.stage] - stageOrder[b.data.stage] || a.data.brand.localeCompare(b.data.brand, 'cs'),
+);
+---
+<Base
+  title="Srovnání kojeneckých mlék"
+  description="Srovnávací tabulka kojeneckých mlék dostupných v ČR – fáze, základ, typ, HMO, palmový olej a cena za 100 ml. Údaje ověřené u výrobce."
+>
+  <section class="container head">
+    <nav class="crumbs" aria-label="Drobečková navigace">
+      <a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/mleka/">Kojenecká mléka</a>
+    </nav>
+    <p class="eyebrow">Srovnání</p>
+    <h1>Srovnání kojeneckých mlék</h1>
+    <p class="lead">
+      Fakta ze složení a ceny na jednom místě. Tabulka neříká, které mléko je nejlepší –
+      pomáhá porovnat, čím se mléka liší.
+    </p>
+  </section>
+
+  <section class="container">
+    <MilkTable milks={milks} />
+    <p class="muted note">
+      Údaje přebíráme z oficiálních obalů a webů výrobců; u každého mléka je datum ověření.
+      Ceny jsou orientační a liší se podle obchodu.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .head { display: grid; gap: var(--space-2); padding-block: var(--space-6) var(--space-5); }
+  .crumbs { font-size: var(--fs-small); }
+  .crumbs a { color: var(--text-muted); }
+  .note { font-size: var(--fs-small); margin-top: var(--space-3); }
+</style>
