@@ -60,6 +60,7 @@ export const glossary: GlossaryTerm[] = [
       'Určené od 6 měsíců – miminkům mladším 6 měsíců se nesmí podávat. Podle NHS přechod na pokračovací mléko v 6 měsících nemá žádný prokázaný přínos; počáteční mléko může dítě pít až do 1 roku [1].',
       'Obaly počátečních a pokračovacích mlék vypadají podobně, proto je dobré je pozorně číst [2].',
     ],
+    link: { label: 'Počáteční, pokračovací, nebo batolecí mléko?', href: '/mleka/pocatecni-vs-pokracovaci/' },
   },
   {
     id: 'batoleci', term: 'Batolecí mléko', aka: 'mléko 3 a 4, growing-up milk', group: 'typy',
@@ -68,6 +69,7 @@ export const glossary: GlossaryTerm[] = [
       'Prodává se pro děti od 1 roku. Podle NHS ho děti ve věku 1–5 let nepotřebují a neexistují důkazy o jeho výživovém přínosu oproti běžnému mléku [1][2].',
       'Od 1 roku může být hlavním nápojem plnotučné pasterizované kravské mléko [1][7].',
     ],
+    link: { label: 'Počáteční, pokračovací, nebo batolecí mléko?', href: '/mleka/pocatecni-vs-pokracovaci/' },
   },
   {
     id: 'ha', term: 'HA mléko', aka: 'hypoalergenní, s hydrolyzovanou bílkovinou', group: 'specialni',
