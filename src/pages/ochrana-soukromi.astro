@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base
+  title="Ochrana soukromí"
+  description="Jak kojeneckemleko.cz měří návštěvnost – bez cookies, bez sledování a bez sdílení dat s třetími stranami."
+>
+  <article class="container page stack">
+    <p class="eyebrow">Soukromí</p>
+    <h1>Ochrana soukromí</h1>
+    <p class="lead">Web nepoužívá cookies, reklamní ani sledovací nástroje třetích stran.</p>
+
+    <h2>Měření návštěvnosti</h2>
+    <p>Abychom věděli, které články jsou užitečné, počítáme návštěvnost vlastním jednoduchým nástrojem na našem serveru. Ukládáme jen:</p>
+    <ul>
+      <li>kterou stránku jste otevřeli (adresa bez parametrů),</li>
+      <li>z jakého webu jste přišli (jen název domény, např. google.com),</li>
+      <li>souhrnné počty zobrazení a návštěvníků za den.</li>
+    </ul>
+    <p>
+      Abychom stejného návštěvníka během dne nepočítali vícekrát, vytvoříme z IP adresy a typu prohlížeče jednosměrný otisk
+      s náhodnou solí, která se každý den mění. IP adresu ani otisk trvale neukládáme – otisky a sůl se smažou nejpozději při první návštěvě následujícího dne,
+      zůstávají jen souhrnná čísla. Z dat nelze zpětně zjistit, kdo jste.
+    </p>
+    <p>Pokud máte v prohlížeči zapnuté „Do Not Track“ nebo Global Privacy Control, návštěvu vůbec nezapočítáme.</p>
+
+    <!-- TODO: doplnit provozovatele webu (jméno/IČO) a kontaktní e-mail -->
+  </article>
+</Base>
+
+<style>
+  .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-6); }
+  .page h2 { margin-top: var(--space-5); }
+  .page ul { padding-left: 1.25rem; display: grid; gap: var(--space-1); }
+</style>

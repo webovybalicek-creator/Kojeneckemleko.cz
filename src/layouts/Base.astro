@@ -57,5 +57,20 @@ const baseLd = [
       <slot />
     </main>
     <Footer />
+    {!noindex && (
+      <script is:inline>
+        // Měření návštěvnosti bez cookies – viz /ochrana-soukromi/
+        (function () {
+          try {
+            var h = location.hostname;
+            if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl || h === 'localhost' || h === '127.0.0.1') return;
+            var d = JSON.stringify({ p: location.pathname, r: document.referrer });
+            if (!(navigator.sendBeacon && navigator.sendBeacon('/api/hit.php', d))) {
+              fetch('/api/hit.php', { method: 'POST', body: d, keepalive: true }).catch(function () {});
+            }
+          } catch (e) {}
+        })();
+      </script>
+    )}
   </body>
 </html>

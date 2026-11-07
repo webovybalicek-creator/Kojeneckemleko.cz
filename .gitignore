@@ -3,3 +3,7 @@ dist/
 .astro/
 .env
 .DS_Store
+
+# Počítadlo – lokální konfigurace a data
+public/api/config.php
+public/api/data/

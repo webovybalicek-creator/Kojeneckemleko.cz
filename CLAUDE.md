@@ -39,5 +39,10 @@ EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké vý
 - žádné obrázky idealizující umělou výživu (miminka na obalech apod.),
 - vždy „připravujte podle návodu na balení“.
 
+## Hosting, deploy a návštěvnost
+- Hosting přes FTP s PHP. Deploy: `.github/workflows/deploy.yml` (zatím jen ruční spuštění), secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR, STATS_PASSWORD. Secrets nečíst ani nevypisovat.
+- Počítadlo: `public/api/hit.php` + `_lib.php` (SQLite v `api/data/`, mimo git i deploy), beacon v `src/layouts/Base.astro`, přehled `public/navstevnost/index.php` pod heslem.
+- Bez cookies, bez IP v DB, denní rotující sůl, respektuje DNT/GPC. Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
+
 ## Příkazy
 `npm run dev` · `npm run build` · `npm run preview`

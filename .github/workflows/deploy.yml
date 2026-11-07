@@ -1,0 +1,54 @@
+# Build Astro a nahrání na hosting přes FTP.
+# Zatím jen ruční spuštění (Actions → Deploy → Run workflow). Automatický deploy při pushi
+# zapneš odkomentováním bloku `push` níže.
+#
+# Potřebné GitHub Secrets (Settings → Secrets and variables → Actions):
+#   FTP_SERVER       – adresa FTP serveru (např. ftp.example.cz)
+#   FTP_USERNAME     – FTP uživatel
+#   FTP_PASSWORD     – FTP heslo
+#   FTP_SERVER_DIR   – (volitelné) cílová složka s lomítkem na konci, např. "www/" – výchozí "./"
+#   STATS_PASSWORD   – heslo ke stránce /navstevnost/
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Konfigurace počítadla návštěvnosti
+        env:
+          STATS_PASSWORD: ${{ secrets.STATS_PASSWORD }}
+        run: php -r 'file_put_contents("dist/api/config.php", "<?php\nreturn " . var_export(["stats_password" => (string) getenv("STATS_PASSWORD")], true) . ";\n");'
+
+      - name: Nahrání na FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || './' }}
+          local-dir: ./dist/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            api/data/**

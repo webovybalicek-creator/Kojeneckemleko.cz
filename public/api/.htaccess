@@ -1,0 +1,5 @@
+# Zakázat přímý přístup ke konfiguraci a knihovně
+<FilesMatch "^(config|_lib)\.php$">
+  Require all denied
+</FilesMatch>
+Options -Indexes
