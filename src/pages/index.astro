@@ -115,7 +115,7 @@ const faqLd = {
             <span class:list={['stage__dot', `stage__dot--${st.tone}`]} aria-hidden="true"></span>
             <article class="stage__card panel panel--cream">
               <p class="eyebrow">{st.age}</p>
-              <h2 class="stage__title">{st.label}</h2>
+              <h2 class="heading-sm stage__title">{st.label}</h2>
               {st.fact && (
                 <p class="stage__fact"><span class="serif tabular">{st.fact}</span> <span class="muted">{st.factNote}</span></p>
               )}
@@ -158,7 +158,7 @@ const faqLd = {
             <span class="eyebrow">{t.eyebrow}</span>
             {!t.ready && <span class="tag tag--sm">Připravujeme</span>}
           </span>
-          <h3>{t.title}</h3>
+          <h3 class="serif">{t.title}</h3>
           <p>{t.text}</p>
           <Illustration name={t.illu} bg="cream" class="topic__illu" />
           <span class="topic__more">Přejít <Arrow /></span>
@@ -194,7 +194,7 @@ const faqLd = {
     <dl class="faq">
       {faq.map((f) => (
         <div class="faq__row">
-          <dt><h3>{f.q}</h3></dt>
+          <dt><h3 class="serif">{f.q}</h3></dt>
           <dd><p>{f.a}</p></dd>
         </div>
       ))}
@@ -237,7 +237,7 @@ const faqLd = {
   .stage__dot--sage { background: var(--color-sage-mist); }
   .stage__dot--keylime { background: var(--color-keylime-wash); }
   .stage__card { display: grid; gap: 0.3rem; padding: var(--space-3) var(--space-4); }
-  .stage__title { font-size: var(--fs-h3); }
+  .stage__title { font-size: 1.125rem; }
   .stage__fact { display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: wrap; }
   .stage__fact .serif { font-size: 1.75rem; line-height: 1.1; color: var(--ink); font-weight: 300; }
   .stage__fact .muted { font-size: var(--fs-small); }
@@ -282,7 +282,7 @@ const faqLd = {
   .method__panel { position: relative; }
   .method :global(.method__illu) { width: 7.5rem; margin-left: -0.75rem; }
   .principles { list-style: none; padding: 0; margin-top: var(--space-3); display: grid; gap: var(--space-2); }
-  .principles li { font-family: var(--font-serif); font-weight: 300; font-size: var(--fs-h3); line-height: 1.3; color: var(--ink); padding-top: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .principles li { font-weight: 500; font-size: 1.0625rem; line-height: 1.4; color: var(--ink); padding-top: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
   .principles li:first-child { border-top: 0; padding-top: 0; }
 
   .sources-strip { padding-top: var(--space-6); }

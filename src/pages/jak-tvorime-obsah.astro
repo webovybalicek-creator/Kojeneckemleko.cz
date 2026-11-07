@@ -43,7 +43,7 @@ const sources = [
       <ul class="sources">
         {sources.map((s) => (
           <li class="panel panel--keylime">
-            <a href={s.url} rel="noopener" class="serif">{s.name}</a>
+            <a href={s.url} rel="noopener" class="heading-sm">{s.name}</a>
             <p class="muted">{s.what}</p>
           </li>
         ))}
@@ -65,7 +65,7 @@ const sources = [
   .principles strong { font-weight: 600; color: var(--ink); }
   .sources { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
   .sources li { padding: var(--space-4); display: grid; gap: var(--space-1); align-content: start; }
-  .sources a { font-size: var(--fs-h3); line-height: 1.25; text-decoration: none; }
+  .sources a { text-decoration: none; }
   .sources p { font-size: var(--fs-small); }
   @media (hover: hover) and (pointer: fine) { .sources a:hover { text-decoration: underline; } }
   @media (max-width: 640px) { .sources { grid-template-columns: 1fr; } }
