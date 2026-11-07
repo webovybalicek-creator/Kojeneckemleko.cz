@@ -6,8 +6,10 @@
 interface Props {
   name: 'sprig' | 'mleka' | 'krmeni' | 'prikrmy' | 'zdroje';
   class?: string;
+  /** Barva kruhu za ilustrací – na tónovaném panelu použij 'cream', jinak kruh splyne s pozadím. */
+  bg?: 'keylime' | 'cream';
 }
-const { name, class: className } = Astro.props;
+const { name, class: className, bg = 'keylime' } = Astro.props;
 
 type Tone = 'sage' | 'mint' | 'keylime' | 'cream' | 'slate';
 interface Leaf { x: number; y: number; a: number; l: number; w?: number; t?: Tone }
@@ -47,10 +49,10 @@ const leaves: Record<string, Leaf[]> = {
 };
 const items = leaves[name] ?? [];
 ---
-<svg class:list={['illu', `illu--${name}`, className]} viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+<svg class:list={['illu', `illu--${name}`, `illu--bg-${bg}`, className]} viewBox="0 0 240 200" aria-hidden="true" focusable="false">
   {name === 'mleka' && (
     <g>
-      <circle cx="120" cy="108" r="74" class="f-keylime" />
+      <circle cx="120" cy="108" r="74" class="f-bg" />
       <path d="M110 46 C110 34 114 26 120 24 C126 26 130 34 130 46 Z" class="f-cream s" />
       <rect x="101" y="46" width="38" height="14" rx="4" class="f-mint s" />
       <rect x="94" y="60" width="52" height="108" rx="16" class="f-cream s" />
@@ -62,7 +64,7 @@ const items = leaves[name] ?? [];
 
   {name === 'prikrmy' && (
     <g>
-      <circle cx="120" cy="112" r="74" class="f-keylime" />
+      <circle cx="120" cy="112" r="74" class="f-bg" />
       <path d="M190 40 L148 104" class="s" />
       <ellipse cx="194" cy="34" rx="9" ry="13" transform="rotate(34 194 34)" class="f-cream s" />
       <path d="M64 120 A56 50 0 0 0 176 120 Z" class="f-mint s" />
@@ -75,7 +77,7 @@ const items = leaves[name] ?? [];
 
   {name === 'zdroje' && (
     <g>
-      <circle cx="120" cy="104" r="74" class="f-keylime" />
+      <circle cx="120" cy="104" r="74" class="f-bg" />
     </g>
   )}
 
@@ -83,7 +85,7 @@ const items = leaves[name] ?? [];
   {name === 'mleka' && <path d="M52 186 C56 170 60 160 66 148 M172 188 C176 170 180 158 186 146" class="s" fill="none" />}
   {name === 'krmeni' && (
     <g>
-      <circle cx="120" cy="104" r="74" class="f-keylime" />
+      <circle cx="120" cy="104" r="74" class="f-bg" />
       <path d="M120 194 V150" class="s" />
     </g>
   )}
@@ -116,5 +118,7 @@ const items = leaves[name] ?? [];
   .f-mint { fill: var(--color-mint-veil); }
   .f-keylime { fill: var(--color-keylime-wash); }
   .f-cream { fill: var(--color-cream-paper); }
+  .f-bg { fill: var(--color-keylime-wash); }
+  .illu--bg-cream .f-bg { fill: var(--color-cream-paper); }
   .f-slate { fill: var(--color-slate-hush); }
 </style>

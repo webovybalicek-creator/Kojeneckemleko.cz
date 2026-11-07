@@ -4,10 +4,28 @@ import Arrow from '../components/Arrow.astro';
 import Marquee from '../components/Marquee.astro';
 import Illustration from '../components/Illustration.astro';
 
+// Fakta z NHS – ověřeno 7. 11. 2026 (revize stránek NHS 12/2025 a NHS 111 Wales 2021)
+const NHS_FORMULA = 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/bottle-feeding/how-to-make-up-a-feed/how-to-use-formula/';
+const NHS_AMOUNT = 'https://111.wales.nhs.uk/livewell/pregnancy/bottleformulacommonquest/';
+
 const stages = [
-  { label: 'Počáteční', age: 'od narození', note: 'Jediná výživa, pokud dítě není kojené.' },
-  { label: 'Pokračovací', age: 'od 6. měsíce', note: 'Doplněk k příkrmům, ne jejich náhrada.' },
-  { label: 'Speciální', age: 'HA · AR · comfort', note: 'Při konkrétních obtížích, po poradě s pediatrem.' },
+  {
+    age: '0 měsíců', label: 'Počáteční', tone: 'cream',
+    note: 'Hlavní nápoj až do 1 roku, pokud dítě není kojené.',
+    fact: '150–200 ml', factNote: 'na kilogram denně',
+    sources: [{ label: 'NHS', href: NHS_FORMULA }, { label: 'NHS Wales', href: NHS_AMOUNT }],
+    link: { label: 'Kolik mléka podle věku', href: '/mleka/kolik-mleka-podle-veku/' },
+  },
+  {
+    age: '6 měsíců', label: 'Pokračovací', tone: 'sage',
+    note: 'Podle britské NHS není nutné – počáteční mléko stačí celý první rok.',
+    sources: [{ label: 'NHS', href: NHS_FORMULA }],
+  },
+  {
+    age: 'Po poradě s pediatrem', label: 'Speciální', tone: 'keylime',
+    note: 'Při konkrétních obtížích dítěte.',
+    chips: ['HA', 'AR', 'Comfort', 'Kozí'],
+  },
 ];
 
 const topics = [
@@ -90,14 +108,36 @@ const faqLd = {
       <Illustration name="sprig" class="hero__sprig" />
     </div>
 
-    <div class="hero__visual panel panel--slate" aria-label="Fáze kojeneckých mlék">
-      {stages.map((s, i) => (
-        <article class="stage panel panel--cream" style={`--i:${i}`}>
-          <p class="eyebrow">{s.age}</p>
-          <h2 class="stage__title">{s.label}</h2>
-          <p class="muted small">{s.note}</p>
-        </article>
-      ))}
+    <div class="hero__visual panel panel--slate">
+      <ol class="timeline" aria-label="Fáze kojeneckých mlék">
+        {stages.map((st, i) => (
+          <li class="stage" style={`--i:${i}`}>
+            <span class:list={['stage__dot', `stage__dot--${st.tone}`]} aria-hidden="true"></span>
+            <article class="stage__card panel panel--cream">
+              <p class="eyebrow">{st.age}</p>
+              <h2 class="stage__title">{st.label}</h2>
+              {st.fact && (
+                <p class="stage__fact"><span class="serif tabular">{st.fact}</span> <span class="muted">{st.factNote}</span></p>
+              )}
+              <p class="muted small">{st.note}</p>
+              {st.chips && (
+                <ul class="stage__chips">{st.chips.map((c) => <li class="tag tag--sm tag--soft">{c}</li>)}</ul>
+              )}
+              {(st.link || st.sources) && (
+                <p class="stage__foot">
+                  {st.link && <a href={st.link.href} class="stage__link">{st.link.label} <Arrow /></a>}
+                  {st.sources && (
+                    <span class="stage__src">
+                      {st.sources.length > 1 ? 'Zdroje: ' : 'Zdroj: '}
+                      {st.sources.map((src, j) => <>{j > 0 && ', '}<a href={src.href} rel="noopener">{src.label}</a></>)}
+                    </span>
+                  )}
+                </p>
+              )}
+            </article>
+          </li>
+        ))}
+      </ol>
     </div>
   </section>
 
@@ -120,7 +160,7 @@ const faqLd = {
           </span>
           <h3>{t.title}</h3>
           <p>{t.text}</p>
-          <Illustration name={t.illu} class="topic__illu" />
+          <Illustration name={t.illu} bg="cream" class="topic__illu" />
           <span class="topic__more">Přejít <Arrow /></span>
         </a>
       ))}
@@ -178,13 +218,39 @@ const faqLd = {
   @keyframes sprig-in { from { opacity: 0; transform: translateY(12px); } }
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 
-  .hero__visual { display: grid; gap: var(--space-2); align-content: center; }
+  .hero__visual { display: grid; align-content: center; padding: var(--space-4); }
+  .timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; left: 0.5rem; top: 1.75rem; bottom: 1.75rem; width: 1.5px;
+    background: var(--color-forest-ink); opacity: 0.35;
+  }
   .stage {
-    display: grid; gap: 0.25rem;
+    display: grid; grid-template-columns: 1rem 1fr; gap: var(--space-2); align-items: start;
     animation: rise 500ms var(--ease-out) both;
     animation-delay: calc(120ms + var(--i) * 70ms);
   }
+  .stage__dot {
+    position: relative; z-index: 1; margin-top: 1.4rem;
+    width: 1rem; height: 1rem; border-radius: 50%;
+    border: 1.5px solid var(--color-forest-ink); background: var(--color-cream-paper);
+  }
+  .stage__dot--sage { background: var(--color-sage-mist); }
+  .stage__dot--keylime { background: var(--color-keylime-wash); }
+  .stage__card { display: grid; gap: 0.3rem; padding: var(--space-3) var(--space-4); }
   .stage__title { font-size: var(--fs-h3); }
+  .stage__fact { display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: wrap; }
+  .stage__fact .serif { font-size: 1.75rem; line-height: 1.1; color: var(--ink); font-weight: 300; }
+  .stage__fact .muted { font-size: var(--fs-small); }
+  .stage__chips { list-style: none; padding: 0; margin: 0.2rem 0 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .stage__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-1) var(--space-2); margin-top: 0.35rem; font-size: var(--fs-small); }
+  .stage__link { display: inline-flex; align-items: center; gap: 0.35em; text-decoration: none; }
+  .stage__link :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .stage__src { color: var(--text-muted); font-size: var(--fs-caption); }
+  .stage__src a { color: inherit; }
+  @media (hover: hover) and (pointer: fine) {
+    .stage__link:hover { text-decoration: underline; }
+    .stage__link:hover :global(svg) { transform: translateX(3px); }
+  }
   .small { font-size: var(--fs-small); }
 
   @keyframes rise {
