@@ -3,8 +3,8 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Arrow from '../../components/Arrow.astro';
 import Illustration from '../../components/Illustration.astro';
+import ArticleCards from '../../components/ArticleCards.astro';
 import { clusterMeta, type Cluster } from '../../data/clusters';
-import { annotate } from '../../data/terms.mjs';
 
 export function getStaticPaths() {
   return (Object.keys(clusterMeta) as Cluster[]).map((cluster) => ({ params: { cluster } }));
@@ -43,16 +43,7 @@ const breadcrumbs = {
   <section class="container section" aria-labelledby="clanky">
     <h2 id="clanky" class="eyebrow">Články</h2>
     {articles.length > 0 ? (
-      <ul class="articles">
-        {articles.map((a) => (
-          <li>
-            <a href={`/${cluster}/${a.id}/`} class="article-row">
-              <span class="heading-sm article-row__title">{a.data.title}</span>
-              <span class="muted" set:html={annotate(a.data.description)} />
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div class="cards-wrap"><ArticleCards articles={articles} showCluster={false} /></div>
     ) : (
       <div class="planned panel panel--cream">
         <p class="muted">Na článcích právě pracujeme. Připravujeme:</p>
@@ -74,20 +65,10 @@ const breadcrumbs = {
   .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
   .crumbs a { color: var(--text-muted); }
 
-  .articles { list-style: none; padding: 0; margin-top: var(--space-3); border-top: 1px solid var(--line); }
-  .article-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
-    padding-block: var(--space-4); border-bottom: 1px solid var(--line);
-    text-decoration: none; color: var(--text);
-  }
-  .article-row__title { }
-  @media (hover: hover) and (pointer: fine) {
-    .article-row:hover .article-row__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
-  }
+  .cards-wrap { margin-top: var(--space-4); }
 
   .planned { margin-top: var(--space-3); border: 1px solid var(--line); }
   .planned ul { margin-top: var(--space-2); padding-left: 1.25rem; display: grid; gap: var(--space-1); }
   .planned li { font-weight: 500; }
 
-  @media (max-width: 760px) { .article-row { grid-template-columns: 1fr; gap: var(--space-1); } }
 </style>

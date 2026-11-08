@@ -1,0 +1,151 @@
+---
+/**
+ * Ilustrační náhled článku – botanické SVG ve stylu Illustration.astro.
+ * Motiv a tón se nastavují ve frontmatteru článku (`cover`). Bez miminek, bez idealizace umělé výživy.
+ */
+import type { coverMotifs } from '../content.config';
+
+interface Props {
+  motif?: (typeof coverMotifs)[number];
+  class?: string;
+}
+const { motif = 'kvet', class: className } = Astro.props;
+
+type Tone = 'sage' | 'mint' | 'keylime' | 'cream' | 'slate';
+interface Leaf { x: number; y: number; a: number; l: number; w?: number; t?: Tone }
+const leafPath = (l: number, w: number) =>
+  `M0 0 C ${l * 0.22} ${-w}, ${l * 0.72} ${-w}, ${l} 0 C ${l * 0.72} ${w}, ${l * 0.22} ${w}, 0 0 Z`;
+
+/** Listy kolem motivu – vlevo a vpravo dole, aby rámovaly kompozici */
+const leaves: Record<string, Leaf[]> = {
+  lahev: [
+    { x: 78, y: 138, a: -130, l: 40, t: 'sage' }, { x: 80, y: 124, a: -168, l: 30, t: 'mint' },
+    { x: 162, y: 138, a: -50, l: 40, t: 'mint' }, { x: 160, y: 124, a: -12, l: 30, t: 'sage' },
+  ],
+  kapka: [
+    { x: 84, y: 140, a: -140, l: 44, t: 'sage' }, { x: 156, y: 140, a: -40, l: 44, t: 'sage' },
+  ],
+  hodiny: [
+    { x: 120, y: 142, a: -158, l: 52, t: 'sage' }, { x: 120, y: 142, a: -22, l: 52, t: 'mint' },
+  ],
+  stit: [
+    { x: 82, y: 140, a: -120, l: 38, t: 'mint' }, { x: 158, y: 140, a: -60, l: 38, t: 'sage' },
+  ],
+  klicky: [],
+  oblak: [
+    { x: 80, y: 142, a: -135, l: 38, t: 'sage' }, { x: 160, y: 142, a: -45, l: 38, t: 'mint' },
+  ],
+  kvet: [
+    { x: 120, y: 128, a: -150, l: 40, t: 'sage' }, { x: 120, y: 116, a: -28, l: 40, t: 'mint' },
+  ],
+  hruska: [],
+};
+const items = leaves[motif] ?? [];
+---
+<svg class:list={['cover', `cover--${motif}`, className]} viewBox="0 0 240 160" aria-hidden="true" focusable="false">
+  <circle cx="120" cy="84" r="60" class="f-cream" />
+
+  {motif === 'kvet' && <path d="M120 148 V96" class="s" />}
+
+  {items.map((lf) => (
+    <g transform={`translate(${lf.x} ${lf.y}) rotate(${lf.a})`}>
+      <path d={leafPath(lf.l, lf.w ?? lf.l * 0.3)} class={`f-${lf.t ?? 'sage'} s`} />
+      <path d={`M${lf.l * 0.12} 0 L${lf.l * 0.82} 0`} class="s thin" />
+    </g>
+  ))}
+
+  {motif === 'lahev' && (
+    <g>
+      <path d="M112 38 C112 28 115 22 120 20 C125 22 128 28 128 38 Z" class="f-cream s" />
+      <rect x="105" y="38" width="30" height="11" rx="3.5" class="f-mint s" />
+      <path d="M100.75 92 H139.25 V126 A11.25 11.25 0 0 1 128 137.25 H112 A11.25 11.25 0 0 1 100.75 126 Z" class="f-mint" />
+      <rect x="100" y="49" width="40" height="89" rx="12" class="s" fill="none" />
+      <path d="M124 64 H132 M127 76 H132 M124 88 H132 M127 100 H132 M124 112 H132" class="s thin" />
+    </g>
+  )}
+
+  {motif === 'kapka' && (
+    <g>
+      <path d="M120 32 C134 54 148 72 148 94 A28 28 0 0 1 92 94 C92 72 106 54 120 32 Z" class="f-mint s" />
+      <path d="M106 96 A14 14 0 0 0 116 112" class="s thin" fill="none" />
+      <path d="M156 50 C152 44 160 40 156 32 M166 56 C162 50 170 46 166 38" class="s thin" fill="none" />
+    </g>
+  )}
+
+  {motif === 'hodiny' && (
+    <g>
+      <circle cx="120" cy="80" r="40" class="f-cream s" />
+      <circle cx="120" cy="80" r="34" class="f-keylime" />
+      <path d="M120 50 V55 M150 80 H145 M120 110 V105 M90 80 H95" class="s" />
+      <path d="M120 80 V62 M120 80 L133 88" class="s" />
+      <circle cx="120" cy="80" r="2.5" class="f-ink" />
+      <path d="M112 36 H128 M120 36 V40" class="s" />
+    </g>
+  )}
+
+  {motif === 'stit' && (
+    <g>
+      <path d="M120 30 C134 38 146 40 156 40 C156 82 146 110 120 126 C94 110 84 82 84 40 C94 40 106 38 120 30 Z" class="f-mint s" />
+      <path d="M120 42 C130 48 138 50 144 50 C144 82 136 102 120 113 Z" class="f-sage" />
+      <path d="M104 78 L116 90 L138 64" class="s thick" fill="none" />
+    </g>
+  )}
+
+  {motif === 'klicky' && (
+    <g>
+      <path d="M62 136 H178" class="s" />
+      <path d="M84 136 V118" class="s" />
+      <g transform="translate(84 120) rotate(-140)"><path d={leafPath(18, 6)} class="f-mint s" /></g>
+      <g transform="translate(84 120) rotate(-40)"><path d={leafPath(18, 6)} class="f-sage s" /></g>
+      <path d="M120 136 V98" class="s" />
+      <g transform="translate(120 112) rotate(-150)"><path d={leafPath(26, 8)} class="f-sage s" /></g>
+      <g transform="translate(120 102) rotate(-35)"><path d={leafPath(28, 9)} class="f-mint s" /></g>
+      <path d="M156 136 V68" class="s" />
+      <g transform="translate(156 112) rotate(-145)"><path d={leafPath(30, 9)} class="f-mint s" /></g>
+      <g transform="translate(156 96) rotate(-30)"><path d={leafPath(32, 10)} class="f-sage s" /></g>
+      <g transform="translate(156 78) rotate(-150)"><path d={leafPath(28, 9)} class="f-sage s" /></g>
+      <g transform="translate(156 70) rotate(-70)"><path d={leafPath(20, 7)} class="f-mint s" /></g>
+    </g>
+  )}
+
+  {motif === 'oblak' && (
+    <g>
+      <path d="M86 98 C72 98 70 78 86 76 C86 58 108 52 116 64 C122 48 150 50 150 70 C166 70 168 98 152 98 Z" class="f-cream s" />
+      <path d="M96 92 C104 88 110 90 116 86" class="s thin" fill="none" />
+      <path d="M108 110 C104 116 104 120 108 120 C112 120 112 116 108 110 Z M132 114 C128 120 128 124 132 124 C136 124 136 120 132 114 Z" class="f-mint s thin" />
+    </g>
+  )}
+
+  {motif === 'kvet' && (
+    <g>
+      {[0, 72, 144, 216, 288].map((r) => (
+        <ellipse cx="120" cy="58" rx="11" ry="19" transform={`rotate(${r} 120 78)`} class="f-cream s" />
+      ))}
+      <circle cx="120" cy="78" r="10" class="f-keylime s" />
+      <circle cx="117" cy="76" r="1.6" class="f-ink" /><circle cx="123" cy="79" r="1.6" class="f-ink" /><circle cx="119" cy="82" r="1.6" class="f-ink" />
+      <circle cx="152" cy="44" r="2.5" class="f-sage s thin" /><circle cx="162" cy="56" r="2" class="f-mint s thin" /><circle cx="84" cy="50" r="2.5" class="f-mint s thin" />
+    </g>
+  )}
+
+  {motif === 'hruska' && (
+    <g>
+      <path d="M120 44 C130 44 132 58 136 70 C142 86 156 94 156 112 C156 130 140 140 120 140 C100 140 84 130 84 112 C84 94 98 86 104 70 C108 58 110 44 120 44 Z" class="f-sage s" />
+      <path d="M100 106 C100 118 106 126 116 130" class="s thin" fill="none" />
+      <path d="M120 44 C120 36 122 30 126 26" class="s" fill="none" />
+      <g transform="translate(123 33) rotate(-20)"><path d={leafPath(34, 10)} class="f-mint s" /><path d="M4 0 L28 0" class="s thin" /></g>
+    </g>
+  )}
+</svg>
+
+<style>
+  .cover { display: block; width: 100%; height: auto; overflow: visible; }
+  .s { stroke: var(--color-forest-ink); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .thin { stroke-width: 1.1; }
+  .thick { stroke-width: 3; }
+  .f-sage { fill: var(--color-sage-mist); }
+  .f-mint { fill: var(--color-mint-veil); }
+  .f-keylime { fill: var(--color-keylime-wash); }
+  .f-cream { fill: var(--color-cream-paper); }
+  .f-slate { fill: var(--color-slate-hush); }
+  .f-ink { fill: var(--color-forest-ink); }
+</style>

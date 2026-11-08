@@ -1,0 +1,87 @@
+---
+/**
+ * Mřížka karet článků s ilustračním náhledem (úvod, rozcestníky).
+ * Popis je prostý text – celá karta je odkaz, takže uvnitř nesmí být další <a> (tooltipy).
+ */
+import type { CollectionEntry } from 'astro:content';
+import ArticleCover from './ArticleCover.astro';
+import Arrow from './Arrow.astro';
+import { clusterMeta } from '../data/clusters';
+
+interface Props {
+  articles: CollectionEntry<'clanky'>[];
+  /** Zobrazit název klastru v eyebrow (na úvodu ano, v rozcestníku ne) */
+  showCluster?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+const { articles, showCluster = true, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
+---
+<ul class="cards">
+  {articles.map((a, i) => (
+    <li style={`--i:${i}`}>
+      <a href={`/${a.data.cluster}/${a.id}/`} class="card">
+        <span class:list={['card__cover', `panel--${a.data.cover?.tone ?? 'sage'}`]}>
+          <ArticleCover motif={a.data.cover?.motif} class="card__illu" />
+        </span>
+        <span class="card__body">
+          <span class="eyebrow card__meta">
+            {showCluster && <>{clusterMeta[a.data.cluster].title} · </>}
+            <time datetime={a.data.updated.toISOString()}>{dateFmt.format(a.data.updated)}</time>
+          </span>
+          <Heading class="heading-sm card__title">{a.data.title}</Heading>
+          <span class="card__desc">{a.data.description}</span>
+          <span class="card__more">Číst článek <Arrow /></span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .cards {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-3);
+  }
+  .cards > li { min-width: 0; animation: card-in 420ms var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }
+  @keyframes card-in { from { opacity: 0; transform: translateY(8px); } }
+
+  .card {
+    display: flex; flex-direction: column; gap: var(--space-3); height: 100%;
+    text-decoration: none; color: var(--text);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .card:active { transform: scale(0.98); }
+  .card__cover {
+    display: grid; place-items: center; aspect-ratio: 16 / 10; overflow: hidden;
+    border-radius: 14px; padding: var(--space-2);
+  }
+  .card :global(.card__illu) { width: min(100%, 19rem); transition: transform var(--dur-base) var(--ease-out); }
+  .card__body { display: flex; flex-direction: column; gap: var(--space-1); flex: 1; }
+  .card__meta { color: var(--text-muted); }
+  .card__title { font-size: var(--fs-h3); line-height: 1.3; text-wrap: balance; color: var(--ink); margin: 0; }
+  .card__desc {
+    color: var(--text-muted); font-size: var(--fs-small); line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card__more {
+    margin-top: auto; padding-top: var(--space-1);
+    display: inline-flex; align-items: center; gap: 0.4em; color: var(--ink); font-size: var(--fs-small); font-weight: 500;
+  }
+  .card__more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover :global(.card__illu) { transform: translateY(-4px); }
+    .card:hover .card__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+    .card:hover .card__more :global(svg) { transform: translateX(4px); }
+  }
+  .card:focus-visible { outline: 2px solid var(--color-forest-ink); outline-offset: 4px; border-radius: 14px; }
+
+  @media (max-width: 960px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .cards { grid-template-columns: 1fr; gap: var(--space-4); } }
+  @media (prefers-reduced-motion: reduce) {
+    .cards > li { animation: none; }
+    .card, .card :global(.card__illu), .card__more :global(svg) { transition: none; }
+  }
+</style>

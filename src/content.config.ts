@@ -22,6 +22,8 @@ const source = z.object({
 });
 
 /** Tematické klastry webu – pořadí odpovídá obsahové strategii. */
+export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska'] as const;
+
 export const clusters = ['mleka', 'krmeni', 'prikrmy'] as const;
 
 const clanky = defineCollection({
@@ -36,6 +38,11 @@ const clanky = defineCollection({
     author: z.string().default('Redakce kojeneckemleko.cz'),
     sources: z.array(source).min(1, 'Každý článek musí mít alespoň jeden zdroj.'),
     draft: z.boolean().default(false),
+    /** Ilustrační náhled článku (karty na úvodu a v rozcestnících) – vlastní botanické SVG, viz ArticleCover.astro */
+    cover: z.object({
+      motif: z.enum(coverMotifs),
+      tone: z.enum(['sage', 'mint', 'keylime', 'slate']).default('sage'),
+    }).optional(),
   }),
 });
 
