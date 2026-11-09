@@ -10,5 +10,11 @@
   "palmOil": false,
   "probiotics": false,
   "officialUrl": "https://www.kendamil.cz/produkt/kendamil-kozi-kojenecke-mleko-1-800-g/",
-  "verified": "2026-11-09"
+  "verified": "2026-11-09",
+  "price": {
+    "czk": 939,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  }
 }

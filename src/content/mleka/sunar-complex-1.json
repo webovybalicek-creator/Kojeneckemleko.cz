@@ -10,5 +10,11 @@
   "palmOil": false,
   "probiotics": false,
   "officialUrl": "https://www.sunar.cz/nase-produkty/kojenecka-mleka/sunar-complex-1",
-  "verified": "2026-11-09"
+  "verified": "2026-11-09",
+  "price": {
+    "czk": 249,
+    "packG": 600,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  }
 }

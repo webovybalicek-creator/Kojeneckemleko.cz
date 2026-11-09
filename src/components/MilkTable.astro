@@ -16,7 +16,8 @@ const baseLabel = {
 const yesNo = (v?: boolean) => (v === undefined ? '–' : v ? 'Ano' : 'Ne');
 const price = (v?: number) =>
   v === undefined ? '–' : new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 2 }).format(v);
-const showPrice = milks.some((m) => m.data.pricePer100ml !== undefined);
+const showPrice = milks.some((m) => m.data.price);
+const czk = (v: number) => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(v);
 const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
 ---
 <div class="table-panel panel panel--slate">
@@ -39,7 +40,7 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
             <th scope="col">HMO</th>
             <th scope="col">Palmový olej</th>
             <th scope="col">Probiotika</th>
-            {showPrice && <th scope="col">Cena / 100 ml</th>}
+            {showPrice && <th scope="col">Orientační cena</th>}
             <th scope="col">Ověřeno</th>
           </tr>
         </thead>
@@ -58,7 +59,10 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
               <td>{yesNo(data.hmo)}</td>
               <td>{yesNo(data.palmOil)}</td>
               <td>{yesNo(data.probiotics)}</td>
-              {showPrice && <td>{price(data.pricePer100ml)}</td>}
+              {showPrice && <td class="price">{data.price ? <>
+                <span class="price__pack">{czk(data.price.czk)} / {data.price.packG} g</span>
+                <span class="price__unit">{czk(data.price.czk / data.price.packG * 100)} za 100 g</span>
+              </> : '–'}</td>}
               <td class="muted">{dateFmt.format(data.verified)}</td>
             </tr>
           ))}
@@ -86,6 +90,9 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
   tbody th a { display: block; text-decoration: none; }
   .brand { display: block; font-size: var(--fs-caption); color: var(--text-muted); }
   .types { display: flex; flex-wrap: wrap; gap: 4px; }
+  .price { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .price__pack { display: block; }
+  .price__unit { display: block; font-size: var(--fs-caption); color: var(--text-muted); }
   @media (hover: hover) and (pointer: fine) {
     tbody tr { transition: background-color var(--dur-fast) var(--ease-out); }
     tbody tr:hover { background: var(--color-keylime-wash); }

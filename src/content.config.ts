@@ -63,6 +63,13 @@ const mleka = defineCollection({
     /** Přidané probiotické kultury podle složení (bakterie mléčného kvašení) */
     probiotics: z.boolean().optional(),
     pricePer100ml: z.number().optional(),
+    /** Orientační cena balení – jeden obchod pro všechna mléka, s datem zjištění */
+    price: z.object({
+      czk: z.number(),
+      packG: z.number(),
+      source: z.string(),
+      date: z.coerce.date(),
+    }).optional(),
     officialUrl: z.url(),
     verified: z.coerce.date(),
   }),
