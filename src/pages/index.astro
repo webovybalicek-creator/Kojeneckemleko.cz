@@ -4,6 +4,8 @@ import Arrow from '../components/Arrow.astro';
 import Marquee from '../components/Marquee.astro';
 import Illustration from '../components/Illustration.astro';
 import ArticleCards from '../components/ArticleCards.astro';
+import RecallList from '../components/RecallList.astro';
+import { clanekUrl } from '../data/stazeni';
 import { clusterMeta } from '../data/clusters';
 import { getCollection } from 'astro:content';
 import { annotate, terms } from '../data/terms.mjs';
@@ -158,6 +160,23 @@ const faqLd = {
     </div>
   </section>
 
+  <section class="container recall" aria-labelledby="stazena">
+    <div class="recall__panel">
+      <div class="recall__head">
+        <div>
+          <p class="eyebrow recall__eyebrow"><span class="recall__dot" aria-hidden="true"></span>Bezpečnostní upozornění</p>
+          <h2 id="stazena">Stažená kojenecká mléka</h2>
+          <p class="recall__lead">
+            Máte doma některé z těchto balení? Pokud sedí název, velikost a datum minimální trvanlivosti,
+            mléko miminku nepodávejte a balení si nechte. Seznam každý týden kontrolujeme na webech SZPI a Ministerstva zdravotnictví.
+          </p>
+        </div>
+        <a href={clanekUrl} class="btn recall__btn">Co dělat a kdy k lékaři <Arrow /></a>
+      </div>
+      <RecallList />
+    </div>
+  </section>
+
   <section class="sources-strip" aria-labelledby="zdroje-pas">
     <p class="eyebrow container" id="zdroje-pas">Vycházíme z doporučení a výzkumu</p>
     <Marquee items={sources} label="Instituce, z jejichž doporučení vycházíme" />
@@ -298,6 +317,15 @@ const faqLd = {
   .section-head { margin-bottom: var(--space-5); }
   .section-head h2 { margin-top: var(--space-1); max-width: 20ch; }
   .section-head--row { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-2) var(--space-4); flex-wrap: wrap; }
+  .recall { margin-top: var(--space-5); }
+  .recall__panel { background: var(--color-alert-wash); border: 1px solid var(--color-alert-line); border-radius: var(--radius-card); padding: clamp(1.25rem, 3vw, 2.25rem); }
+  .recall__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); }
+  .recall__head > div { max-width: 46rem; }
+  .recall__eyebrow { color: var(--color-alert-ink); display: inline-flex; align-items: center; gap: 0.5rem; }
+  .recall__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-alert-ink); }
+  .recall h2 { margin: 0.35rem 0 0.6rem; }
+  .recall__lead { margin: 0; color: var(--color-charcoal); }
+  .recall__btn { flex: none; }
   .section-head__links { font-size: var(--fs-small); color: var(--text-muted); }
   .latest-group + .latest-group { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
   .latest-group__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }

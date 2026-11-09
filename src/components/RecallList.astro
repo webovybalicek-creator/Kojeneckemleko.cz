@@ -1,0 +1,49 @@
+---
+/**
+ * Seznam stažených kojeneckých mlék (úvod + článek). Data: src/data/stazeni.ts.
+ */
+import { stazeni, posledniKontrola, formatDatum } from '../data/stazeni';
+---
+<div class="recall-list">
+  <ul>
+    {stazeni.map((s) => (
+      <li class="recall-item">
+        <div class="recall-item__main">
+          <p class="recall-item__name">{s.vyrobek} <span>{s.baleni}</span></p>
+          <p class="recall-item__id">{s.identifikace}</p>
+          {s.poznamka && <p class="recall-item__note">{s.poznamka}</p>}
+        </div>
+        <p class="recall-item__meta">
+          <span>{s.duvod}</span>
+          <a href={s.zdroj} rel="noopener" target="_blank">{s.vydal}, {formatDatum(s.datum)}</a>
+        </p>
+      </li>
+    ))}
+  </ul>
+  <p class="recall-list__foot">
+    Jiné výrobky stejné značky s jiným datem minimální trvanlivosti (DMT) se varování netýkají.
+    Ověřeno na webech SZPI, Ministerstva zdravotnictví a výrobců {formatDatum(posledniKontrola)}.
+  </p>
+</div>
+
+<style>
+  .recall-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+  .recall-item {
+    display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 1.5rem; align-items: start;
+    margin: 0; padding: 0.9rem 1.1rem; background: var(--color-cream-paper);
+    border: 1px solid var(--color-alert-line); border-left: 3px solid var(--color-alert-ink); border-radius: 10px;
+  }
+  .recall-item p { margin: 0; }
+  .recall-item__name { font-weight: 600; color: var(--color-charcoal); }
+  .recall-item__name span { font-weight: 400; color: var(--text-muted); margin-left: 0.25em; }
+  .recall-item__id { font-size: var(--fs-small); color: var(--color-charcoal); font-variant-numeric: tabular-nums; margin-top: 0.15rem !important; }
+  .recall-item__note { font-size: var(--fs-small); color: var(--text-muted); margin-top: 0.15rem !important; }
+  .recall-item__meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; font-size: var(--fs-small); text-align: right; }
+  .recall-item__meta span { color: var(--color-alert-ink); font-weight: 600; }
+  .recall-item__meta a { color: var(--text-muted); }
+  .recall-list__foot { font-size: var(--fs-small); color: var(--text-muted); margin: 0.9rem 0 0; }
+  @media (max-width: 640px) {
+    .recall-item { grid-template-columns: 1fr; }
+    .recall-item__meta { align-items: flex-start; text-align: left; flex-direction: row; flex-wrap: wrap; gap: 0.15rem 0.75rem; }
+  }
+</style>

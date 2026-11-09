@@ -11,6 +11,9 @@
   --color-cream-paper: #fffefc;    /* pozadí stránky */
   --color-charcoal: #222222;       /* navigace, sekundární text */
   --color-border-mist: #efeeeb;    /* hairline linky */
+  --color-alert-wash: #fcefe3;     /* jen bezpečnostní upozornění (stažená mléka) */
+  --color-alert-line: #f1d6bf;
+  --color-alert-ink: #8a3a10;      /* AA na alert-wash i cream */
 
   /* Sémantické role */
   --bg: var(--color-cream-paper);

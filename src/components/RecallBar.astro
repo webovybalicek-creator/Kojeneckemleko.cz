@@ -1,0 +1,57 @@
+---
+/**
+ * Pruh nad hlavičkou na všech stránkách: upozornění na stažená kojenecká mléka.
+ * Data: src/data/stazeni.ts. Na samotném článku o stažených mlécích se neukazuje.
+ */
+import { stazeni, posledniKontrola, clanekUrl, formatDatum } from '../data/stazeni';
+
+const path = Astro.url.pathname;
+const show = stazeni.length > 0 && path !== clanekUrl && !path.startsWith('/og/');
+const pocet = new Set(stazeni.map((s) => s.vyrobek)).size;
+const nazvy = (n: number) => (n === 1 ? 'výrobek' : n < 5 ? 'výrobky' : 'výrobků');
+---
+{show && (
+  <a href={clanekUrl} class="recall-bar">
+    <span class="container recall-bar__inner">
+      <span class="recall-bar__dot" aria-hidden="true"></span>
+      <span class="recall-bar__text">
+        <strong>Stažená kojenecká mléka</strong><span class="recall-bar__detail">: {pocet} {nazvy(pocet)} na seznamu</span><span> – zkontrolujte balení.</span>
+        <span class="recall-bar__date"> Ověřeno {formatDatum(posledniKontrola)}</span>
+      </span>
+      <span class="recall-bar__cta">Seznam <span aria-hidden="true">→</span></span>
+    </span>
+  </a>
+)}
+
+<style>
+  .recall-bar {
+    display: block; background: var(--color-alert-wash); color: var(--color-alert-ink);
+    text-decoration: none; font-size: var(--fs-small); line-height: 1.35;
+    border-bottom: 1px solid var(--color-alert-line);
+  }
+  .recall-bar__inner { display: flex; align-items: center; gap: 0.6rem; padding-block: 0.55rem; }
+  .recall-bar__dot {
+    flex: none; position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--color-alert-ink);
+  }
+  .recall-bar__dot::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--color-alert-ink);
+    animation: recall-pulse 2.4s var(--ease-out) infinite;
+  }
+  .recall-bar__text { flex: 1; min-width: 0; }
+  .recall-bar strong { font-weight: 600; }
+  .recall-bar__date { opacity: 0.75; white-space: nowrap; }
+  .recall-bar__cta { flex: none; font-weight: 600; white-space: nowrap; }
+  .recall-bar__cta span { display: inline-block; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .recall-bar:hover .recall-bar__cta span { transform: translateX(3px); }
+    .recall-bar:hover strong { text-decoration: underline; text-underline-offset: 2px; }
+  }
+  @media (max-width: 640px) {
+    .recall-bar__detail, .recall-bar__date { display: none; }
+  }
+  @keyframes recall-pulse {
+    0% { transform: scale(1); opacity: 0.45; }
+    70%, 100% { transform: scale(2.6); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .recall-bar__dot::after { animation: none; opacity: 0; } }
+</style>
