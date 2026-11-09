@@ -1,0 +1,31 @@
+name: Stažení fotek (Pexels)
+on:
+  push:
+    branches: [main]
+    paths: [scripts/foto.json]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  foto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stáhnout chybějící fotky
+        run: |
+          mkdir -p public/images/foto
+          for slug in $(jq -r 'to_entries[] | select(.key | startswith("_") | not) | .key' scripts/foto.json); do
+            id=$(jq -r --arg s "$slug" '.[$s]' scripts/foto.json)
+            f="public/images/foto/$slug.jpg"
+            if [ ! -f "$f" ] || [ "$(cat public/images/foto/$slug.id 2>/dev/null)" != "$id" ]; then
+              curl -fsSL "https://images.pexels.com/photos/$id/pexels-photo-$id.jpeg?auto=compress&cs=tinysrgb&w=1200&h=750&fit=crop" -o "$f"
+              echo "$id" > "public/images/foto/$slug.id"
+              echo "staženo $slug ($id)"
+            fi
+          done
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add public/images/foto
+          git diff --cached --quiet || (git commit -m "Fotky z Pexels (automaticky)" && git push)
