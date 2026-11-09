@@ -1,0 +1,20 @@
+{
+  "name": "Sunar Sensitive 1",
+  "brand": "Sunar",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.sunar.cz/nase-produkty/kojenecka-mleka/sunar-sensitive-1",
+  "price": {
+    "czk": 249,
+    "packG": 500,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

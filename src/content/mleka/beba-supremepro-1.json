@@ -1,0 +1,20 @@
+{
+  "name": "BEBA SUPREMEpro 1, 6 HMO",
+  "brand": "BEBA",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-supremepro-1",
+  "price": {
+    "czk": 649,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

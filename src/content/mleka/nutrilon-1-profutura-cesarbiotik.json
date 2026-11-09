@@ -1,0 +1,20 @@
+{
+  "name": "Nutrilon 1 Profutura Cesarbiotik",
+  "brand": "Nutrilon",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-1-profutura-cesarbiotik-kojenecke-mleko-800g.html",
+  "price": {
+    "czk": 529,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

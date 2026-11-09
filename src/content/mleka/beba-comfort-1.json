@@ -1,0 +1,20 @@
+{
+  "name": "BEBA COMFORT 1, 5 HMO",
+  "brand": "BEBA",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "comfort"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-comfort-1-hm-o-800-g",
+  "price": {
+    "czk": 479,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

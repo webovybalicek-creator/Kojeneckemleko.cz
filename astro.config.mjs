@@ -3,11 +3,12 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeTerms from './src/lib/rehype-terms.mjs';
+import rehypeCite from './src/lib/rehype-cite.mjs';
 
 export default defineConfig({
   site: 'https://kojeneckemleko.cz',
   trailingSlash: 'always',
-  markdown: { rehypePlugins: [rehypeTerms] },
+  markdown: { rehypePlugins: [rehypeCite, rehypeTerms] },
   integrations: [
     mdx(),
     sitemap({

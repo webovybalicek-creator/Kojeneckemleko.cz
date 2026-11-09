@@ -9,7 +9,7 @@ const url = new URL('/slovnicek/', Astro.site).toString();
 
 // [n] → odkaz na zdroj
 const withRefs = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\[(\d+)\]/g, '<a class="ref" href="#zdroj-$1">[$1]</a>');
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\[(\d+)\]/g, '<sup class="cite"><a href="#zdroj-$1" aria-label="Zdroj $1">$1</a></sup>');
 
 const definedTermSet = {
   '@context': 'https://schema.org',
@@ -95,7 +95,7 @@ const definedTermSet = {
   .more { display: inline-flex; align-items: center; gap: 0.35em; font-size: var(--fs-small); text-decoration: none; margin-top: 4px; }
   .more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
   @media (hover: hover) and (pointer: fine) { .more:hover :global(svg) { transform: translateX(3px); } .more:hover { text-decoration: underline; } }
-  dd :global(.ref) { font-size: 0.8em; text-decoration: none; }
+
   .disclaimer { margin-top: var(--space-4); }
   .small { font-size: var(--fs-small); }
   @media (max-width: 760px) { .term-card { grid-template-columns: 1fr; gap: var(--space-2); } }
