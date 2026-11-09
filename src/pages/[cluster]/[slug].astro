@@ -121,6 +121,11 @@ const breadcrumbs = {
   .prose :global(li + li) { margin-top: 0.35em; }
   .prose :global(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
   .prose :global(th), .prose :global(td) { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--line); }
+  @media (max-width: 640px) {
+    .prose :global(table) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .prose :global(th), .prose :global(td) { padding: 0.6rem 0.5rem; min-width: 7.5rem; }
+    .prose :global(th:first-child), .prose :global(td:first-child) { min-width: 5.5rem; }
+  }
   .prose :global(blockquote) { border-left: 2px solid var(--color-sage-mist); padding-left: var(--space-3); color: var(--text-muted); }
 
   .disclaimer { font-size: var(--fs-small); margin-top: var(--space-4); }

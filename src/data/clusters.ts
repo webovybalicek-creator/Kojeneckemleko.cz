@@ -14,26 +14,20 @@ export const clusterMeta: Record<Cluster, {
     description: 'Typy kojeneckých mlék, složení, značky dostupné v ČR a srovnávací tabulky. Nezávisle a s odkazy na odborné zdroje.',
     lead: 'Počáteční, pokračovací, HA, AR, kozí nebo A2? Vysvětlujeme, čím se mléka liší a co z toho opravdu vyplývá.',
     tone: 'sage',
-    planned: [
-    ],
+    planned: [],
   },
   krmeni: {
     title: 'Krmení',
     description: 'Kojení, kombinované krmení, lahve, sterilizace a běžné obtíže s krmením miminka. Podle WHO, NHS a ESPGHAN.',
     lead: 'Kojení, lahev nebo obojí – praktické informace pro každý způsob krmení.',
     tone: 'mint',
-    planned: [
-      'Kombinované krmení',
-      'Jak vybrat kojeneckou láhev a savičku',
-    ],
+    planned: [],
   },
   prikrmy: {
     title: 'Příkrmy',
     description: 'Kdy začít s příkrmy, BLW nebo kaše, zavádění alergenů a jídelníček podle věku miminka.',
     lead: 'Kdy začít, jak na to a co zařadit v jakém věku.',
     tone: 'keylime',
-    planned: [
-      'Jídelníček podle věku',
-    ],
+    planned: [],
   },
 };
