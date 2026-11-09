@@ -87,6 +87,7 @@ export const glossary: GlossaryTerm[] = [
       'Mléko s jen částečně štěpenou bílkovinou není vhodné pro děti s diagnostikovanou alergií na bílkovinu kravského mléka – pro ty se předepisuje mléko s plně štěpenou bílkovinou [1][2].',
     ],
     note: 'Před nasazením se poraďte s pediatrem.',
+    link: { label: 'HA mléko: pomáhá předcházet alergii?', href: '/mleka/ha-mleko/' },
   },
   {
     id: 'extenzivne-hydrolyzovane', term: 'Extenzivně hydrolyzované mléko', aka: 'plně štěpená bílkovina, na předpis', group: 'specialni',
@@ -104,6 +105,7 @@ export const glossary: GlossaryTerm[] = [
       'Příprava se může lišit od běžného mléka. Protože sušené mléko není sterilní a nižší teplota vody nezničí případné bakterie, je třeba postupovat opatrně podle návodu [1].',
     ],
     note: 'Pouze na doporučení lékaře.',
+    link: { label: 'AR mléko: kdy pomáhá zahuštěné mléko', href: '/mleka/ar-mleko/' },
   },
   {
     id: 'comfort', term: 'Comfort mléko', aka: 'mléko „pro bříško“', group: 'specialni',

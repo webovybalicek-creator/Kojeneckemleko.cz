@@ -16,11 +16,8 @@ export const clusterMeta: Record<Cluster, {
     tone: 'sage',
     planned: [
       'Jak vybrat kojenecké mléko',
-      'Počáteční vs. pokračovací mléko',
-      'HA, AR a comfort mléka – kdy dávají smysl',
       'Kozí mléko pro kojence',
-      'Jak správně připravit umělé mléko',
-      'Kolik mléka dát miminku podle věku',
+      'Comfort mléko – kdy dává smysl',
     ],
   },
   krmeni: {
@@ -31,9 +28,6 @@ export const clusterMeta: Record<Cluster, {
     planned: [
       'Kombinované krmení',
       'Jak vybrat kojeneckou láhev a savičku',
-      'Sterilizace lahví',
-      'Koliky a ublinkávání',
-      'Alergie na bílkovinu kravského mléka',
     ],
   },
   prikrmy: {
