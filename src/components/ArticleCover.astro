@@ -36,6 +36,9 @@ const leaves: Record<string, Leaf[]> = {
     { x: 84, y: 140, a: -125, l: 40, t: 'sage' }, { x: 86, y: 128, a: -165, l: 28, t: 'mint' },
   ],
   miska: [],
+  mesic: [
+    { x: 82, y: 142, a: -130, l: 38, t: 'sage' }, { x: 158, y: 142, a: -50, l: 38, t: 'mint' },
+  ],
   oblak: [
     { x: 80, y: 142, a: -135, l: 38, t: 'sage' }, { x: 160, y: 142, a: -45, l: 38, t: 'mint' },
   ],
@@ -159,6 +162,15 @@ const items = leaves[motif] ?? [];
       <path d="M78 84 H162 C162 110 144 128 120 128 C96 128 78 110 78 84 Z" class="f-cream s" />
       <path d="M86 96 C94 104 104 108 112 109" class="s thin" fill="none" />
       <path d="M104 132 H136" class="s" />
+    </g>
+  )}
+  {motif === 'mesic' && (
+    <g>
+      <path d="M128 36 A44 44 0 1 0 152 116 A36 36 0 1 1 128 36 Z" class="f-keylime s" />
+      <path d="M100 60 A30 30 0 0 0 104 104" class="s thin" fill="none" />
+      <path d="M150 52 V62 M145 57 H155" class="s thin" />
+      <path d="M164 80 V86 M161 83 H167" class="s thin" />
+      <circle cx="140" cy="76" r="2" class="f-ink" />
     </g>
   )}
 </svg>
