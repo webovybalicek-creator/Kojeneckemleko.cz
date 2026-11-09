@@ -7,3 +7,4 @@ dist/
 # Počítadlo – lokální konfigurace a data
 public/api/config.php
 public/api/data/
+.indexnow/

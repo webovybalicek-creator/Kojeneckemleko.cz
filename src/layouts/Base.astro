@@ -28,6 +28,16 @@ const baseLd = [
     name: siteName,
     url: Astro.site?.toString(),
     inLanguage: 'cs-CZ',
+    publisher: { '@id': new URL('/#organizace', Astro.site).toString() },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': new URL('/#organizace', Astro.site).toString(),
+    name: 'kojeneckemleko.cz',
+    url: Astro.site?.toString(),
+    description: 'Nezávislý průvodce krmením miminka pro rodiče v ČR. Bez reklamy na kojenecká mléka a bez provizí.',
+    publishingPrinciples: new URL('/jak-tvorime-obsah/', Astro.site).toString(),
   },
   ...jsonLd,
 ];

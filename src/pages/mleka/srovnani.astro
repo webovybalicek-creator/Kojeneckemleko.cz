@@ -27,10 +27,20 @@ const groups = [
 const brands = [...new Set(milks.map((m) => m.data.brand))]
   .sort((a, b) => a.localeCompare(b, 'cs'))
   .map((label) => ({ label }));
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Kojenecká mléka', item: new URL('/mleka/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: 'Srovnání kojeneckých mlék', item: new URL('/mleka/srovnani/', Astro.site).toString() },
+  ],
+};
 ---
 <Base
   title="Srovnání kojeneckých mlék"
   description="Srovnání počátečních, pokračovacích a speciálních (HA, AR, bez laktózy) kojeneckých mlék v ČR: HMO, palmový olej, probiotika, ceny. Bez hodnocení."
+  jsonLd={[breadcrumbs]}
 >
   <section class="container head">
     <nav class="crumbs" aria-label="Drobečková navigace">

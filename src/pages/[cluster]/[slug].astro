@@ -31,10 +31,13 @@ const articleLd = {
   description: data.description,
   datePublished: data.published.toISOString(),
   dateModified: data.updated.toISOString(),
-  author: { '@type': 'Person', name: data.author },
+  author: data.author.startsWith('Redakce')
+    ? { '@type': 'Organization', name: data.author, url: Astro.site?.toString() }
+    : { '@type': 'Person', name: data.author },
+  publisher: { '@id': new URL('/#organizace', Astro.site).toString() },
   inLanguage: 'cs-CZ',
   mainEntityOfPage: url,
-  image: new URL(`/images/og/${entry.id}.png`, Astro.site).toString(),
+  image: [new URL(`/images/og/${entry.id}.png`, Astro.site).toString(), ...(data.cover?.photo ? [new URL(data.cover.photo, Astro.site).toString()] : [])],
   citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, publisher: s.publisher })),
 };
 const faqLd = data.faq.length

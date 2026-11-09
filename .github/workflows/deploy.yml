@@ -50,3 +50,22 @@ jobs:
             **/.git*/**
             **/node_modules/**
             api/data/**
+
+      # Ohlášení změněných stránek Seznamu a Bingu (IndexNow). Stav otisků se drží v cache.
+      - name: Obnovení stavu IndexNow
+        uses: actions/cache/restore@v4
+        with:
+          path: .indexnow
+          key: indexnow-${{ github.run_id }}
+          restore-keys: indexnow-
+
+      - name: IndexNow
+        continue-on-error: true
+        run: node scripts/indexnow.mjs
+
+      - name: Uložení stavu IndexNow
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .indexnow
+          key: indexnow-${{ github.run_id }}
