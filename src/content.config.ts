@@ -22,7 +22,7 @@ const source = z.object({
 });
 
 /** Tematické klastry webu – pořadí odpovídá obsahové strategii. */
-export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska', 'lzicka', 'miska', 'mesic'] as const;
+export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska', 'lzicka', 'miska', 'mesic', 'vejce', 'brokolice', 'hrnec'] as const;
 
 export const clusters = ['mleka', 'krmeni', 'prikrmy'] as const;
 
