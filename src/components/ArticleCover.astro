@@ -57,6 +57,15 @@ const leaves: Record<string, Leaf[]> = {
     { x: 120, y: 128, a: -150, l: 40, t: 'sage' }, { x: 120, y: 116, a: -28, l: 40, t: 'mint' },
   ],
   hruska: [],
+  sklenice: [
+    { x: 80, y: 142, a: -135, l: 36, t: 'sage' }, { x: 160, y: 142, a: -45, l: 36, t: 'mint' },
+  ],
+  vlocka: [
+    { x: 82, y: 142, a: -130, l: 34, t: 'mint' }, { x: 158, y: 142, a: -50, l: 34, t: 'sage' },
+  ],
+  kufrik: [
+    { x: 78, y: 142, a: -140, l: 34, t: 'sage' }, { x: 162, y: 140, a: -40, l: 30, t: 'mint' },
+  ],
   pirko: [
     { x: 80, y: 142, a: -135, l: 36, t: 'sage' }, { x: 162, y: 142, a: -45, l: 30, t: 'mint' },
   ],
@@ -126,6 +135,39 @@ const items = leaves[motif] ?? [];
       <g transform="translate(156 96) rotate(-30)"><path d={leafPath(32, 10)} class="f-sage s" /></g>
       <g transform="translate(156 78) rotate(-150)"><path d={leafPath(28, 9)} class="f-sage s" /></g>
       <g transform="translate(156 70) rotate(-70)"><path d={leafPath(20, 7)} class="f-mint s" /></g>
+    </g>
+  )}
+
+  {motif === 'sklenice' && (
+    <g>
+      <path d="M96 40 H144 L138 124 A6 6 0 0 1 132 130 H108 A6 6 0 0 1 102 124 Z" class="f-cream s" />
+      <path d="M99.5 76 H140.5 L138 124 A6 6 0 0 1 132 130 H108 A6 6 0 0 1 102 124 Z" class="f-mint" />
+      <path d="M99.5 76 C110 72 118 80 128 76 C134 74 138 75 140.5 76" class="s thin" fill="none" />
+      <path d="M96 40 H144 L138 124 A6 6 0 0 1 132 130 H108 A6 6 0 0 1 102 124 Z" class="s" fill="none" />
+      <path d="M110 92 v18" class="s thin" fill="none" />
+      <circle cx="126" cy="98" r="2.5" class="f-cream s thin" /><circle cx="120" cy="112" r="1.8" class="f-cream s thin" />
+    </g>
+  )}
+
+  {motif === 'vlocka' && (
+    <g>
+      {[0, 60, 120].map((r) => (
+        <g transform={`rotate(${r} 120 82)`}>
+          <path d="M120 40 V124" class="s" fill="none" />
+          <path d="M110 50 L120 58 L130 50 M110 114 L120 106 L130 114" class="s thin" fill="none" />
+        </g>
+      ))}
+      <circle cx="120" cy="82" r="9" class="f-mint s" />
+    </g>
+  )}
+
+  {motif === 'kufrik' && (
+    <g>
+      <path d="M106 62 V54 A6 6 0 0 1 112 48 H128 A6 6 0 0 1 134 54 V62" class="s" fill="none" />
+      <rect x="84" y="62" width="72" height="56" rx="8" class="f-mint s" />
+      <path d="M84 84 H156" class="s thin" fill="none" />
+      <rect x="114" y="79" width="12" height="10" rx="2" class="f-cream s thin" />
+      <path d="M140 100 C150 96 154 104 146 108 C140 111 136 104 140 100 Z" class="f-sage s thin" />
     </g>
   )}
 
