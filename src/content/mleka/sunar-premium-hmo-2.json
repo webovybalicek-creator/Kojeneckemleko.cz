@@ -1,0 +1,20 @@
+{
+  "name": "Sunar Premium HMO 2",
+  "brand": "Sunar",
+  "stage": "pokracovaci",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.sunar.cz/nase-produkty/kojenecka-mleka/sunar-premium-hmo-2",
+  "price": {
+    "czk": 369,
+    "packG": 700,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

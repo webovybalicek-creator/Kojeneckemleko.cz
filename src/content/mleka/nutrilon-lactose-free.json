@@ -1,0 +1,15 @@
+{
+  "name": "Nutrilon Lactose Free",
+  "brand": "Nutrilon",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "bez-laktozy"
+  ],
+  "hmo": false,
+  "palmOil": true,
+  "probiotics": false,
+  "medical": true,
+  "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-lactose-free-400g.html",
+  "verified": "2026-11-09"
+}

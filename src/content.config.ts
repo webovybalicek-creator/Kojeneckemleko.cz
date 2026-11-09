@@ -67,6 +67,8 @@ const mleka = defineCollection({
     palmOil: z.boolean().optional(),
     /** Přidané probiotické kultury podle složení (bakterie mléčného kvašení) */
     probiotics: z.boolean().optional(),
+    /** Potravina pro zvláštní lékařské účely – používat pod dohledem lékaře (podle webu výrobce) */
+    medical: z.boolean().optional(),
     pricePer100ml: z.number().optional(),
     /** Orientační cena balení – jeden obchod pro všechna mléka, s datem zjištění */
     price: z.object({

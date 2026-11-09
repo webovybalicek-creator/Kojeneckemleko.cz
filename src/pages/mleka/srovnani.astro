@@ -4,10 +4,25 @@ import Base from '../../layouts/Base.astro';
 import MilkTable from '../../components/MilkTable.astro';
 import Marquee from '../../components/Marquee.astro';
 
-const stageOrder = { pocatecni: 0, pokracovaci: 1, batoleci: 2 } as const;
 const milks = (await getCollection('mleka')).sort(
-  (a, b) => stageOrder[a.data.stage] - stageOrder[b.data.stage] || a.data.brand.localeCompare(b.data.brand, 'cs'),
+  (a, b) => a.data.brand.localeCompare(b.data.brand, 'cs') || a.data.name.localeCompare(b.data.name, 'cs'),
 );
+const specialTypes = ['HA', 'AR', 'bez-laktozy'];
+const isSpecial = (m: (typeof milks)[number]) => m.data.types.some((t) => specialTypes.includes(t));
+const groups = [
+  {
+    id: 'pocatecni', title: 'Počáteční mléka', sub: 'Od narození. Jediné mléko, které miminko v 1. roce potřebuje, pokud není kojené.',
+    milks: milks.filter((m) => m.data.stage === 'pocatecni' && !isSpecial(m)),
+  },
+  {
+    id: 'pokracovaci', title: 'Pokračovací mléka', sub: 'Od ukončeného 6. měsíce, vedle příkrmů. Podle NHS nejsou nutná – počáteční mléko stačí celý 1. rok.',
+    milks: milks.filter((m) => m.data.stage === 'pokracovaci' && !isSpecial(m)),
+  },
+  {
+    id: 'specialni', title: 'Speciální mléka', sub: 'HA, AR a bez laktózy – jen po poradě s pediatrem. Některá jsou potravinou pro zvláštní lékařské účely.',
+    milks: milks.filter(isSpecial),
+  },
+].filter((g) => g.milks.length > 0);
 // Faktický výčet značek ve srovnání – jen text, bez log a odkazů. Zobrazí se až s ověřenými daty.
 const brands = [...new Set(milks.map((m) => m.data.brand))]
   .sort((a, b) => a.localeCompare(b, 'cs'))
@@ -15,7 +30,7 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
 ---
 <Base
   title="Srovnání kojeneckých mlék"
-  description="Srovnání počátečních kojeneckých mlék v ČR: základ, HMO, palmový olej, probiotika a orientační ceny. Složení z webů výrobců, bez hodnocení."
+  description="Srovnání počátečních, pokračovacích a speciálních (HA, AR, bez laktózy) kojeneckých mlék v ČR: HMO, palmový olej, probiotika, ceny. Bez hodnocení."
 >
   <section class="container head">
     <nav class="crumbs" aria-label="Drobečková navigace">
@@ -36,9 +51,28 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
     </section>
   )}
 
+  <nav class="container jump" aria-label="Skupiny mlék">
+    {groups.map((g) => <a href={`#${g.id}`} class="tag">{g.title} <span>{g.milks.length}</span></a>)}
+  </nav>
+
+  {groups.map((g) => (
+    <section class="container group" id={g.id} aria-labelledby={`${g.id}-h`}>
+      <div class="group__head">
+        <h2 id={`${g.id}-h`}>{g.title}</h2>
+        <p class="muted">{g.sub}</p>
+      </div>
+      <MilkTable milks={g.milks} caption={g.title} />
+    </section>
+  ))}
+
   <section class="container">
-    <MilkTable milks={milks} />
     <div class="notes">
+      <p class="muted note">
+        Speciální mléka (HA, AR, bez laktózy) nejsou určena pro všechna miminka. Podávejte je jen po poradě s pediatrem –
+        víc v článcích <a href="/mleka/ha-mleko/">HA mléko</a>, <a href="/mleka/ar-mleko/">AR mléko</a> a
+        <a href="/krmeni/alergie-na-bilkovinu-kravskeho-mleka/">alergie na bílkovinu kravského mléka</a>.
+        „Pod dohledem lékaře“ označuje výrobky, které výrobce uvádí jako potravinu pro zvláštní lékařské účely.
+      </p>
       <p class="muted note">
         Údaje přebíráme ze složení na oficiálních webech výrobců (odkaz u názvu mléka); u každého mléka je datum ověření.
         Složení se může změnit – rozhodující je vždy obal výrobku, který máte doma. Připravujte podle návodu na balení.
@@ -48,12 +82,12 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
         a v čase se liší. Přepočet na 100 g prášku pomáhá srovnat různá balení; spotřeba prášku na jedno krmení se mezi mléky mírně liší.
       </p>
       <p class="muted note">
-        Všechna počáteční mléka prodávaná v EU musí splňovat stejné požadavky na složení podle nařízení (EU) 2016/127.
+        Všechna počáteční a pokračovací mléka prodávaná v EU musí splňovat stejné požadavky na složení podle nařízení (EU) 2016/127.
         Kojení je podle WHO doporučeným způsobem výživy kojenců.
       </p>
       <p class="muted note">
-        U některých šarží Nutrilon Profutura Duobiotik 1 probíhá stahování z trhu – ověřte DMT v článku{' '}
-        <a href="/mleka/stazena-kojenecka-mleka/">Stažená kojenecká mléka 2026</a>.
+        U některých šarží mlék probíhá stahování z trhu – ověřte DMT v přehledu{' '}
+        <a href="/mleka/stazena-kojenecka-mleka/">Stažená kojenecká mléka</a>.
       </p>
     </div>
   </section>
@@ -65,6 +99,13 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
   .crumbs a { color: var(--text-muted); }
   .brands { margin-bottom: var(--space-3); }
   .brands .eyebrow { display: block; }
+  .jump { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: var(--space-4); }
+  .jump .tag span { opacity: 0.6; margin-left: 0.25em; }
+  .group { scroll-margin-top: 6rem; }
+  .group + .group { margin-top: var(--space-6); }
+  .group__head { margin-bottom: var(--space-3); max-width: 70ch; }
+  .group__head h2 { margin: 0 0 0.4rem; }
+  .group__head p { margin: 0; }
   .notes { display: grid; gap: var(--space-2); margin-top: var(--space-3); max-width: 70ch; }
   .note { font-size: var(--fs-small); }
 </style>

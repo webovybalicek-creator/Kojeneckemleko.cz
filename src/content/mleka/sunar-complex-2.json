@@ -1,0 +1,20 @@
+{
+  "name": "Sunar Complex 2",
+  "brand": "Sunar",
+  "stage": "pokracovaci",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.sunar.cz/nase-produkty/kojenecka-mleka/sunar-complex-2",
+  "price": {
+    "czk": 289,
+    "packG": 600,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

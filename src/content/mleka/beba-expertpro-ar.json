@@ -1,0 +1,21 @@
+{
+  "name": "BEBA EXPERTpro AR",
+  "brand": "BEBA",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "AR"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": true,
+  "medical": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-a-r-1-800-g",
+  "price": {
+    "czk": 569,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

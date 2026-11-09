@@ -1,0 +1,20 @@
+{
+  "name": "BEBA EXPERTpro HA 1",
+  "brand": "BEBA",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "HA"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-expertpro-ha-1-0",
+  "price": {
+    "czk": 419,
+    "packG": 600,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

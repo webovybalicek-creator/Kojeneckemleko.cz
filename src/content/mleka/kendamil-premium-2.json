@@ -1,0 +1,20 @@
+{
+  "name": "Kendamil Premium 2 HMO+",
+  "brand": "Kendamil",
+  "stage": "pokracovaci",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.kendamil.cz/produkt/kendamil-premium-2-hmo/",
+  "price": {
+    "czk": 279,
+    "packG": 600,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Nutrilon 1 AR",
+  "brand": "Nutrilon",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "AR"
+  ],
+  "hmo": false,
+  "palmOil": true,
+  "probiotics": false,
+  "medical": true,
+  "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-1-ar-specialni-kojenecke-mleko-800g.html",
+  "verified": "2026-11-09"
+}

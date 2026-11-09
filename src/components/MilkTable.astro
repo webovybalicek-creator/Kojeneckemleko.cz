@@ -13,6 +13,7 @@ const baseLabel = {
   kravske: 'Kravské', kozi: 'Kozí', sojove: 'Sójové',
   hydrolyzovane: 'Hydrolyzované', aminokyselinove: 'Aminokyselinové',
 } as const;
+const typeLabel: Record<string, string> = { 'bez-laktozy': 'bez laktózy', bio: 'BIO' };
 const yesNo = (v?: boolean) => (v === undefined ? '–' : v ? 'Ano' : 'Ne');
 const price = (v?: number) =>
   v === undefined ? '–' : new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 2 }).format(v);
@@ -50,12 +51,13 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
               <th scope="row">
                 <span class="brand">{data.brand}</span>
                 <a href={data.officialUrl} rel="noopener nofollow">{data.name}</a>
+                {data.medical && <span class="medical">Pod dohledem lékaře</span>}
               </th>
               <td>{stageLabel[data.stage]}</td>
               <td>{baseLabel[data.base]}</td>
               <td><span class="types">{data.types.map((t) => tagToTerm[t]
-                ? <a href={termHref(tagToTerm[t])} class="tag tag--sm tag--soft">{t}</a>
-                : <span class="tag tag--sm tag--soft">{t}</span>)}</span></td>
+                ? <a href={termHref(tagToTerm[t])} class="tag tag--sm tag--soft">{typeLabel[t] ?? t}</a>
+                : <span class="tag tag--sm tag--soft">{typeLabel[t] ?? t}</span>)}</span></td>
               <td>{yesNo(data.hmo)}</td>
               <td>{yesNo(data.palmOil)}</td>
               <td>{yesNo(data.probiotics)}</td>
@@ -73,6 +75,7 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
 </div>
 
 <style>
+  .medical { display: block; margin-top: 0.2rem; font-size: 0.72rem; font-weight: 600; color: var(--color-alert-ink); }
   .table-panel { padding: var(--space-3); }
   .table-scroll {
     overflow-x: auto; border-radius: 10px; background: var(--color-cream-paper);

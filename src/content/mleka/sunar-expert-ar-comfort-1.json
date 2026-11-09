@@ -1,0 +1,22 @@
+{
+  "name": "Sunar Expert AR+Comfort 1",
+  "brand": "Sunar",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "AR",
+    "comfort"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": false,
+  "medical": true,
+  "officialUrl": "https://www.sunar.cz/nase-produkty/kojenecka-mleka/sunar-expert-arcomfort-1",
+  "price": {
+    "czk": 489,
+    "packG": 700,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}

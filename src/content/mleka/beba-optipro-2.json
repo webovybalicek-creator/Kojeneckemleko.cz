@@ -1,0 +1,20 @@
+{
+  "name": "BEBA OPTIPRO 2",
+  "brand": "BEBA",
+  "stage": "pokracovaci",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-optipro-2-600-g",
+  "price": {
+    "czk": 259,
+    "packG": 500,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  },
+  "verified": "2026-11-09"
+}
