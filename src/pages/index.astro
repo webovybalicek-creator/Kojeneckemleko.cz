@@ -5,7 +5,8 @@ import Marquee from '../components/Marquee.astro';
 import Illustration from '../components/Illustration.astro';
 import ArticleCards from '../components/ArticleCards.astro';
 import RecallList from '../components/RecallList.astro';
-import { clanekUrl } from '../data/stazeni';
+import { clanekUrl, kontrolaUrl } from '../data/stazeni';
+import { nastroje } from '../data/nastroje';
 import { clusterMeta } from '../data/clusters';
 import { getCollection } from 'astro:content';
 import { annotate, terms } from '../data/terms.mjs';
@@ -171,7 +172,10 @@ const faqLd = {
             mléko miminku nepodávejte a balení si nechte. Seznam každý týden kontrolujeme na webech SZPI a Ministerstva zdravotnictví.
           </p>
         </div>
-        <a href={clanekUrl} class="btn recall__btn">Co dělat a kdy k lékaři <Arrow /></a>
+        <p class="recall__actions">
+          <a href={kontrolaUrl} class="btn">Zkontrolovat moje balení <Arrow /></a>
+          <a href={clanekUrl} class="btn btn--ghost">Co dělat a kdy k lékaři</a>
+        </p>
       </div>
       <RecallList />
     </div>
@@ -201,6 +205,27 @@ const faqLd = {
         </a>
       ))}
     </div>
+  </section>
+
+  <section class="container section tools" aria-labelledby="nastroje">
+    <div class="section-head section-head--row">
+      <div>
+        <p class="eyebrow">Nástroje · zdarma, bez registrace</p>
+        <h2 id="nastroje">Pomůcky pro každý den</h2>
+      </div>
+      <a href="/nastroje/" class="latest-group__all">Všechny nástroje <Arrow /></a>
+    </div>
+    <ul class="tools__list">
+      {nastroje.map((n) => (
+        <li>
+          <a href={n.href} class:list={['tool', 'panel', `panel--${n.tone}`]}>
+            <h3 class="heading-sm">{n.title}</h3>
+            <p>{n.text}</p>
+            <span class="tool__more">{n.cta} <Arrow /></span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <section class="container section" aria-labelledby="nejnovejsi">
@@ -325,7 +350,7 @@ const faqLd = {
   .recall__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-alert-ink); }
   .recall h2 { margin: 0.35rem 0 0.6rem; }
   .recall__lead { margin: 0; color: var(--color-charcoal); }
-  .recall__btn { flex: none; }
+  .recall__actions { display: flex; flex-wrap: wrap; gap: var(--space-1); max-width: none; }
   .section-head__links { font-size: var(--fs-small); color: var(--text-muted); }
   .latest-group + .latest-group { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
   .latest-group__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
@@ -333,6 +358,16 @@ const faqLd = {
   .latest-group__all { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
   .latest-group__all :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
   @media (hover: hover) and (pointer: fine) { .latest-group__all:hover :global(svg) { transform: translateX(4px); } }
+
+  .tools { padding-top: 0; }
+  .tools__list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+  .tool { display: flex; flex-direction: column; gap: var(--space-1); height: 100%; padding: var(--space-4); text-decoration: none; color: var(--text); transition: transform var(--dur-fast) var(--ease-out); }
+  .tool p { font-size: var(--fs-small); color: var(--color-charcoal); }
+  .tool__more { margin-top: auto; padding-top: var(--space-2); display: inline-flex; align-items: center; gap: 0.4em; color: var(--ink); font-size: var(--fs-small); font-weight: 500; }
+  .tool__more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .tool:active { transform: scale(0.98); }
+  @media (hover: hover) and (pointer: fine) { .tool:hover .tool__more :global(svg) { transform: translateX(4px); } .tool:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; } }
+  @media (max-width: 960px) { .tools__list { grid-template-columns: 1fr; } }
 
   .topics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
   .topic {

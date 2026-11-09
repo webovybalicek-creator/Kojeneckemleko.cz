@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import ArticleCover from '../../components/ArticleCover.astro';
+import { nastroje } from '../../data/nastroje';
+
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Nástroje', item: new URL('/nastroje/', Astro.site).toString() },
+  ],
+};
+---
+<Base
+  title="Nástroje pro rodiče"
+  description="Jednoduché nástroje zdarma a bez registrace: kontrola staženého kojeneckého mléka, deník krmení s časovačem kojení a kalkulačka množství mléka."
+  jsonLd={[breadcrumbs]}
+>
+  <section class="container">
+    <header class="hub-head panel panel--mint">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <span>Nástroje</span></nav>
+      <h1>Nástroje</h1>
+      <p class="lead">Malé pomůcky pro každý den s miminkem. Zdarma, bez registrace a bez reklam – vše běží jen ve vašem prohlížeči.</p>
+    </header>
+  </section>
+
+  <section class="container section" aria-labelledby="seznam">
+    <h2 id="seznam" class="eyebrow">Všechny nástroje</h2>
+    <ul class="cards">
+      {nastroje.map((n, i) => (
+        <li style={`--i:${i}`}>
+          <a href={n.href} class="card">
+            <span class:list={['card__cover', `panel--${n.tone}`]}>
+              <ArticleCover motif={n.motif} class="card__illu" />
+            </span>
+            <span class="card__body">
+              <h3 class="heading-sm card__title">{n.title}</h3>
+              <span class="card__desc">{n.text}</span>
+              <span class="card__more">{n.cta} <Arrow /></span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hub-head { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); padding-block: var(--space-6); }
+  .hub-head h1 { font-size: var(--fs-display); line-height: 1.05; }
+  .hub-head > * { max-width: 40rem; }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+
+  .cards { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
+  .cards > li { min-width: 0; animation: card-in 420ms var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }
+  @keyframes card-in { from { opacity: 0; transform: translateY(8px); } }
+  .card { display: flex; flex-direction: column; gap: var(--space-3); height: 100%; text-decoration: none; color: var(--text); transition: transform var(--dur-fast) var(--ease-out); }
+  .card:active { transform: scale(0.98); }
+  .card__cover { display: grid; place-items: center; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 14px; padding: var(--space-2); }
+  .card :global(.card__illu) { width: min(100%, 19rem); transition: transform var(--dur-base) var(--ease-out); }
+  .card__body { display: flex; flex-direction: column; gap: var(--space-1); flex: 1; }
+  .card__title { margin: 0; }
+  .card__desc { color: var(--text-muted); font-size: var(--fs-small); line-height: 1.55; }
+  .card__more { margin-top: auto; padding-top: var(--space-1); display: inline-flex; align-items: center; gap: 0.4em; color: var(--ink); font-size: var(--fs-small); font-weight: 500; }
+  .card__more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover :global(.card__illu) { transform: translateY(-4px); }
+    .card:hover .card__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+    .card:hover .card__more :global(svg) { transform: translateX(4px); }
+  }
+  .card:focus-visible { outline: 2px solid var(--color-forest-ink); outline-offset: 4px; border-radius: 14px; }
+  @media (max-width: 960px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .cards > li { animation: none; } }
+</style>

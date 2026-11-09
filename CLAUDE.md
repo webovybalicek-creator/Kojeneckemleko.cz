@@ -42,6 +42,12 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 - Tooltipy: `src/data/terms.mjs` (zkratky institucí = jen vysvětlivka; pojmy = vysvětlivka + odkaz do slovníčku). V MDX článcích je doplní rehype plugin `src/lib/rehype-terms.mjs` u prvního výskytu; v prostých textech (perexy, FAQ) funkce `annotate()` přes `set:html`. Nový pojem = přidat do `terms.mjs` (a případně do slovníčku).
 - Markdown pluginy vyžadují balíček `@astrojs/markdown-remark` (Astro 7).
 
+## Nástroje (`/nastroje/`)
+Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/nastroje.ts` (rozcestník i sekce na úvodu).
+- **Kontrola staženého mléka** `/nastroje/kontrola-mleka/` – `RecallCheck.astro` (i v článku o stažených mlécích). Čte `src/data/stazeni.ts`; u každé položky vyplnit `dmt` (ISO data) a případně `sarze`, jinak nástroj nabídne jen ruční porovnání podle `identifikace`.
+- **Deník krmení** `/nastroje/denik-krmeni/` – `FeedingLog.astro`: časovač kojení (L/P, přepnutí = stále jeden záznam), lahev v ml, přehled dne, úprava/zpětné přidání, CSV. Data jen v localStorage `km-denik-v1` (při změně struktury zvýšit verzi a migrovat). Nic neposílat na server.
+- Nástroje nic nedoporučují (žádné „kdy krmit“, žádné připomínky krmení) – jen zapisují a porovnávají s oficiálním seznamem.
+
 ## Regulace (nic nezákonného kolem kojeneckých mlék)
 EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké výživy; v ČR navíc zákon o regulaci reklamy, dozor SZPI. Proto:
 - žádné affiliate odkazy, kupony, vzorky ani reklama na mléka bez právní kontroly,

@@ -1,0 +1,113 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import RecallCheck from '../../components/RecallCheck.astro';
+import RecallList from '../../components/RecallList.astro';
+import { stazeni, posledniKontrola, clanekUrl, kontrolaUrl, formatDatum } from '../../data/stazeni';
+
+const url = new URL(kontrolaUrl, Astro.site).toString();
+const pocet = new Set(stazeni.map((s) => s.vyrobek)).size;
+
+const faq = [
+  {
+    q: 'Jak poznám, že je moje mléko stažené z prodeje?',
+    a: 'Musí sedět přesný název výrobku, velikost balení a datum minimální trvanlivosti, u některých výrobků i šarže. Jiné výrobky stejné značky s jiným datem se varování netýkají.',
+  },
+  {
+    q: 'Odkud seznam berete a jak je aktuální?',
+    a: `Z oznámení Státní zemědělské a potravinářské inspekce, Ministerstva zdravotnictví a výrobců. Weby kontrolujeme dvakrát týdně, naposledy ${formatDatum(posledniKontrola)}. Úplný a závazný seznam vždy vedou SZPI a ministerstvo.`,
+  },
+  {
+    q: 'Ukládáte, které mléko jsem zadala?',
+    a: 'Ne. Kontrola probíhá jen ve vašem prohlížeči a žádný údaj se nikam neodesílá.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+      { '@type': 'ListItem', position: 2, name: 'Nástroje', item: new URL('/nastroje/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: 'Kontrola staženého mléka', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Kontrola staženého kojeneckého mléka',
+    url,
+    applicationCategory: 'HealthApplication',
+    operatingSystem: 'Web',
+    inLanguage: 'cs-CZ',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'CZK' },
+    dateModified: posledniKontrola,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<Base
+  title="Kontrola staženého kojeneckého mléka"
+  description="Je vaše kojenecké mléko na seznamu stažených? Vyberte výrobek a datum minimální trvanlivosti a hned uvidíte výsledek. Podle SZPI a MZd, zdarma."
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <header class="stack head">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/nastroje/">Nástroje</a></nav>
+      <p class="eyebrow">Nástroj · zdarma, bez registrace</p>
+      <h1>Kontrola staženého mléka</h1>
+      <p class="lead">
+        Dvě klepnutí a víte, jestli je vaše balení na seznamu stažených kojeneckých mlék.
+        Na seznamu {pocet === 1 ? 'je' : pocet < 5 ? 'jsou' : 'je'} teď {pocet} {pocet === 1 ? 'výrobek' : pocet < 5 ? 'výrobky' : 'výrobků'}.
+      </p>
+    </header>
+
+    <RecallCheck />
+
+    <section class="block" aria-labelledby="seznam">
+      <h2 id="seznam">Celý seznam stažených mlék</h2>
+      <p class="muted">Podle čeho balení poznáte – datum minimální trvanlivosti (DMT), případně šarže.</p>
+      <div class="list"><RecallList /></div>
+      <p><a href={clanekUrl} class="more">Proč byla mléka stažena, co dělat a kdy k lékaři <Arrow /></a></p>
+    </section>
+
+    <section class="block" aria-labelledby="otazky">
+      <h2 id="otazky">Časté otázky</h2>
+      <dl class="faq">
+        {faq.map((f) => (
+          <div>
+            <dt class="heading-sm">{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <p class="muted small disclaimer">
+      Nástroj má informativní charakter a nenahrazuje oficiální varování SZPI a Ministerstva zdravotnictví ani radu pediatra.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page { max-width: calc(52rem + 2 * var(--gutter)); padding-top: var(--space-6); }
+  .head { margin-bottom: var(--space-5); }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .block { margin-top: var(--space-6); display: grid; gap: var(--space-2); }
+  .list { margin-top: var(--space-2); }
+  .more { display: inline-flex; align-items: center; gap: 0.35em; font-size: var(--fs-small); font-weight: 500; }
+  .more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .more:hover :global(svg) { transform: translateX(3px); } }
+  .faq { display: grid; margin-top: var(--space-2); border-top: 1px solid var(--line); }
+  .faq > div { padding-block: var(--space-3); border-bottom: 1px solid var(--line); display: grid; gap: var(--space-1); }
+  .faq dd { margin: 0; color: var(--color-charcoal); max-width: 68ch; }
+  .disclaimer { margin-top: var(--space-4); }
+  .small { font-size: var(--fs-small); }
+</style>

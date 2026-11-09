@@ -1,0 +1,240 @@
+---
+/**
+ * Kontrola balení proti seznamu stažených mlék – dva klepnutí: výrobek → datum minimální trvanlivosti.
+ * Data: src/data/stazeni.ts (pole `dmt`, `sarze`). Vše běží v prohlížeči, nic se neodesílá.
+ * Položka bez `dmt` nabídne ruční porovnání podle `identifikace`.
+ */
+import Arrow from './Arrow.astro';
+import { stazeni, posledniKontrola, clanekUrl, formatDatum } from '../data/stazeni';
+
+interface Props {
+  /** Úroveň nadpisu nástroje (na samostatné stránce je nad ním h1) */
+  headingLevel?: 'h2' | 'h3';
+}
+const { headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
+
+const produkty = stazeni.map((s, i) => ({
+  id: `p${i}`,
+  vyrobek: s.vyrobek,
+  baleni: s.baleni,
+  identifikace: s.identifikace,
+  // pevné mezery, aby se datum nezalomilo
+  dmt: (s.dmt ?? []).map((d) => ({ iso: d, label: formatDatum(d).replace(/ /g, '\u00a0') })),
+  sarze: s.sarze ?? '',
+  duvod: s.duvod,
+  vydal: s.vydal,
+  zdroj: s.zdroj,
+  datum: formatDatum(s.datum),
+}));
+const overeno = formatDatum(posledniKontrola);
+---
+<div class="check" data-recall-check data-produkty={JSON.stringify(produkty)} data-overeno={overeno}>
+  <div class="check__inner">
+    <div class="check__head">
+      <p class="eyebrow">Kontrola balení</p>
+      <Heading class="heading-sm check__title">Je moje mléko na seznamu stažených?</Heading>
+    </div>
+
+    <fieldset class="check__step">
+      <legend><span class="check__num">1</span> Které mléko máte doma?</legend>
+      <div class="chips">
+        {produkty.map((p) => (
+          <label class="chip">
+            <input type="radio" name="rc-produkt" value={p.id} />
+            <span>{p.vyrobek} <small>{p.baleni}</small></span>
+          </label>
+        ))}
+        <label class="chip">
+          <input type="radio" name="rc-produkt" value="jine" />
+          <span>Jiné mléko</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="check__step" data-step="2" hidden>
+      <legend><span class="check__num">2</span> <span data-q2>Jaké datum minimální trvanlivosti je na balení?</span></legend>
+      <p class="check__hint" data-hint2>Datum minimální trvanlivosti (DMT) je vytištěné na obalu.</p>
+      <div class="chips" data-dates></div>
+    </fieldset>
+
+    <div class="check__result" data-result aria-live="polite" hidden></div>
+
+    <noscript>
+      <p class="check__hint">Kontrola potřebuje zapnutý JavaScript. Celý seznam najdete <a href={clanekUrl}>v přehledu stažených mlék</a>.</p>
+    </noscript>
+
+    <p class="check__foot">
+      Seznam ověřen {overeno} na webech SZPI, Ministerstva zdravotnictví a výrobců.
+      Kontrola běží jen ve vašem prohlížeči, nic se neodesílá.
+    </p>
+  </div>
+
+  <template data-tpl-links>
+    <a href={`${clanekUrl}#kdy-k-lékaři`} class="btn">Co dělat a kdy k lékaři <Arrow /></a>
+  </template>
+</div>
+
+<script>
+  interface Produkt {
+    id: string; vyrobek: string; baleni: string; identifikace: string;
+    dmt: { iso: string; label: string }[]; sarze: string;
+    duvod: string; vydal: string; zdroj: string; datum: string;
+  }
+
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string);
+  const OFICIALNI =
+    'Úplný a aktuální seznam vedou <a href="https://www.szpi.gov.cz/" rel="noopener" target="_blank">SZPI</a> a ' +
+    '<a href="https://mzd.gov.cz/?p=227996" rel="noopener" target="_blank">Ministerstvo zdravotnictví</a>.';
+
+  document.querySelectorAll<HTMLElement>('[data-recall-check]').forEach((root) => {
+    const produkty: Produkt[] = JSON.parse(root.dataset.produkty || '[]');
+    const overeno = root.dataset.overeno || '';
+    const step2 = root.querySelector<HTMLElement>('[data-step="2"]')!;
+    const q2 = root.querySelector<HTMLElement>('[data-q2]')!;
+    const hint2 = root.querySelector<HTMLElement>('[data-hint2]')!;
+    const dates = root.querySelector<HTMLElement>('[data-dates]')!;
+    const result = root.querySelector<HTMLElement>('[data-result]')!;
+    const links = root.querySelector<HTMLTemplateElement>('[data-tpl-links]')!;
+
+    const show = (kind: 'hit' | 'ok', title: string, body: string, withLinks = false) => {
+      result.className = `check__result check__result--${kind}`;
+      result.innerHTML = `<p class="check__verdict">${title}</p>${body}`;
+      if (withLinks) {
+        const p = document.createElement('p');
+        p.className = 'check__actions';
+        p.appendChild(links.content.cloneNode(true));
+        result.appendChild(p);
+      }
+      result.hidden = false;
+    };
+
+    const hit = (p: Produkt, co: string) =>
+      show(
+        'hit',
+        'Toto balení je na seznamu stažených mlék.',
+        `<p><strong>${esc(p.vyrobek)}, ${esc(p.baleni)}</strong> – ${esc(co)}.</p>` +
+          '<ul>' +
+          '<li><strong>Mléko miminku nepodávejte</strong>, ani když nemá žádné potíže.</li>' +
+          '<li>Balení si nechte, i otevřené – může posloužit k laboratornímu vyšetření. Výrobek můžete také vrátit v obchodě.</li>' +
+          '<li>Pokud miminko zvrací, má průjem nebo odmítá pít, kontaktujte pediatra.</li>' +
+          '</ul>' +
+          `<p class="check__src">Důvod: ${esc(p.duvod)}. Zdroj varování: <a href="${esc(p.zdroj)}" rel="noopener" target="_blank">${esc(p.vydal)}, ${esc(p.datum)}</a>.</p>`,
+        true,
+      );
+
+    const miss = (p: Produkt) =>
+      show(
+        'ok',
+        'Toto balení na seznamu není.',
+        `<p>Podle seznamu ověřeného ${esc(overeno)} se varování u výrobku ${esc(p.vyrobek)} (${esc(p.baleni)}) týká jen balení s označením: ${esc(p.identifikace)}. ` +
+          'Zkontrolujte ještě, že sedí přesný název a velikost balení.</p>' +
+          `<p class="check__src">${OFICIALNI} Při jakékoli nejistotě se poraďte s pediatrem.</p>`,
+      );
+
+    const chip = (value: string, label: string) => {
+      const l = document.createElement('label');
+      l.className = 'chip';
+      const i = document.createElement('input');
+      i.type = 'radio'; i.name = 'rc-datum'; i.value = value;
+      const s = document.createElement('span');
+      s.textContent = label;
+      l.append(i, s);
+      return l;
+    };
+
+    root.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.name === 'rc-produkt') {
+        result.hidden = true;
+        dates.replaceChildren();
+        if (t.value === 'jine') {
+          step2.hidden = true;
+          show(
+            'ok',
+            'Jiná mléka na seznamu nejsou.',
+            `<p>Podle seznamu ověřeného ${esc(overeno)} se varování týká jen výrobků uvedených v kroku 1. Jiné výrobky stejné značky dotčené nejsou.</p>` +
+              `<p class="check__src">${OFICIALNI} Při jakékoli nejistotě se poraďte s pediatrem.</p>`,
+          );
+          return;
+        }
+        const p = produkty.find((x) => x.id === t.value);
+        if (!p) return;
+        if (p.dmt.length) {
+          q2.textContent = 'Jaké datum minimální trvanlivosti je na balení?';
+          hint2.textContent = 'Datum minimální trvanlivosti (DMT) je vytištěné na obalu.';
+          p.dmt.forEach((d) => dates.append(chip(d.iso, p.sarze ? `${d.label} · šarže ${p.sarze}` : d.label)));
+          dates.append(chip('jine', 'Jiné datum'));
+        } else {
+          q2.textContent = 'Sedí označení na vašem balení?';
+          hint2.textContent = `Stažená balení poznáte podle: ${p.identifikace}`;
+          dates.append(chip('ano', 'Ano, sedí'), chip('jine', 'Ne, nesedí'));
+        }
+        step2.hidden = false;
+      } else if (t.name === 'rc-datum') {
+        const sel = root.querySelector<HTMLInputElement>('input[name="rc-produkt"]:checked');
+        const p = produkty.find((x) => x.id === sel?.value);
+        if (!p) return;
+        if (t.value === 'jine') return miss(p);
+        const d = p.dmt.find((x) => x.iso === t.value);
+        hit(p, d ? `datum minimální trvanlivosti ${d.label}${p.sarze ? `, šarže ${p.sarze}` : ''}` : p.identifikace);
+      }
+    });
+  });
+</script>
+
+<style>
+  .check { background: var(--color-slate-hush); border-radius: var(--radius-card); padding: var(--space-3); }
+  .check__inner { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .check__head { display: grid; gap: 0.35rem; }
+  .check__head > * { margin: 0 !important; }
+  .check__title { font-size: 1.375rem; }
+  .check :global(p) { margin-block: 0; }
+  .check__step { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: var(--space-2); }
+  .check__step[hidden] { display: none; }
+  .check__step:not([hidden])[data-step='2'] { animation: step-in var(--dur-base) var(--ease-out); }
+  legend { padding: 0; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 0.6rem; margin-bottom: var(--space-2); }
+  .check__num {
+    flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    background: var(--color-keylime-wash); font-size: var(--fs-small); font-variant-numeric: tabular-nums;
+  }
+  .check__hint { font-size: var(--fs-small); color: var(--text-muted); margin-top: calc(-1 * var(--space-2)); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .check :global(.chip) { position: relative; display: inline-flex; cursor: pointer; }
+  .check :global(.chip input) { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .check :global(.chip span) {
+    display: inline-flex; align-items: baseline; gap: 0.4em; min-height: 2.75rem; padding: 0.7rem 1rem;
+    border-radius: var(--radius-card); background: var(--color-keylime-wash); color: var(--ink);
+    font-size: var(--fs-small); font-weight: 500; line-height: 1.3; font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px transparent;
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .check :global(.chip small) { font-size: inherit; font-weight: 400; color: var(--text-muted); }
+  .check :global(.chip:active span) { transform: scale(0.97); }
+  .check :global(.chip input:checked + span) { background: var(--ink); color: var(--color-cream-paper); }
+  .check :global(.chip input:checked + span small) { color: inherit; opacity: 0.8; }
+  .check :global(.chip input:focus-visible + span) { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) {
+    .check :global(.chip:hover input:not(:checked) + span) { background: var(--color-mint-veil); }
+  }
+
+  .check__result { border-radius: 10px; padding: var(--space-3); display: grid; gap: var(--space-2); animation: step-in var(--dur-base) var(--ease-out); }
+  .check__result[hidden] { display: none; }
+  .check__result--hit { background: var(--color-alert-wash); border: 1px solid var(--color-alert-line); border-left: 3px solid var(--color-alert-ink); }
+  .check__result--ok { background: var(--color-keylime-wash); }
+  .check__result :global(.check__verdict) { font-weight: 600; font-size: 1.1875rem; line-height: 1.3; color: var(--ink); }
+  .check__result--hit :global(.check__verdict) { color: var(--color-alert-ink); }
+  .check__result :global(ul) { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+  .check__result :global(.check__src) { font-size: var(--fs-small); color: var(--text-muted); }
+  .check__result :global(.check__src a) { color: inherit; }
+  .check__result :global(.check__actions) { margin-top: 0.25rem; }
+  .check__foot { font-size: var(--fs-small); color: var(--text-muted); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+  @keyframes step-in { from { opacity: 0; transform: translateY(6px); } }
+  @media (max-width: 640px) {
+    .check { padding: var(--space-1); }
+    .check__inner { padding: var(--space-3); }
+    .check :global(.chip), .check :global(.chip span) { width: 100%; }
+  }
+</style>

@@ -1,0 +1,585 @@
+---
+/**
+ * Deník krmení a časovač kojení. Záznamy jen v localStorage (klíč km-denik-v1), nic se neodesílá.
+ * Jedno kojení = jeden záznam i při střídání prsů. Běžící časovač přežije zavření stránky.
+ */
+const amounts = [30, 60, 90, 120, 150, 180, 210, 240];
+---
+<div class="log" data-feeding-log>
+  <noscript><p class="log__notice">Deník potřebuje zapnutý JavaScript.</p></noscript>
+  <p class="log__notice" data-nostorage hidden>
+    Prohlížeč nedovolil ukládání (například anonymní okno). Deník funguje, ale po zavření stránky se záznamy ztratí.
+  </p>
+
+  <!-- Poslední krmení -->
+  <section class="last" aria-live="polite">
+    <p class="eyebrow">Poslední krmení</p>
+    <p class="last__ago serif" data-ago>Zatím žádný záznam</p>
+    <p class="last__detail" data-last-detail>Klepněte níže na prs nebo lahev a začněte.</p>
+  </section>
+
+  <!-- Volba / běžící časovač / lahev -->
+  <section class="stage" aria-label="Nové krmení">
+    <div class="start" data-view="start">
+      <button type="button" class="big" data-start="L"><span class="big__label">Levý prs</span><span class="big__tag" data-tag="L" hidden>naposledy</span></button>
+      <button type="button" class="big" data-start="R"><span class="big__label">Pravý prs</span><span class="big__tag" data-tag="R" hidden>naposledy</span></button>
+      <button type="button" class="big big--alt" data-open-bottle><span class="big__label">Lahev</span></button>
+    </div>
+
+    <div class="timer" data-view="timer" hidden>
+      <p class="eyebrow" data-timer-side>Kojení · levý prs</p>
+      <p class="timer__time serif tabular" data-timer-time role="timer">0:00</p>
+      <p class="timer__sides tabular">
+        <span data-side-L>Levý 0:00</span><span aria-hidden="true">·</span><span data-side-R>Pravý 0:00</span>
+      </p>
+      <p class="timer__warn" data-timer-warn hidden>Časovač běží přes hodinu. Pokud jste ho zapomněli zastavit, délku po uložení upravíte.</p>
+      <div class="timer__actions">
+        <button type="button" class="btn btn--ghost" data-switch>Přepnout na pravý</button>
+        <button type="button" class="btn" data-stop>Ukončit a uložit</button>
+      </div>
+      <button type="button" class="link" data-cancel>Zrušit bez uložení</button>
+    </div>
+
+    <form class="bottle" data-view="bottle" hidden>
+      <p class="eyebrow">Lahev</p>
+      <fieldset>
+        <legend>Kolik miminko vypilo?</legend>
+        <div class="chips">
+          {amounts.map((a) => (
+            <label class="chip"><input type="radio" name="fl-ml-chip" value={a} /><span>{a} ml</span></label>
+          ))}
+        </div>
+        <label class="field field--inline">
+          <span>Jiné množství</span>
+          <span class="field__unit"><input type="number" name="ml" inputmode="numeric" min="5" max="400" step="5" placeholder="např. 75" /> ml</span>
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Co bylo v lahvi?</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="kind" value="um" checked /><span>Umělé mléko</span></label>
+          <label class="chip"><input type="radio" name="kind" value="mm" /><span>Odstříkané mateřské</span></label>
+        </div>
+      </fieldset>
+      <p class="form-error" data-bottle-error hidden>Zadejte množství mezi 5 a 400 ml.</p>
+      <div class="timer__actions">
+        <button type="button" class="btn btn--ghost" data-close-bottle>Zpět</button>
+        <button type="submit" class="btn">Uložit</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Dnešek -->
+  <section class="today" aria-labelledby="fl-today">
+    <h2 id="fl-today" class="eyebrow">Dnes</h2>
+    <dl class="stats">
+      <div><dt>Krmení</dt><dd class="serif tabular" data-stat-count>0</dd></div>
+      <div><dt>Kojení</dt><dd class="serif tabular" data-stat-min>0 min</dd></div>
+      <div><dt>Z lahve</dt><dd class="serif tabular" data-stat-ml>0 ml</dd></div>
+    </dl>
+  </section>
+
+  <!-- Historie -->
+  <section class="history" aria-labelledby="fl-history">
+    <div class="history__head">
+      <h2 id="fl-history" class="eyebrow">Záznamy</h2>
+      <button type="button" class="link" data-add>+ Přidat zpětně</button>
+    </div>
+    <div data-history><p class="muted small">Záznamy se objeví tady.</p></div>
+    <button type="button" class="link" data-more hidden>Zobrazit starší</button>
+  </section>
+
+  <footer class="log__foot">
+    <p class="small muted">
+      Záznamy se ukládají jen v tomto zařízení a prohlížeči. Nikam je neposíláme a nemáme k nim přístup.
+      Když vymažete data prohlížeče, zmizí.
+    </p>
+    <p class="log__tools">
+      <button type="button" class="link" data-export>Stáhnout jako CSV</button>
+      <button type="button" class="link link--danger" data-clear>Smazat všechny záznamy</button>
+    </p>
+  </footer>
+
+  <div class="undo" data-undo hidden role="status">
+    <span data-undo-text>Záznam smazán.</span>
+    <button type="button" data-undo-btn>Vrátit</button>
+  </div>
+
+  <dialog class="edit" data-dialog aria-labelledby="fl-edit-title">
+    <form method="dialog" data-edit-form>
+      <h2 id="fl-edit-title" class="heading-sm" data-edit-title>Přidat záznam</h2>
+      <div class="chips" data-edit-type>
+        <label class="chip"><input type="radio" name="type" value="k" checked /><span>Kojení</span></label>
+        <label class="chip"><input type="radio" name="type" value="l" /><span>Lahev</span></label>
+      </div>
+      <label class="field"><span>Začátek</span><input type="datetime-local" name="when" required /></label>
+      <div class="edit__row" data-edit-k>
+        <label class="field"><span>Levý prs</span><span class="field__unit"><input type="number" name="lmin" inputmode="numeric" min="0" max="180" step="1" value="0" /> min</span></label>
+        <label class="field"><span>Pravý prs</span><span class="field__unit"><input type="number" name="rmin" inputmode="numeric" min="0" max="180" step="1" value="0" /> min</span></label>
+      </div>
+      <div data-edit-l hidden>
+        <label class="field"><span>Množství</span><span class="field__unit"><input type="number" name="ml" inputmode="numeric" min="5" max="400" step="5" /> ml</span></label>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="kind" value="um" checked /><span>Umělé mléko</span></label>
+          <label class="chip"><input type="radio" name="kind" value="mm" /><span>Odstříkané mateřské</span></label>
+        </div>
+      </div>
+      <p class="form-error" data-edit-error hidden></p>
+      <div class="timer__actions">
+        <button type="button" class="btn btn--ghost" data-edit-cancel>Zrušit</button>
+        <button type="submit" class="btn">Uložit</button>
+      </div>
+    </form>
+  </dialog>
+</div>
+
+<script>
+  type Side = 'L' | 'R';
+  interface Entry {
+    id: string;
+    t: 'k' | 'l';      // kojení / lahev
+    start: number;     // ms
+    L?: number;        // s
+    R?: number;        // s
+    last?: Side;
+    ml?: number;
+    kind?: 'um' | 'mm';
+  }
+  interface Active { start: number; side: Side; sideStart: number; L: number; R: number }
+  interface State { entries: Entry[]; active: Active | null }
+
+  const KEY = 'km-denik-v1';
+  const root = document.querySelector<HTMLElement>('[data-feeding-log]');
+
+  if (root) {
+    const $ = <T extends HTMLElement = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+    let state: State = { entries: [], active: null };
+    let storageOk = true;
+    let days = 3;
+    let editingId: string | null = null;
+    let undoEntry: Entry | null = null;
+    let undoTimer = 0;
+
+    // ---------- úložiště ----------
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p && Array.isArray(p.entries)) state = { entries: p.entries, active: p.active ?? null };
+      }
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      storageOk = false;
+      $('[data-nostorage]').hidden = false;
+    }
+    const save = () => {
+      if (!storageOk) return;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* plné úložiště – pokračujeme v paměti */ }
+    };
+
+    // ---------- formát ----------
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const clock = (s: number) => {
+      s = Math.max(0, Math.floor(s));
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+      return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`;
+    };
+    const mins = (s = 0) => Math.max(s > 0 ? 1 : 0, Math.round(s / 60));
+    const hm = (ms: number) => { const d = new Date(ms); return `${d.getHours()}:${pad(d.getMinutes())}`; };
+    const dayKey = (ms: number) => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+    const dayLabel = (ms: number) => {
+      const today = dayKey(Date.now()), yest = dayKey(Date.now() - 864e5), k = dayKey(ms);
+      if (k === today) return 'Dnes';
+      if (k === yest) return 'Včera';
+      return new Intl.DateTimeFormat('cs-CZ', { weekday: 'long', day: 'numeric', month: 'numeric' }).format(new Date(ms));
+    };
+    const ago = (ms: number) => {
+      const m = Math.floor((Date.now() - ms) / 60000);
+      if (m < 1) return 'právě teď';
+      if (m < 60) return `před ${m} min`;
+      const h = Math.floor(m / 60);
+      if (h < 24) return `před ${h} h${m % 60 ? ` ${m % 60} min` : ''}`;
+      const d = Math.floor(h / 24);
+      return d === 1 ? 'včera' : `před ${d} dny`;
+    };
+    const sideName = (s: Side) => (s === 'L' ? 'levý' : 'pravý');
+    const describe = (e: Entry) => {
+      if (e.t === 'l') return `Lahev · ${e.ml} ml · ${e.kind === 'mm' ? 'odstříkané mateřské' : 'umělé mléko'}`;
+      const parts: string[] = [];
+      if (e.L) parts.push(`levý ${mins(e.L)} min`);
+      if (e.R) parts.push(`pravý ${mins(e.R)} min`);
+      return `Kojení · ${parts.join(', ') || 'bez délky'}`;
+    };
+    /** Konec krmení – od něj se počítá „před…“ */
+    const endOf = (e: Entry) => e.start + ((e.L ?? 0) + (e.R ?? 0)) * 1000;
+    const sorted = () => [...state.entries].sort((a, b) => b.start - a.start);
+
+    // ---------- vykreslení ----------
+    const views = ['start', 'timer', 'bottle'] as const;
+    const setView = (v: (typeof views)[number]) =>
+      views.forEach((x) => { $(`[data-view="${x}"]`).hidden = x !== v; });
+
+    const renderLast = () => {
+      const last = sorted()[0];
+      const lastBreast = sorted().find((e) => e.t === 'k' && e.last);
+      (['L', 'R'] as Side[]).forEach((s) => { $(`[data-tag="${s}"]`).hidden = lastBreast?.last !== s; });
+      if (state.active) {
+        $('[data-ago]').textContent = 'Právě kojíte';
+        $('[data-last-detail]').textContent = `Začátek v ${hm(state.active.start)}`;
+        return;
+      }
+      if (!last) {
+        $('[data-ago]').textContent = 'Zatím žádný záznam';
+        $('[data-last-detail]').textContent = 'Klepněte níže na prs nebo lahev a začněte.';
+        return;
+      }
+      $('[data-ago]').textContent = ago(endOf(last));
+      let d = `${describe(last)} · ${hm(last.start)}`;
+      if (last.t === 'k' && last.L && last.R && last.last) d += ` · skončeno ${last.last === 'L' ? 'levým' : 'pravým'}`;
+      $('[data-last-detail]').textContent = d;
+    };
+
+    const renderStats = () => {
+      const k = dayKey(Date.now());
+      const t = state.entries.filter((e) => dayKey(e.start) === k);
+      $('[data-stat-count]').textContent = String(t.length);
+      $('[data-stat-min]').textContent = `${t.reduce((s, e) => s + (e.t === 'k' ? mins((e.L ?? 0) + (e.R ?? 0)) : 0), 0)} min`;
+      $('[data-stat-ml]').textContent = `${t.reduce((s, e) => s + (e.ml ?? 0), 0)} ml`;
+    };
+
+    const renderHistory = () => {
+      const box = $('[data-history]');
+      const all = sorted();
+      if (!all.length) {
+        box.innerHTML = '<p class="muted small">Záznamy se objeví tady.</p>';
+        $('[data-more]').hidden = true;
+        return;
+      }
+      const groups = new Map<string, Entry[]>();
+      all.forEach((e) => { const k = dayKey(e.start); groups.set(k, [...(groups.get(k) ?? []), e]); });
+      const keys = [...groups.keys()];
+      box.replaceChildren();
+      keys.slice(0, days).forEach((k) => {
+        const list = groups.get(k)!;
+        const h = document.createElement('h3');
+        h.className = 'history__day';
+        h.textContent = `${dayLabel(list[0].start)} · ${list.length}×`;
+        const ul = document.createElement('ul');
+        list.forEach((e) => {
+          const li = document.createElement('li');
+          const time = document.createElement('time');
+          time.className = 'tabular';
+          time.textContent = hm(e.start);
+          const text = document.createElement('span');
+          text.className = 'history__text';
+          text.textContent = describe(e);
+          const edit = document.createElement('button');
+          edit.type = 'button'; edit.className = 'icon'; edit.dataset.edit = e.id;
+          edit.setAttribute('aria-label', `Upravit záznam ${hm(e.start)}`);
+          edit.textContent = 'Upravit';
+          const del = document.createElement('button');
+          del.type = 'button'; del.className = 'icon'; del.dataset.del = e.id;
+          del.setAttribute('aria-label', `Smazat záznam ${hm(e.start)}`);
+          del.textContent = 'Smazat';
+          const acts = document.createElement('span');
+          acts.className = 'history__actions';
+          acts.append(edit, del);
+          li.append(time, text, acts);
+          ul.append(li);
+        });
+        box.append(h, ul);
+      });
+      $('[data-more]').hidden = keys.length <= days;
+    };
+
+    const renderTimer = () => {
+      const a = state.active;
+      if (!a) return;
+      const now = Date.now();
+      const cur = (now - a.sideStart) / 1000;
+      const L = a.L + (a.side === 'L' ? cur : 0), R = a.R + (a.side === 'R' ? cur : 0);
+      $('[data-timer-side]').textContent = `Kojení · ${sideName(a.side)} prs`;
+      $('[data-timer-time]').textContent = clock(L + R);
+      $('[data-side-L]').textContent = `Levý ${clock(L)}`;
+      $('[data-side-R]').textContent = `Pravý ${clock(R)}`;
+      $('[data-switch]').textContent = `Přepnout na ${a.side === 'L' ? 'pravý' : 'levý'}`;
+      $('[data-timer-warn]').hidden = L + R < 3600;
+    };
+
+    const render = () => {
+      setView(state.active ? 'timer' : $('[data-view="bottle"]').hidden ? 'start' : 'bottle');
+      renderLast(); renderStats(); renderHistory(); renderTimer();
+    };
+
+    // ---------- akce ----------
+    const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+
+    root.addEventListener('click', (ev) => {
+      const el = (ev.target as HTMLElement).closest<HTMLElement>('button');
+      if (!el) return;
+      const now = Date.now();
+
+      if (el.dataset.start) {
+        state.active = { start: now, side: el.dataset.start as Side, sideStart: now, L: 0, R: 0 };
+      } else if ('switch' in el.dataset && state.active) {
+        const a = state.active;
+        a[a.side] += (now - a.sideStart) / 1000;
+        a.side = a.side === 'L' ? 'R' : 'L';
+        a.sideStart = now;
+      } else if ('stop' in el.dataset && state.active) {
+        const a = state.active;
+        a[a.side] += (now - a.sideStart) / 1000;
+        state.entries.push({ id: uid(), t: 'k', start: a.start, L: Math.round(a.L), R: Math.round(a.R), last: a.side });
+        state.active = null;
+      } else if ('cancel' in el.dataset) {
+        state.active = null;
+      } else if ('openBottle' in el.dataset) {
+        $('[data-view="bottle"]').hidden = false;
+      } else if ('closeBottle' in el.dataset) {
+        $('[data-view="bottle"]').hidden = true;
+      } else if (el.dataset.del) {
+        const i = state.entries.findIndex((e) => e.id === el.dataset.del);
+        if (i < 0) return;
+        undoEntry = state.entries.splice(i, 1)[0];
+        $('[data-undo]').hidden = false;
+        clearTimeout(undoTimer);
+        undoTimer = window.setTimeout(() => { $('[data-undo]').hidden = true; undoEntry = null; }, 7000);
+      } else if ('undoBtn' in el.dataset && undoEntry) {
+        state.entries.push(undoEntry);
+        undoEntry = null;
+        $('[data-undo]').hidden = true;
+      } else if (el.dataset.edit) {
+        openEdit(state.entries.find((e) => e.id === el.dataset.edit) ?? null);
+        return;
+      } else if ('add' in el.dataset) {
+        openEdit(null);
+        return;
+      } else if ('more' in el.dataset) {
+        days += 7;
+      } else if ('export' in el.dataset) {
+        exportCsv();
+        return;
+      } else if ('clear' in el.dataset) {
+        if (!state.entries.length || !confirm('Opravdu smazat všechny záznamy? Nejde to vrátit.')) return;
+        state.entries = [];
+      } else if ('editCancel' in el.dataset) {
+        dialog.close();
+        return;
+      } else {
+        return;
+      }
+      save(); render();
+    });
+
+    // lahev
+    const bottle = $<HTMLFormElement>('[data-view="bottle"]');
+    bottle.addEventListener('change', (ev) => {
+      const t = ev.target as HTMLInputElement;
+      if (t.name === 'fl-ml-chip') (bottle.elements.namedItem('ml') as HTMLInputElement).value = '';
+    });
+    bottle.addEventListener('input', (ev) => {
+      const t = ev.target as HTMLInputElement;
+      if (t.name === 'ml' && t.value) bottle.querySelectorAll<HTMLInputElement>('input[name="fl-ml-chip"]').forEach((c) => { c.checked = false; });
+    });
+    bottle.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const chipEl = bottle.querySelector<HTMLInputElement>('input[name="fl-ml-chip"]:checked');
+      const ml = Number((bottle.elements.namedItem('ml') as HTMLInputElement).value || chipEl?.value || 0);
+      const err = $('[data-bottle-error]');
+      if (!(ml >= 5 && ml <= 400)) { err.hidden = false; return; }
+      err.hidden = true;
+      const kind = (bottle.querySelector<HTMLInputElement>('input[name="kind"]:checked')?.value ?? 'um') as 'um' | 'mm';
+      state.entries.push({ id: uid(), t: 'l', start: Date.now(), ml: Math.round(ml), kind });
+      bottle.reset();
+      bottle.hidden = true;
+      save(); render();
+    });
+
+    // přidání / úprava
+    const dialog = $<HTMLDialogElement>('[data-dialog]');
+    const form = $<HTMLFormElement>('[data-edit-form]');
+    const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement & RadioNodeList;
+    const toLocal = (ms: number) => {
+      const d = new Date(ms);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+    const syncType = () => {
+      const k = f('type').value === 'k';
+      $('[data-edit-k]').hidden = !k;
+      $('[data-edit-l]').hidden = k;
+    };
+    function openEdit(e: Entry | null) {
+      editingId = e?.id ?? null;
+      form.reset();
+      $('[data-edit-title]').textContent = e ? 'Upravit záznam' : 'Přidat záznam';
+      $('[data-edit-error]').hidden = true;
+      f('when').value = toLocal(e?.start ?? Date.now());
+      f('when').max = toLocal(Date.now() + 60000);
+      if (e) {
+        f('type').value = e.t;
+        if (e.t === 'k') { f('lmin').value = String(mins(e.L)); f('rmin').value = String(mins(e.R)); }
+        else { f('ml').value = String(e.ml ?? ''); f('kind').value = e.kind ?? 'um'; }
+      }
+      syncType();
+      if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+    }
+    $('[data-edit-type]').addEventListener('change', syncType);
+    dialog.addEventListener('click', (ev) => { if (ev.target === dialog) dialog.close(); });
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const err = $('[data-edit-error]');
+      const fail = (m: string) => { err.textContent = m; err.hidden = false; };
+      const start = new Date(f('when').value).getTime();
+      if (!start || start > Date.now() + 120000) return fail('Zadejte čas, který už proběhl.');
+      const prev = state.entries.find((e) => e.id === editingId);
+      let entry: Entry;
+      if (f('type').value === 'k') {
+        const l = Number(f('lmin').value || 0), r = Number(f('rmin').value || 0);
+        if (l < 0 || r < 0 || l > 180 || r > 180 || l + r === 0) return fail('Zadejte délku kojení aspoň u jednoho prsu (nejvýš 180 min).');
+        const last: Side = l && r ? (prev?.last ?? 'R') : l ? 'L' : 'R';
+        entry = { id: editingId ?? uid(), t: 'k', start, L: l * 60, R: r * 60, last };
+      } else {
+        const ml = Number(f('ml').value || 0);
+        if (!(ml >= 5 && ml <= 400)) return fail('Zadejte množství mezi 5 a 400 ml.');
+        entry = { id: editingId ?? uid(), t: 'l', start, ml: Math.round(ml), kind: f('kind').value === 'mm' ? 'mm' : 'um' };
+      }
+      state.entries = state.entries.filter((e) => e.id !== entry.id).concat(entry);
+      dialog.close();
+      save(); render();
+    });
+
+    // export
+    function exportCsv() {
+      if (!state.entries.length) return;
+      const rows = [['datum', 'čas', 'typ', 'levý (min)', 'pravý (min)', 'množství (ml)', 'obsah lahve']];
+      [...state.entries].sort((a, b) => a.start - b.start).forEach((e) => {
+        const d = new Date(e.start);
+        rows.push([
+          `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`, hm(e.start), e.t === 'k' ? 'kojení' : 'lahev',
+          e.t === 'k' ? String(mins(e.L)) : '', e.t === 'k' ? String(mins(e.R)) : '',
+          e.ml ? String(e.ml) : '', e.t === 'l' ? (e.kind === 'mm' ? 'odstříkané mateřské' : 'umělé mléko') : '',
+        ]);
+      });
+      const csv = '﻿' + rows.map((r) => r.join(';')).join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = `denik-krmeni-${dayKey(Date.now())}.csv`;
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    // ---------- běh ----------
+    render();
+    setInterval(() => { if (state.active) renderTimer(); }, 1000);
+    setInterval(() => { if (!state.active) { renderLast(); renderStats(); } }, 30000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+    // Druhá záložka se stejným deníkem
+    window.addEventListener('storage', (ev) => {
+      if (ev.key !== KEY || !ev.newValue) return;
+      try { const p = JSON.parse(ev.newValue); if (p && Array.isArray(p.entries)) { state = p; render(); } } catch { /* ignorovat */ }
+    });
+  }
+</script>
+
+<style>
+  .log { display: grid; gap: var(--space-3); }
+  .log :global([hidden]) { display: none !important; }
+  .small { font-size: var(--fs-small); }
+  .log__notice { background: var(--color-alert-wash); border: 1px solid var(--color-alert-line); color: var(--color-alert-ink); border-radius: 10px; padding: var(--space-2) var(--space-3); font-size: var(--fs-small); }
+
+  .last { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); display: grid; gap: 0.25rem; }
+  .last__ago { font-size: var(--fs-h2); line-height: 1.15; letter-spacing: -0.02em; }
+  .last__detail { color: var(--color-charcoal); font-variant-numeric: tabular-nums; }
+
+  .stage { background: var(--color-slate-hush); border-radius: var(--radius-card); padding: var(--space-2); }
+  .start { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1); }
+  .big {
+    position: relative; display: grid; place-items: center; align-content: center; gap: 0.35rem; min-height: 6.5rem;
+    border: 0; border-radius: var(--radius-card); background: var(--color-cream-paper); color: var(--ink);
+    font-weight: 600; font-size: 1.1875rem; letter-spacing: -0.012em;
+    transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  }
+  .big--alt { grid-column: 1 / -1; min-height: 4rem; }
+  .big:active { transform: scale(0.97); }
+  .big__tag { font-size: var(--fs-caption); font-weight: 500; letter-spacing: 0; padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); background: var(--color-keylime-wash); }
+  @media (hover: hover) and (pointer: fine) { .big:hover { background: var(--color-keylime-wash); } .big:hover .big__tag { background: var(--color-cream-paper); } }
+
+  .timer, .bottle { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-2); animation: view-in var(--dur-base) var(--ease-out); }
+  .timer { justify-items: center; text-align: center; }
+  .timer__time { font-size: clamp(4rem, 22vw, 6.5rem); line-height: 1; letter-spacing: -0.03em; }
+  .timer__sides { display: flex; gap: 0.6rem; color: var(--text-muted); font-size: var(--fs-small); }
+  .timer__warn { font-size: var(--fs-small); color: var(--color-alert-ink); }
+  .timer__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1); width: 100%; margin-top: var(--space-2); }
+  .timer__actions .btn { justify-content: center; min-height: 3.25rem; font-size: 1rem; }
+
+  .log fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: var(--space-2); }
+  .log legend { padding: 0; font-weight: 600; color: var(--ink); margin-bottom: var(--space-1); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip { position: relative; display: inline-flex; cursor: pointer; }
+  .chip input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0.6rem 0.95rem; border-radius: var(--radius-card);
+    background: var(--color-keylime-wash); color: var(--ink); font-size: var(--fs-small); font-weight: 500; font-variant-numeric: tabular-nums;
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .chip:active span { transform: scale(0.97); }
+  .chip input:checked + span { background: var(--ink); color: var(--color-cream-paper); }
+  .chip input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .field { display: grid; gap: 0.3rem; font-size: var(--fs-small); color: var(--text-muted); }
+  .field--inline { grid-template-columns: 1fr auto; align-items: center; }
+  .field__unit { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-charcoal); }
+  .log input[type='number'], .log input[type='datetime-local'] {
+    padding: 0.7rem 0.85rem; font-size: 1rem; border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card);
+    background: var(--color-cream-paper); color: var(--color-charcoal); min-height: 2.75rem;
+  }
+  .log input[type='number'] { width: 6.5rem; }
+  .log input[type='datetime-local'] { width: 100%; }
+  .log input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .form-error { color: var(--color-alert-ink); font-size: var(--fs-small); }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-1); margin-top: var(--space-1); }
+  .stats div { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3) var(--space-2); display: grid; gap: 0.2rem; }
+  .stats dt { font-size: var(--fs-small); color: var(--text-muted); }
+  .stats dd { margin: 0; font-size: clamp(1.5rem, 6vw, 2rem); line-height: 1.1; }
+
+  .history__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+  .history :global(.history__day) { font-size: var(--fs-small); color: var(--text-muted); font-weight: 600; margin-top: var(--space-3); letter-spacing: 0; text-transform: capitalize; }
+  .history :global(ul) { list-style: none; padding: 0; margin: var(--space-1) 0 0; border-top: 1px solid var(--line); }
+  .history :global(li) { display: grid; grid-template-columns: 3rem 1fr auto; gap: 0.1rem 0.75rem; align-items: center; padding-block: 0.6rem; border-bottom: 1px solid var(--line); }
+  .history :global(.history__actions) { display: flex; gap: 0.9rem; }
+  .history :global(time) { color: var(--ink); font-weight: 600; }
+  .history :global(.history__text) { font-size: var(--fs-small); color: var(--color-charcoal); }
+  .history :global(.icon), .link {
+    border: 0; background: none; padding: 0.4rem 0.1rem; color: var(--text-muted); font-size: var(--fs-small);
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em;
+  }
+  .link { color: var(--ink); justify-self: start; }
+  .link--danger { color: var(--color-alert-ink); }
+  .timer .link { justify-self: center; color: var(--text-muted); }
+
+  .log__foot { border-top: 1px solid var(--line); padding-top: var(--space-3); display: grid; gap: var(--space-2); }
+  .log__tools { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+
+  .undo {
+    position: fixed; left: 50%; bottom: max(1rem, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 70;
+    display: flex; align-items: center; gap: var(--space-3); padding: 0.75rem 1rem; border-radius: var(--radius-card);
+    background: var(--ink); color: var(--color-cream-paper); font-size: var(--fs-small); white-space: nowrap;
+    animation: undo-in var(--dur-base) var(--ease-out);
+  }
+  .undo button { border: 0; background: none; color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; padding: 0.25rem; }
+
+  .edit { border: 0; border-radius: var(--radius-card); padding: 0; width: min(26rem, calc(100vw - 2rem)); background: var(--color-cream-paper); color: var(--text); margin: auto; }
+  .edit::backdrop { background: color-mix(in srgb, var(--color-forest-shadow) 35%, transparent); }
+  .edit[open] { animation: view-in var(--dur-base) var(--ease-out); }
+  .edit form { display: grid; gap: var(--space-3); padding: var(--space-4); }
+  .edit__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+
+  @keyframes view-in { from { opacity: 0; transform: translateY(6px); } }
+  @keyframes undo-in { from { opacity: 0; transform: translate(-50%, 8px); } }
+  @media (max-width: 480px) {
+    .history :global(li) { grid-template-columns: 3rem 1fr; }
+    .history :global(.history__actions) { grid-column: 2; }
+  }
+</style>

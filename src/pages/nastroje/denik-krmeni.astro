@@ -1,0 +1,140 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import FeedingLog from '../../components/FeedingLog.astro';
+
+const url = new URL('/nastroje/denik-krmeni/', Astro.site).toString();
+
+const steps = [
+  { t: 'Kojení', d: 'Klepněte na levý nebo pravý prs a časovač běží. Když prs vyměníte, přepnete jedním tlačítkem – celé kojení se uloží jako jeden záznam.' },
+  { t: 'Lahev', d: 'Vyberte množství a jestli šlo o umělé, nebo odstříkané mateřské mléko. Hotovo na dvě klepnutí.' },
+  { t: 'Přehled', d: 'Nahoře vidíte, před jakou dobou miminko naposledy pilo a kterým prsem jste skončila. Pod tím součty za dnešek a záznamy po dnech.' },
+];
+
+const faq = [
+  {
+    q: 'Je deník opravdu zdarma?',
+    a: 'Ano, celý. Bez registrace, bez reklam a bez placené verze – včetně úprav záznamů, zpětného přidání a stažení dat.',
+  },
+  {
+    q: 'Kde jsou moje záznamy uložené?',
+    a: 'Jen ve vašem telefonu nebo počítači, v úložišti prohlížeče. Na náš server se neposílají a nevidíme je. Proto se také nepřenesou do jiného zařízení a zmizí, když vymažete data prohlížeče.',
+  },
+  {
+    q: 'Co když zavřu stránku nebo zamknu telefon, zatímco časovač běží?',
+    a: 'Nic se neztratí. Deník si pamatuje čas začátku, takže po návratu ukáže správnou délku kojení.',
+  },
+  {
+    q: 'Jak si deník přidám na plochu telefonu?',
+    a: 'V prohlížeči otevřete nabídku sdílení nebo menu a zvolte „Přidat na plochu“. Deník se pak otevírá jedním klepnutím jako aplikace.',
+  },
+  {
+    q: 'Poradí mi deník, kdy a kolik krmit?',
+    a: 'Ne. Je to jen zápisník, který nic nehodnotí ani nepřipomíná. S otázkami ke kojení a krmení se obraťte na pediatra nebo laktační poradkyni.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+      { '@type': 'ListItem', position: 2, name: 'Nástroje', item: new URL('/nastroje/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: 'Deník krmení', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Deník krmení a časovač kojení',
+    url,
+    applicationCategory: 'HealthApplication',
+    operatingSystem: 'Web',
+    inLanguage: 'cs-CZ',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'CZK' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<Base
+  title="Deník krmení a časovač kojení online"
+  description="Jednoduchý deník krmení zdarma: časovač kojení pro levý a pravý prs, záznam lahve v ml a přehled dne. Bez registrace, data zůstávají ve vašem telefonu."
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <header class="stack head">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/nastroje/">Nástroje</a></nav>
+      <p class="eyebrow">Nástroj · zdarma, bez registrace</p>
+      <h1>Deník krmení</h1>
+      <p class="lead">Kdy miminko naposledy pilo, z kterého prsu a kolik z lahve. Jedno klepnutí, žádný účet.</p>
+    </header>
+
+    <FeedingLog />
+
+    <section class="block" aria-labelledby="jak">
+      <h2 id="jak">Jak deník funguje</h2>
+      <ol class="steps">
+        {steps.map((s) => (
+          <li><span class="heading-sm">{s.t}</span><span>{s.d}</span></li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="block" aria-labelledby="otazky">
+      <h2 id="otazky">Časté otázky</h2>
+      <dl class="faq">
+        {faq.map((f) => (
+          <div>
+            <dt class="heading-sm">{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="block" aria-labelledby="dal">
+      <h2 id="dal">Může se hodit</h2>
+      <ul class="links">
+        <li><a href="/mleka/kolik-mleka-podle-veku/">Kolik mléka dát miminku podle věku <Arrow /></a></li>
+        <li><a href="/krmeni/kombinovane-krmeni/">Kombinované krmení: kojení a lahev <Arrow /></a></li>
+        <li><a href="/krmeni/odstrikavani-materskeho-mleka/">Odstříkávání a skladování mateřského mléka <Arrow /></a></li>
+      </ul>
+    </section>
+
+    <p class="muted small disclaimer">
+      Deník je pomůcka k zapisování. Nenahrazuje radu pediatra, porodní asistentky ani laktační poradkyně.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page { max-width: calc(40rem + 2 * var(--gutter)); padding-top: var(--space-5); }
+  .head { margin-bottom: var(--space-4); }
+  @media (max-width: 640px) {
+    .page { padding-top: var(--space-3); }
+    .head { margin-bottom: var(--space-3); }
+    .head > * + * { margin-top: var(--space-1); }
+    .head h1 { font-size: 2rem; }
+    .head .lead { font-size: var(--fs-body); }
+  }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .block { margin-top: var(--space-6); display: grid; gap: var(--space-2); }
+  .steps { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; gap: var(--space-1); }
+  .steps li { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); display: grid; gap: 0.3rem; }
+  .faq { display: grid; margin-top: var(--space-2); border-top: 1px solid var(--line); }
+  .faq > div { padding-block: var(--space-3); border-bottom: 1px solid var(--line); display: grid; gap: var(--space-1); }
+  .faq dd { margin: 0; color: var(--color-charcoal); }
+  .links { list-style: none; padding: 0; display: grid; gap: var(--space-1); }
+  .links a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .links :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .links a:hover :global(svg) { transform: translateX(3px); } }
+  .disclaimer { margin-top: var(--space-4); }
+  .small { font-size: var(--fs-small); }
+</style>
