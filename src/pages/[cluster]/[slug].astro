@@ -4,16 +4,23 @@ import Base from '../../layouts/Base.astro';
 import SourceList from '../../components/SourceList.astro';
 import { clusterMeta } from '../../data/clusters';
 import { annotate } from '../../data/terms.mjs';
+import ArticleCards from '../../components/ArticleCards.astro';
 
 export async function getStaticPaths() {
   const articles = await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft);
-  return articles.map((entry) => ({
-    params: { cluster: entry.data.cluster, slug: entry.id },
-    props: { entry },
-  }));
+  const byDate = [...articles].sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
+  return articles.map((entry) => {
+    // Související: nejdřív stejný klastr, doplnit nejnovějšími z ostatních
+    const others = byDate.filter((a) => a.id !== entry.id);
+    const related = [
+      ...others.filter((a) => a.data.cluster === entry.data.cluster),
+      ...others.filter((a) => a.data.cluster !== entry.data.cluster),
+    ].slice(0, 3);
+    return { params: { cluster: entry.data.cluster, slug: entry.id }, props: { entry, related } };
+  });
 }
 
-const { entry } = Astro.props;
+const { entry, related } = Astro.props;
 const { Content } = await render(entry);
 const { data } = entry;
 const meta = clusterMeta[data.cluster];
@@ -30,6 +37,7 @@ const articleLd = {
   author: { '@type': 'Person', name: data.author },
   inLanguage: 'cs-CZ',
   mainEntityOfPage: url,
+  image: new URL(`/images/og/${entry.id}.png`, Astro.site).toString(),
   citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, publisher: s.publisher })),
 };
 const breadcrumbs = {
@@ -42,7 +50,7 @@ const breadcrumbs = {
   ],
 };
 ---
-<Base title={data.title} description={data.description} ogType="article" jsonLd={[articleLd, breadcrumbs]} noindex={data.draft}>
+<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${entry.id}.png`} jsonLd={[articleLd, breadcrumbs]} noindex={data.draft}>
   <article class="container article">
     <header class="article__head">
       <nav class="crumbs" aria-label="Drobečková navigace">
@@ -66,6 +74,13 @@ const breadcrumbs = {
       Článek má informativní charakter a nenahrazuje konzultaci s pediatrem. Máte-li o zdraví dítěte obavy, obraťte se na lékaře.
     </p>
   </article>
+
+  {related.length > 0 && (
+    <section class="container related" aria-labelledby="souvisejici">
+      <h2 id="souvisejici">Související články</h2>
+      <ArticleCards articles={related} />
+    </section>
+  )}
 </Base>
 
 <style>
@@ -85,4 +100,6 @@ const breadcrumbs = {
   .prose :global(blockquote) { border-left: 2px solid var(--color-sage-mist); padding-left: var(--space-3); color: var(--text-muted); }
 
   .disclaimer { font-size: var(--fs-small); margin-top: var(--space-4); }
+  .related { padding-top: var(--space-6); padding-bottom: var(--space-6); border-top: 1px solid var(--line); margin-top: var(--space-6); }
+  .related h2 { margin-bottom: var(--space-4); }
 </style>

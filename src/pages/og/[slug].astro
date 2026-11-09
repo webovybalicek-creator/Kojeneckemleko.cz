@@ -1,0 +1,80 @@
+---
+/**
+ * Šablona obrázku pro sdílení (Open Graph), 1200×630.
+ * Ze stránek se PNG generují skriptem `npm run og` (Playwright) do public/images/og/<slug>.png.
+ * Noindex, mimo sitemapu, v robots.txt Disallow.
+ */
+import { getCollection } from 'astro:content';
+import '../../styles/global.css';
+import ArticleCover from '../../components/ArticleCover.astro';
+import { clusterMeta } from '../../data/clusters';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('clanky', ({ data }) => !data.draft);
+  return [
+    ...articles.map((a) => ({
+      params: { slug: a.id },
+      props: {
+        title: a.data.title,
+        eyebrow: clusterMeta[a.data.cluster].title,
+        motif: a.data.cover?.motif ?? 'kvet',
+        tone: a.data.cover?.tone ?? 'sage',
+      },
+    })),
+    {
+      params: { slug: 'default' },
+      props: {
+        title: 'Nezávislý průvodce krmením miminka',
+        eyebrow: 'Ověřeno ve zdrojích WHO, NHS a ESPGHAN',
+        motif: 'klicky',
+        tone: 'sage',
+      },
+    },
+  ];
+}
+
+const { title, eyebrow, motif, tone } = Astro.props;
+---
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="og">
+      <div class="og__text">
+        <p class="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p class="og__logo">kojeneckemleko<span>.cz</span></p>
+      </div>
+      <div class:list={['og__art', `panel--${tone}`]}>
+        <ArticleCover motif={motif} class="og__illu" />
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  html, body { margin: 0; background: var(--color-cream-paper); }
+  .og {
+    width: 1200px; height: 630px; box-sizing: border-box; padding: 56px;
+    display: grid; grid-template-columns: 1fr 440px; gap: 56px; align-items: stretch;
+    background: var(--color-cream-paper);
+  }
+  .og__text { display: flex; flex-direction: column; justify-content: center; gap: 24px; min-width: 0; }
+  .og .eyebrow { font-size: 18px; margin: 0; }
+  h1 {
+    font-family: var(--font-serif); font-weight: 300; color: var(--color-forest-ink);
+    font-size: 62px; line-height: 1.08; letter-spacing: -0.01em; margin: 0; text-wrap: balance;
+  }
+  .og__logo {
+    margin: auto 0 0; font-family: var(--font-sans); font-weight: 600; font-size: 26px;
+    letter-spacing: -0.03em; color: var(--color-forest-ink);
+  }
+  .og__logo span { font-weight: 400; opacity: 0.6; }
+  .og__art { border-radius: 28px; display: grid; place-items: center; padding: 24px; }
+  .og__art { overflow: hidden; }
+  .og__art :global(.og__illu) { width: 118%; }
+</style>

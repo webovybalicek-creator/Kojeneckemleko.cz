@@ -24,12 +24,20 @@ import Base from '../layouts/Base.astro';
     </p>
     <p>Pokud máte v prohlížeči zapnuté „Do Not Track“ nebo Global Privacy Control, návštěvu vůbec nezapočítáme.</p>
 
-    <!-- TODO: doplnit provozovatele webu (jméno/IČO) a kontaktní e-mail -->
+    <h3 id="provozovatel" class="operator-title">Provozovatel webu</h3>
+    <p class="operator">
+      Vladimír Fischer, IČ: 03051820<br />
+      se sídlem Nerudova 765/10, 251 01 Říčany<br />
+      zapsaný v živnostenském rejstříku vedeném Městským úřadem Říčany 538728, CZ0209 – Praha-východ<br />
+      Kontaktní adresa: Vladimír Fischer, Nerudova 765/10, Říčany
+    </p>
   </article>
 </Base>
 
 <style>
   .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-6); }
   .page h2 { margin-top: var(--space-5); }
+  .operator-title { margin-top: var(--space-6); font-size: var(--fs-small); color: var(--text-muted); }
+  .operator { margin-top: var(--space-1); color: var(--text-muted); font-size: var(--fs-small); line-height: 1.7; }
   .page ul { padding-left: 1.25rem; display: grid; gap: var(--space-1); }
 </style>
