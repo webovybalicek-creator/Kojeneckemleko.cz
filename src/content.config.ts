@@ -60,6 +60,8 @@ const mleka = defineCollection({
     types: z.array(z.enum(['standard', 'HA', 'AR', 'comfort', 'bez-laktozy', 'A2', 'bio'])).default(['standard']),
     hmo: z.boolean().optional(),
     palmOil: z.boolean().optional(),
+    /** Přidané probiotické kultury podle složení (bakterie mléčného kvašení) */
+    probiotics: z.boolean().optional(),
     pricePer100ml: z.number().optional(),
     officialUrl: z.url(),
     verified: z.coerce.date(),

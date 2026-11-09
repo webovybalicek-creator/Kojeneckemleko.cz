@@ -16,6 +16,7 @@ const baseLabel = {
 const yesNo = (v?: boolean) => (v === undefined ? '–' : v ? 'Ano' : 'Ne');
 const price = (v?: number) =>
   v === undefined ? '–' : new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 2 }).format(v);
+const showPrice = milks.some((m) => m.data.pricePer100ml !== undefined);
 const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
 ---
 <div class="table-panel panel panel--slate">
@@ -37,7 +38,8 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
             <th scope="col">Typ</th>
             <th scope="col">HMO</th>
             <th scope="col">Palmový olej</th>
-            <th scope="col">Cena / 100 ml</th>
+            <th scope="col">Probiotika</th>
+            {showPrice && <th scope="col">Cena / 100 ml</th>}
             <th scope="col">Ověřeno</th>
           </tr>
         </thead>
@@ -55,7 +57,8 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
                 : <span class="tag tag--sm tag--soft">{t}</span>)}</span></td>
               <td>{yesNo(data.hmo)}</td>
               <td>{yesNo(data.palmOil)}</td>
-              <td>{price(data.pricePer100ml)}</td>
+              <td>{yesNo(data.probiotics)}</td>
+              {showPrice && <td>{price(data.pricePer100ml)}</td>}
               <td class="muted">{dateFmt.format(data.verified)}</td>
             </tr>
           ))}

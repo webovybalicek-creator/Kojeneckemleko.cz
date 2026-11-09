@@ -15,7 +15,7 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
 ---
 <Base
   title="Srovnání kojeneckých mlék"
-  description="Srovnávací tabulka kojeneckých mlék dostupných v ČR – fáze, základ, typ, HMO, palmový olej a cena za 100 ml. Údaje ověřené u výrobce."
+  description="Srovnání počátečních kojeneckých mlék dostupných v ČR: základ, HMO, palmový olej a probiotika podle složení na webu výrobce. Bez hodnocení, s datem ověření."
 >
   <section class="container head">
     <nav class="crumbs" aria-label="Drobečková navigace">
@@ -24,7 +24,7 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
     <p class="eyebrow">Srovnání</p>
     <h1>Srovnání kojeneckých mlék</h1>
     <p class="lead">
-      Fakta ze složení a ceny na jednom místě. Tabulka neříká, které mléko je nejlepší –
+      Fakta ze složení na jednom místě. Tabulka neříká, které mléko je nejlepší –
       pomáhá porovnat, čím se mléka liší.
     </p>
   </section>
@@ -38,10 +38,20 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
 
   <section class="container">
     <MilkTable milks={milks} />
-    <p class="muted note">
-      Údaje přebíráme z oficiálních obalů a webů výrobců; u každého mléka je datum ověření.
-      Ceny jsou orientační a liší se podle obchodu.
-    </p>
+    <div class="notes">
+      <p class="muted note">
+        Údaje přebíráme ze složení na oficiálních webech výrobců (odkaz u názvu mléka); u každého mléka je datum ověření.
+        Složení se může změnit – rozhodující je vždy obal výrobku, který máte doma. Připravujte podle návodu na balení.
+      </p>
+      <p class="muted note">
+        Všechna počáteční mléka prodávaná v EU musí splňovat stejné požadavky na složení podle nařízení (EU) 2016/127.
+        Kojení je podle WHO doporučeným způsobem výživy kojenců.
+      </p>
+      <p class="muted note">
+        U některých šarží Nutrilon Profutura Duobiotik 1 probíhá stahování z trhu – ověřte DMT v článku{' '}
+        <a href="/mleka/stazena-kojenecka-mleka/">Stažená kojenecká mléka 2026</a>.
+      </p>
+    </div>
   </section>
 </Base>
 
@@ -51,5 +61,6 @@ const brands = [...new Set(milks.map((m) => m.data.brand))]
   .crumbs a { color: var(--text-muted); }
   .brands { margin-bottom: var(--space-3); }
   .brands .eyebrow { display: block; }
-  .note { font-size: var(--fs-small); margin-top: var(--space-3); }
+  .notes { display: grid; gap: var(--space-2); margin-top: var(--space-3); max-width: 70ch; }
+  .note { font-size: var(--fs-small); }
 </style>

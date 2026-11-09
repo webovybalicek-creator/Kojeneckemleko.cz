@@ -1,0 +1,14 @@
+{
+  "name": "BEBA Optipro 1",
+  "brand": "BEBA",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": true,
+  "officialUrl": "https://www.nestlebaby.cz/beba-optipro-1-600g",
+  "verified": "2026-11-09"
+}

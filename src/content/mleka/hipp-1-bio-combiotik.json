@@ -1,0 +1,14 @@
+{
+  "name": "HiPP 1 BIO Combiotik",
+  "brand": "HiPP",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "bio"
+  ],
+  "hmo": false,
+  "palmOil": true,
+  "probiotics": true,
+  "officialUrl": "https://www.hipp.cz/fileadmin/media/CZ/products/product_pdfs/CZ2102.pdf",
+  "verified": "2026-11-09"
+}

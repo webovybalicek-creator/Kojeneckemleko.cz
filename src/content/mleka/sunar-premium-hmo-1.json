@@ -1,0 +1,14 @@
+{
+  "name": "Sunar Premium HMO 1",
+  "brand": "Sunar",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://sunar.cz/nase-produkty/kojenecka-mleka/sunar-premium-hmo-1",
+  "verified": "2026-11-09"
+}

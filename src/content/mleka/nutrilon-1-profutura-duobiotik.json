@@ -1,0 +1,14 @@
+{
+  "name": "Nutrilon 1 Profutura Duobiotik",
+  "brand": "Nutrilon",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-1-profutura-duobiotik-kojenecke-mleko-800g.html",
+  "verified": "2026-11-09"
+}

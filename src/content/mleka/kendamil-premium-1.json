@@ -1,0 +1,14 @@
+{
+  "name": "Kendamil Premium 1",
+  "brand": "Kendamil",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "standard"
+  ],
+  "hmo": false,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.kendamil.cz/produkt/kendamil-premium-1-800-g/",
+  "verified": "2026-11-09"
+}

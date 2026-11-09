@@ -1,0 +1,14 @@
+{
+  "name": "Kendamil Kozí kojenecké mléko 1",
+  "brand": "Kendamil",
+  "stage": "pocatecni",
+  "base": "kozi",
+  "types": [
+    "standard"
+  ],
+  "hmo": true,
+  "palmOil": false,
+  "probiotics": false,
+  "officialUrl": "https://www.kendamil.cz/produkt/kendamil-kozi-kojenecke-mleko-1-800-g/",
+  "verified": "2026-11-09"
+}
