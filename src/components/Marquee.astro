@@ -10,16 +10,20 @@ interface Props {
   /** sekundy na jeden průchod */
   speed?: number;
 }
-const { items, label, speed = Math.max(24, items.length * 4) } = Astro.props;
+const { items, label } = Astro.props;
+// Každá kopie musí být širší než nejširší obrazovka, jinak vpravo zbude mezera a smyčka poskočí.
+const reps = Math.max(1, Math.ceil(16 / items.length));
+const looped = Array.from({ length: reps }, () => items).flat();
+const speed = Astro.props.speed ?? Math.max(24, looped.length * 3.5);
 ---
 <div class="marquee" role="region" aria-label={label} style={`--duration:${speed}s`}>
   <div class="marquee__track">
     {[0, 1].map((copy) => (
       <ul class="marquee__list" aria-hidden={copy === 1 ? 'true' : undefined}>
-        {items.map((item) => (
-          <li>
+        {looped.map((item, i) => (
+          <li aria-hidden={copy === 0 && i >= items.length ? 'true' : undefined}>
             {item.href
-              ? <a href={item.href} rel="noopener" tabindex={copy === 1 ? -1 : undefined}>{item.label}</a>
+              ? <a href={item.href} rel="noopener" tabindex={copy === 1 || i >= items.length ? -1 : undefined} aria-hidden={copy === 0 && i >= items.length ? 'true' : undefined}>{item.label}</a>
               : <span>{item.label}</span>}
           </li>
         ))}
@@ -74,6 +78,6 @@ const { items, label, speed = Math.max(24, items.length * 4) } = Astro.props;
     .marquee { -webkit-mask-image: none; mask-image: none; }
     .marquee__track { animation: none; width: auto; justify-content: center; padding-inline: var(--gutter); }
     .marquee__list { flex-shrink: 1; flex-wrap: wrap; justify-content: center; row-gap: var(--space-1); }
-    .marquee__list[aria-hidden='true'] { display: none; }
+    .marquee__list[aria-hidden='true'], .marquee__list li[aria-hidden='true'] { display: none; }
   }
 </style>
