@@ -1,6 +1,6 @@
 /**
  * Slovníček pojmů – /slovnicek/#<id>. Každá definice musí stát na zdrojích níže (čísla = pořadí v `glossarySources`).
- * Ověřeno 7. 11. 2026, viz claude/zdroje-registr.md v projektu.
+ * Ověřeno 7. 11. 2026 (hesla DHA, A2, kolika, dyschezie, laktózová intolerance, BLW, anafylaxe 9. 11. 2026), viz claude/zdroje-registr.md v projektu.
  */
 
 export interface GlossarySource { title: string; publisher: string; url: string; year?: number; kind?: 'studie' | 'doporuceni' | 'legislativa'; doi?: string; authors?: { name: string; url?: string; role?: string }[] }
@@ -26,13 +26,35 @@ export const glossarySources: GlossarySource[] = [
     year: 2024, kind: 'studie', doi: '10.1097/MPG.0000000000003897',
     authors: [{ name: 'Yvan Vandenplas' }, { name: 'Ilse Broekaert' }, { name: 'Magnus Domellöf' }, { name: 'a další' }],
   },
+  { title: 'Nařízení Komise v přenesené pravomoci (EU) 2016/127', publisher: 'Úřední věstník EU (EUR-Lex)', url: 'https://eur-lex.europa.eu/eli/reg_del/2016/127/2024-10-11/eng/pdf', year: 2016, kind: 'legislativa' },
+  {
+    title: 'A2 Milk and BCM-7 Peptide as Emerging Parameters of Milk Quality', publisher: 'Frontiers in Nutrition 9: 842375',
+    url: 'https://www.frontiersin.org/articles/10.3389/fnut.2022.842375/full', year: 2022, kind: 'studie', doi: '10.3389/fnut.2022.842375',
+    authors: [{ name: 'Marzia Giribaldi' }, { name: 'Cristina Lamberti' }, { name: 'a další' }],
+  },
+  {
+    title: 'Milk A1 β-casein and health-related outcomes in humans: a systematic review', publisher: 'Nutrition Reviews',
+    url: 'https://doi.org/10.1093/nutrit/nuy063', year: 2019, kind: 'studie', doi: '10.1093/nutrit/nuy063',
+    authors: [{ name: 'Daniela Kuellenberg de Gaudry' }, { name: 'Szimonetta Lohner' }, { name: 'Christine Schmucker' }, { name: 'a další' }],
+  },
+  {
+    title: 'The New Rome IV Criteria for Functional Gastrointestinal Disorders in Infants and Toddlers', publisher: 'Pediatric Gastroenterology, Hepatology & Nutrition 20(1): 1–13',
+    url: 'https://koreascience.kr/article/JAKO201713647762132.pdf', year: 2017, kind: 'studie', doi: '10.5223/pghn.2017.20.1.1',
+    authors: [{ name: 'Judith Zeevenhooven' }, { name: 'Ilan J. N. Koppen' }, { name: 'Marc A. Benninga' }],
+  },
+  { title: "Your baby's first solid foods", publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/babys-first-solid-foods/', year: 2026, kind: 'doporuceni' },
+  { title: 'Food allergies in babies and young children', publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/food-allergies-in-babies-and-young-children/', year: 2024, kind: 'doporuceni' },
+  { title: 'Lactose intolerance (new parent and baby)', publisher: 'NHS – Healthier Together', url: 'https://www.healthiertogether.nhs.uk/new-parent-and-baby/lactose-intolerance', kind: 'doporuceni' },
+  { title: 'Colic – breastfeeding challenges', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/breastfeeding/breastfeeding-challenges/colic/', year: 2026, kind: 'doporuceni' },
 ];
 
-export type GlossaryGroup = 'typy' | 'specialni' | 'bezpecnost';
+export type GlossaryGroup = 'typy' | 'specialni' | 'slozeni' | 'krmeni' | 'bezpecnost';
 
 export const glossaryGroups: Record<GlossaryGroup, string> = {
   typy: 'Typy mlék podle věku',
   specialni: 'Speciální mléka',
+  slozeni: 'Složení mléka',
+  krmeni: 'Krmení, příkrmy a obtíže',
   bezpecnost: 'Bezpečnost a označení',
 };
 
@@ -164,6 +186,65 @@ export const glossary: GlossaryTerm[] = [
     ],
     note: 'Pouze na doporučení lékaře.',
     link: { label: 'ABKM u kojence: příznaky a co dělat', href: '/krmeni/alergie-na-bilkovinu-kravskeho-mleka/' },
+  },
+  {
+    id: 'dha', term: 'DHA', aka: 'kyselina dokosahexaenová, omega-3', group: 'slozeni',
+    short: 'Omega-3 mastná kyselina, kterou musí v EU obsahovat každé počáteční i pokračovací mléko.',
+    body: [
+      'Dokosahexaenová kyselina (DHA) patří mezi omega-3 mastné kyseliny. Evropské nařízení 2016/127 ji stanovuje jako povinnou složku počátečních i pokračovacích mlék, v množství 20–50 mg na 100 kcal [9].',
+    ],
+    link: { label: 'Jak vybrat kojenecké mléko', href: '/mleka/jak-vybrat-kojenecke-mleko/' },
+  },
+  {
+    id: 'a2', term: 'A2 mléko', aka: 'beta-kasein A2', group: 'slozeni',
+    short: 'Kravské mléko, které obsahuje jen variantu A2 bílkoviny beta-kaseinu.',
+    body: [
+      'Beta-kasein v kravském mléce se vyskytuje ve dvou hlavních variantách, A1 a A2. A2 mléko pochází od krav, jejichž mléko obsahuje jen variantu A2 [10].',
+      'Systematický přehled našel středně jisté důkazy jen pro to, že A1 může mít nepříznivější vliv na trávení než A2; pro ostatní zdravotní účinky je jistota nízká [11]. A2 mléko je stále kravské mléko, proto nepomáhá při alergii na bílkovinu kravského mléka [10].',
+    ],
+    link: { label: 'A2 kojenecké mléko', href: '/mleka/a2-mleko/' },
+  },
+  {
+    id: 'kolika', term: 'Kolika', aka: 'kojenecká kolika, pravidlo 3-3-3', group: 'krmeni',
+    short: 'Neutišitelný pláč jinak zdravého miminka 3 a více hodin denně, nejméně 3 dny v týdnu, alespoň 3 týdny.',
+    body: [
+      'Koliky má asi 1 z 5 miminek. Obvykle začínají v prvních týdnech a zlepší se kolem 3.–4. měsíce. Příčina není známá [16].',
+    ],
+    link: { label: 'Koliky u miminka', href: '/krmeni/koliky/' },
+  },
+  {
+    id: 'dyschezie', term: 'Kojenecká dyschezie', group: 'krmeni',
+    short: 'Miminko do 9 měsíců dlouho tlačí a pláče, než se vykaká měkká stolice – nejde o zácpu.',
+    body: [
+      'Podle kritérií Rome IV jde o miminko mladší 9 měsíců, které alespoň 10 minut tlačí a pláče před vyprázdněním měkké stolice. Miminko se teprve učí koordinovat svaly. Potíže odezní samy, léky ani dráždění konečníku nejsou potřeba [12].',
+    ],
+    link: { label: 'Zácpa u kojence', href: '/krmeni/zacpa-u-kojence/' },
+  },
+  {
+    id: 'laktozova-intolerance', term: 'Laktózová intolerance', group: 'krmeni',
+    short: 'Tělo nedokáže dobře strávit mléčný cukr laktózu. U miminek je vzácná a obvykle přechodná po střevní infekci.',
+    body: [
+      'Trvalá forma se obvykle neprojevuje před 2. rokem života. U miminek je častější přechodná forma po poškození střevní sliznice, například po střevní infekci. Kojení se při ní nepřerušuje [15].',
+      'Nejde o alergii – mléka bez laktózy obvykle obsahují mléčnou bílkovinu, proto se při alergii na kravské mléko nehodí [15].',
+    ],
+    link: { label: 'Mléko bez laktózy', href: '/mleka/mleko-bez-laktozy/' },
+  },
+  {
+    id: 'blw', term: 'BLW', aka: 'baby-led weaning, příkrmy vedené miminkem', group: 'krmeni',
+    short: 'Způsob zavádění příkrmů, kdy miminko od začátku jí samo kousky jídla místo kaší ze lžičky.',
+    body: [
+      'Podle NHS je BLW jednou z možností, jak začít s příkrmy. Miminko si samo bere kousky měkkého jídla velikosti prstu. Riziko dušení podle NHS není vyšší než při krmení lžičkou [13].',
+    ],
+    link: { label: 'BLW: příkrmy bez kaší', href: '/prikrmy/blw/' },
+  },
+  {
+    id: 'anafylaxe', term: 'Anafylaxe', aka: 'anafylaktická reakce', group: 'krmeni',
+    short: 'Závažná, život ohrožující alergická reakce – vyžaduje okamžitou pomoc (155).',
+    body: [
+      'Mezi příznaky patří dechové potíže, otok hrdla nebo jazyka a vystouplá svědivá vyrážka. Jde o urgentní stav [14].',
+    ],
+    note: 'Při podezření na anafylaxi okamžitě volejte 155.',
+    link: { label: 'Zavádění alergenů', href: '/prikrmy/alergeny/' },
   },
   {
     id: 'tekute-mleko', term: 'Tekuté mléko připravené k podání', aka: 'ready-to-feed', group: 'bezpecnost',

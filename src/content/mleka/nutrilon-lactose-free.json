@@ -11,5 +11,11 @@
   "probiotics": false,
   "medical": true,
   "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-lactose-free-400g.html",
-  "verified": "2026-11-09"
+  "verified": "2026-11-09",
+  "price": {
+    "czk": 259,
+    "packG": 400,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  }
 }

@@ -9,7 +9,7 @@ const url = new URL('/slovnicek/', Astro.site).toString();
 
 // [n] → odkaz na zdroj
 const withRefs = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\[(\d+)\]/g, '<sup class="cite"><a href="#zdroj-$1" aria-label="Zdroj $1">$1</a></sup>');
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\s*\[(\d+)\]/g, '<sup class="cite"><a href="#zdroj-$1" aria-label="Zdroj $1">$1</a></sup>');
 
 const definedTermSet = {
   '@context': 'https://schema.org',

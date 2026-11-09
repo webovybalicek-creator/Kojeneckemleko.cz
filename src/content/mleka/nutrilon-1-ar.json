@@ -11,5 +11,11 @@
   "probiotics": false,
   "medical": true,
   "officialUrl": "https://www.nutriklub.cz/vsechny-produkty/produkt/nutrilon-1-ar-specialni-kojenecke-mleko-800g.html",
-  "verified": "2026-11-09"
+  "verified": "2026-11-09",
+  "price": {
+    "czk": 499,
+    "packG": 800,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  }
 }

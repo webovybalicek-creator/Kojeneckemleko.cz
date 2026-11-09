@@ -1,0 +1,12 @@
+{
+  "name": "HiPP HA 1 Combiotik",
+  "brand": "HiPP",
+  "stage": "pocatecni",
+  "base": "kravske",
+  "types": [
+    "HA"
+  ],
+  "probiotics": true,
+  "officialUrl": "https://www.hipp.cz/mleko/produkty/hipp-ha-combiotikr/hipp-ha-1-combiotikr-2123-03/",
+  "verified": "2026-11-09"
+}

@@ -9,5 +9,11 @@
   "hmo": false,
   "probiotics": true,
   "officialUrl": "https://www.hipp.cz/mleko/produkty/hipp-combiotikr/pokracovaci-mlecna-kojenecka-vyziva-hipp-2-bio-combiotikr-800-g/",
-  "verified": "2026-11-09"
+  "verified": "2026-11-09",
+  "price": {
+    "czk": 1399,
+    "packG": 2400,
+    "source": "Dr.Max (drmax.cz)",
+    "date": "2026-11-09"
+  }
 }

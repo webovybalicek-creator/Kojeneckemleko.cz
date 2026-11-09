@@ -25,6 +25,10 @@ export const terms = {
   DMT: { tip: 'Datum minimální trvanlivosti na obalu.', href: '/slovnicek/#dmt' },
   Comfort: { tip: 'Mléko s částečně štěpenou bílkovinou prodávané proti kolikám a zácpě; důkazy o účinku chybí.', href: '/slovnicek/#comfort' },
   Cronobacter: { tip: 'Bakterie, která se může vyskytnout v sušeném mléce – proto se připravuje vodou alespoň 70 °C.', href: '/slovnicek/#cronobacter' },
+  DHA: { tip: 'Omega-3 mastná kyselina, povinná složka kojeneckých mlék v EU.', href: '/slovnicek/#dha' },
+  BLW: { tip: 'Baby-led weaning – miminko od začátku příkrmů jí samo kousky jídla.', href: '/slovnicek/#blw' },
+  dyschezie: { tip: 'Miminko dlouho tlačí a pláče před měkkou stolicí – nejde o zácpu.', href: '/slovnicek/#dyschezie' },
+  anafylaxe: { tip: 'Závažná alergická reakce – okamžitě volejte 155.', href: '/slovnicek/#anafylaxe' },
   cereulid: { tip: 'Toxin bakterie Bacillus cereus, kvůli kterému byla v roce 2026 stažena některá mléka.', href: '/slovnicek/#cereulid' },
 };
 

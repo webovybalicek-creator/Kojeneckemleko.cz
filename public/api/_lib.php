@@ -44,6 +44,7 @@ function km_db(): PDO
         CREATE TABLE IF NOT EXISTS referrers (day TEXT NOT NULL, host TEXT NOT NULL, views INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, host));
         CREATE TABLE IF NOT EXISTS today_visitors (day TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (day, hash));
         CREATE TABLE IF NOT EXISTS salt (day TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS login_fail (hash TEXT NOT NULL, ts INTEGER NOT NULL);
     ');
     return $pdo;
 }
@@ -81,4 +82,40 @@ function km_is_bot(string $ua): bool
 function km_e(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+
+/**
+ * Omezení pokusů o přihlášení na /navstevnost/.
+ * Klíč = hash(denní sůl + IP) – IP se neukládá. Limity: 5 chyb / 15 min z jednoho zdroje,
+ * 30 chyb / hodinu celkem. Záznamy starší 24 h se mažou.
+ */
+const KM_FAIL_PER_KEY = 5;
+const KM_FAIL_KEY_WINDOW = 900;
+const KM_FAIL_GLOBAL = 30;
+const KM_FAIL_GLOBAL_WINDOW = 3600;
+
+function km_login_key(PDO $pdo): string
+{
+    $salt = km_salt($pdo, km_today());
+    return hash('sha256', $salt . '|login|' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+}
+
+function km_login_blocked(PDO $pdo, string $key): bool
+{
+    $now = time();
+    $pdo->prepare('DELETE FROM login_fail WHERE ts < ?')->execute([$now - 86400]);
+    $q = $pdo->prepare('SELECT COUNT(*) FROM login_fail WHERE hash = ? AND ts >= ?');
+    $q->execute([$key, $now - KM_FAIL_KEY_WINDOW]);
+    if ((int) $q->fetchColumn() >= KM_FAIL_PER_KEY) {
+        return true;
+    }
+    $g = $pdo->prepare('SELECT COUNT(*) FROM login_fail WHERE ts >= ?');
+    $g->execute([$now - KM_FAIL_GLOBAL_WINDOW]);
+    return (int) $g->fetchColumn() >= KM_FAIL_GLOBAL;
+}
+
+function km_login_fail(PDO $pdo, string $key): void
+{
+    $pdo->prepare('INSERT INTO login_fail (hash, ts) VALUES (?, ?)')->execute([$key, time()]);
 }

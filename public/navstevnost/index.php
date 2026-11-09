@@ -28,14 +28,21 @@ if (isset($_GET['odhlasit'])) {
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     usleep(400000); // zpomalení zkoušení hesel
-    if ($password !== '' && hash_equals($password, (string) ($_POST['heslo'] ?? ''))) {
+    $lockDb = km_db();
+    $lockKey = km_login_key($lockDb);
+    if (km_login_blocked($lockDb, $lockKey)) {
+        http_response_code(429);
+        $error = 'Příliš mnoho pokusů. Zkuste to znovu za 15 minut.';
+    } elseif ($password !== '' && hash_equals($password, (string) ($_POST['heslo'] ?? ''))) {
         session_regenerate_id(true);
         $_SESSION['ok'] = true;
         $_SESSION['nemerit'] = true; // po přihlášení vyřadit prohlížeč z měření
         header('Location: ./');
         exit;
+    } else {
+        km_login_fail($lockDb, $lockKey);
+        $error = $password === '' ? 'Heslo není nastavené (secret STATS_PASSWORD).' : 'Nesprávné heslo.';
     }
-    $error = $password === '' ? 'Heslo není nastavené (secret STATS_PASSWORD).' : 'Nesprávné heslo.';
 }
 
 $authed = !empty($_SESSION['ok']) && $password !== '';
