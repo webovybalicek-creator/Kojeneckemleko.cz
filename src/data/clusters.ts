@@ -42,7 +42,6 @@ export const clusterMeta: Record<Cluster, {
     lead: 'Kdy začít, jak na to a co zařadit v jakém věku.',
     tone: 'keylime',
     planned: [
-      'Kdy začít s příkrmy',
       'BLW, nebo kaše?',
       'Zavádění alergenů',
       'Jídelníček podle věku',

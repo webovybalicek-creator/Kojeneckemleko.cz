@@ -32,6 +32,10 @@ const leaves: Record<string, Leaf[]> = {
     { x: 82, y: 140, a: -120, l: 38, t: 'mint' }, { x: 158, y: 140, a: -60, l: 38, t: 'sage' },
   ],
   klicky: [],
+  lzicka: [
+    { x: 84, y: 140, a: -125, l: 40, t: 'sage' }, { x: 86, y: 128, a: -165, l: 28, t: 'mint' },
+  ],
+  miska: [],
   oblak: [
     { x: 80, y: 142, a: -135, l: 38, t: 'sage' }, { x: 160, y: 142, a: -45, l: 38, t: 'mint' },
   ],
@@ -133,6 +137,28 @@ const items = leaves[motif] ?? [];
       <path d="M100 106 C100 118 106 126 116 130" class="s thin" fill="none" />
       <path d="M120 44 C120 36 122 30 126 26" class="s" fill="none" />
       <g transform="translate(123 33) rotate(-20)"><path d={leafPath(34, 10)} class="f-mint s" /><path d="M4 0 L28 0" class="s thin" /></g>
+    </g>
+  )}
+  {motif === 'lzicka' && (
+    <g>
+      <g transform="rotate(-38 124 84)">
+        <ellipse cx="124" cy="52" rx="15" ry="20" class="f-cream s" />
+        <ellipse cx="124" cy="54" rx="9.5" ry="13" class="f-keylime" />
+        <path d="M120 71 C121 90 120 110 119 126 A5 5 0 0 0 129 126 C128 110 127 90 128 71" class="f-cream s" />
+      </g>
+      <circle cx="150" cy="118" r="7" class="f-mint s thin" />
+      <circle cx="162" cy="104" r="4.5" class="f-sage s thin" />
+    </g>
+  )}
+
+  {motif === 'miska' && (
+    <g>
+      <path d="M100 82 C98 64 108 54 114 58 C116 48 128 46 132 56 C140 52 148 62 142 82 Z" class="f-sage s" />
+      <path d="M114 58 C116 66 118 74 118 82 M132 56 C130 66 128 74 128 82" class="s thin" fill="none" />
+      <g transform="translate(140 78) rotate(-60)"><path d={leafPath(30, 9)} class="f-mint s" /><path d="M4 0 L24 0" class="s thin" /></g>
+      <path d="M78 84 H162 C162 110 144 128 120 128 C96 128 78 110 78 84 Z" class="f-cream s" />
+      <path d="M86 96 C94 104 104 108 112 109" class="s thin" fill="none" />
+      <path d="M104 132 H136" class="s" />
     </g>
   )}
 </svg>
