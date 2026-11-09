@@ -43,6 +43,10 @@ const leaves: Record<string, Leaf[]> = {
   hrnec: [
     { x: 74, y: 142, a: -140, l: 32, t: 'sage' }, { x: 166, y: 142, a: -40, l: 32, t: 'mint' },
   ],
+  lupa: [
+    { x: 80, y: 142, a: -135, l: 34, t: 'sage' },
+  ],
+  trava: [],
   mesic: [
     { x: 82, y: 142, a: -130, l: 38, t: 'sage' }, { x: 158, y: 142, a: -50, l: 38, t: 'mint' },
   ],
@@ -210,6 +214,27 @@ const items = leaves[motif] ?? [];
       <path d="M108 104 C114 98 126 98 132 104" class="s thin" fill="none" />
       <path d="M104 70 C100 62 108 58 104 48 M120 72 C116 62 124 56 120 44 M136 70 C132 62 140 58 136 48" class="s thin" fill="none" />
       <circle cx="98" cy="118" r="3" class="f-mint s thin" /><circle cx="140" cy="114" r="4" class="f-mint s thin" />
+    </g>
+  )}
+  {motif === 'lupa' && (
+    <g>
+      <circle cx="112" cy="76" r="30" class="f-cream s" />
+      <circle cx="112" cy="76" r="23" class="f-keylime" />
+      <path d="M98 70 A16 16 0 0 1 110 58" class="s thin" fill="none" />
+      <path d="M134 98 L156 120" class="s thick" />
+      <path d="M150 114 L162 126" stroke="var(--color-forest-ink)" stroke-width="9" stroke-linecap="round" />
+      <g transform="translate(112 84) rotate(-90)"><path d={leafPath(18, 6)} class="f-sage s thin" /></g>
+    </g>
+  )}
+
+  {motif === 'trava' && (
+    <g>
+      <path d="M70 136 H170" class="s" />
+      <path d="M88 136 C86 116 80 102 72 92 M96 136 C98 110 96 90 92 70 M108 136 C110 118 116 104 124 96" class="s" fill="none" />
+      <path d="M132 136 C130 110 134 88 142 72 M146 136 C148 118 156 106 166 100 M124 136 C122 120 118 110 110 104" class="s" fill="none" />
+      <g transform="translate(92 72) rotate(-80)"><path d={leafPath(22, 7)} class="f-sage s" /></g>
+      <g transform="translate(142 74) rotate(-65)"><path d={leafPath(24, 8)} class="f-mint s" /></g>
+      <circle cx="120" cy="64" r="7" class="f-keylime s thin" /><circle cx="120" cy="64" r="2.2" class="f-ink" />
     </g>
   )}
 </svg>

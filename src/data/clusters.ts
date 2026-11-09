@@ -15,9 +15,6 @@ export const clusterMeta: Record<Cluster, {
     lead: 'Počáteční, pokračovací, HA, AR, kozí nebo A2? Vysvětlujeme, čím se mléka liší a co z toho opravdu vyplývá.',
     tone: 'sage',
     planned: [
-      'Jak vybrat kojenecké mléko',
-      'Kozí mléko pro kojence',
-      'Comfort mléko – kdy dává smysl',
     ],
   },
   krmeni: {
