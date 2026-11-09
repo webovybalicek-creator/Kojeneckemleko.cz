@@ -40,6 +40,13 @@ const articleLd = {
   image: new URL(`/images/og/${entry.id}.png`, Astro.site).toString(),
   citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, publisher: s.publisher })),
 };
+const faqLd = data.faq.length
+  ? [{
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: data.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    }]
+  : [];
 const breadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -50,7 +57,7 @@ const breadcrumbs = {
   ],
 };
 ---
-<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${entry.id}.png`} jsonLd={[articleLd, breadcrumbs]} noindex={data.draft}>
+<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${entry.id}.png`} jsonLd={[articleLd, breadcrumbs, ...faqLd]} noindex={data.draft}>
   <article class="container article">
     <header class="article__head">
       <nav class="crumbs" aria-label="Drobečková navigace">
@@ -67,6 +74,23 @@ const breadcrumbs = {
     <div class="prose">
       <Content />
     </div>
+
+    {data.faq.length > 0 && (
+      <section class="faq" aria-labelledby="caste-otazky">
+        <h2 id="caste-otazky">Časté otázky</h2>
+        {data.faq.map((f) => (
+          <details class="faq__item">
+            <summary>{f.q}</summary>
+            <p>
+              {f.a}
+              {f.cite.length > 0 && (
+                <sup class="cite">{f.cite.map((n, k) => <>{k > 0 && ','}<a href={`#zdroj-${n}`} aria-label={`Zdroj ${n}`}>{n}</a></>)}</sup>
+              )}
+            </p>
+          </details>
+        ))}
+      </section>
+    )}
 
     <SourceList sources={data.sources} updated={data.updated} />
 
@@ -100,6 +124,23 @@ const breadcrumbs = {
   .prose :global(blockquote) { border-left: 2px solid var(--color-sage-mist); padding-left: var(--space-3); color: var(--text-muted); }
 
   .disclaimer { font-size: var(--fs-small); margin-top: var(--space-4); }
+  .faq { margin-bottom: var(--space-5); }
+  .faq h2 { margin-bottom: var(--space-3); }
+  .faq__item { border-bottom: 1px solid var(--line); }
+  .faq__item:first-of-type { border-top: 1px solid var(--line); }
+  .faq__item summary {
+    cursor: pointer; list-style: none; padding: var(--space-2) 2rem var(--space-2) 0; position: relative;
+    font-weight: 600; color: var(--ink);
+  }
+  .faq__item summary::-webkit-details-marker { display: none; }
+  .faq__item summary::after {
+    content: ''; position: absolute; right: 0.25rem; top: 50%; width: 0.55rem; height: 0.55rem;
+    border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+    transform: translateY(-70%) rotate(45deg); transition: transform var(--dur-base) var(--ease-out);
+  }
+  .faq__item[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+  .faq__item p { padding: 0 0 var(--space-3); color: var(--text); }
+  @media (prefers-reduced-motion: reduce) { .faq__item summary::after { transition: none; } }
   .related { padding-top: var(--space-6); padding-bottom: var(--space-6); border-top: 1px solid var(--line); margin-top: var(--space-6); }
   .related h2 { margin-bottom: var(--space-4); }
 </style>

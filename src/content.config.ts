@@ -38,6 +38,8 @@ const clanky = defineCollection({
     author: z.string().default('Redakce kojeneckemleko.cz'),
     sources: z.array(source).min(1, 'Každý článek musí mít alespoň jeden zdroj.'),
     draft: z.boolean().default(false),
+    /** Časté otázky na konci článku (+ FAQPage JSON-LD). `cite` = čísla zdrojů ze `sources`, odpověď jen z obsahu článku. */
+    faq: z.array(z.object({ q: z.string(), a: z.string(), cite: z.array(z.number().int().positive()).default([]) })).default([]),
     /** Ilustrační náhled článku (karty na úvodu a v rozcestnících) – vlastní botanické SVG, viz ArticleCover.astro */
     cover: z.object({
       motif: z.enum(coverMotifs),
