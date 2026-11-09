@@ -19,6 +19,7 @@ export async function getStaticPaths() {
         eyebrow: clusterMeta[a.data.cluster].title,
         motif: a.data.cover?.motif ?? 'kvet',
         tone: a.data.cover?.tone ?? 'sage',
+        photo: a.data.cover?.photo,
       },
     })),
     {
@@ -33,7 +34,7 @@ export async function getStaticPaths() {
   ];
 }
 
-const { title, eyebrow, motif, tone } = Astro.props;
+const { title, eyebrow, motif, tone, photo } = Astro.props as { title: string; eyebrow: string; motif: any; tone: string; photo?: string };
 ---
 <!doctype html>
 <html lang="cs">
@@ -49,9 +50,13 @@ const { title, eyebrow, motif, tone } = Astro.props;
         <h1>{title}</h1>
         <p class="og__logo">kojeneckemleko<span>.cz</span></p>
       </div>
-      <div class:list={['og__art', `panel--${tone}`]}>
-        <ArticleCover motif={motif} class="og__illu" />
-      </div>
+      {photo ? (
+        <div class="og__art og__art--photo"><img src={photo} alt="" /></div>
+      ) : (
+        <div class:list={['og__art', `panel--${tone}`]}>
+          <ArticleCover motif={motif} class="og__illu" />
+        </div>
+      )}
     </div>
   </body>
 </html>
@@ -77,4 +82,6 @@ const { title, eyebrow, motif, tone } = Astro.props;
   .og__art { border-radius: 28px; display: grid; place-items: center; padding: 24px; }
   .og__art { overflow: hidden; }
   .og__art :global(.og__illu) { width: 118%; }
+  .og__art--photo { padding: 0; }
+  .og__art--photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.9); }
 </style>

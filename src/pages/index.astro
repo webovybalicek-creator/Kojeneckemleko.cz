@@ -4,6 +4,7 @@ import Arrow from '../components/Arrow.astro';
 import Marquee from '../components/Marquee.astro';
 import Illustration from '../components/Illustration.astro';
 import ArticleCards from '../components/ArticleCards.astro';
+import { clusterMeta } from '../data/clusters';
 import { getCollection } from 'astro:content';
 import { annotate, terms } from '../data/terms.mjs';
 import { tagToTerm, termHref, glossary } from '../data/slovnicek';
@@ -13,9 +14,13 @@ const chipTip = (c: string) => glossary.find((g) => g.id === tagToTerm[c])?.shor
 const NHS_FORMULA = 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/bottle-feeding/how-to-make-up-a-feed/how-to-use-formula/';
 const NHS_AMOUNT = 'https://111.wales.nhs.uk/livewell/pregnancy/bottleformulacommonquest/';
 
-const latest = (await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft))
-  .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf() || b.data.updated.valueOf() - a.data.updated.valueOf())
-  .slice(0, 6);
+// Nejnovější články po rubrikách – každý řádek jednotný (Příkrmy fotky, ostatní kresby)
+const allArticles = (await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft))
+  .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf() || b.data.updated.valueOf() - a.data.updated.valueOf());
+const latestByCluster = (['mleka', 'krmeni', 'prikrmy'] as const).map((c) => ({
+  cluster: c,
+  articles: allArticles.filter((a) => a.data.cluster === c).slice(0, 3),
+})).filter((g) => g.articles.length > 0);
 
 const stages = [
   {
@@ -185,11 +190,16 @@ const faqLd = {
         <p class="eyebrow">Nejnovější články</p>
         <h2 id="nejnovejsi">Čerstvě ověřeno ve zdrojích</h2>
       </div>
-      <p class="section-head__links">
-        <a href="/mleka/">Mléka</a> · <a href="/krmeni/">Krmení</a> · <a href="/slovnicek/">Slovníček</a>
-      </p>
     </div>
-    <ArticleCards articles={latest} />
+    {latestByCluster.map((g) => (
+      <div class="latest-group">
+        <div class="latest-group__head">
+          <h3 class="heading-sm">{clusterMeta[g.cluster].title}</h3>
+          <a href={`/${g.cluster}/`} class="latest-group__all">Všechny články <Arrow /></a>
+        </div>
+        <ArticleCards articles={g.articles} showCluster={false} />
+      </div>
+    ))}
   </section>
 
   <section class="container section method" aria-labelledby="metodika">
@@ -289,6 +299,12 @@ const faqLd = {
   .section-head h2 { margin-top: var(--space-1); max-width: 20ch; }
   .section-head--row { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-2) var(--space-4); flex-wrap: wrap; }
   .section-head__links { font-size: var(--fs-small); color: var(--text-muted); }
+  .latest-group + .latest-group { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+  .latest-group__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+  .latest-group__head h3 { margin: 0; font-size: var(--fs-h3); color: var(--ink); }
+  .latest-group__all { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
+  .latest-group__all :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .latest-group__all:hover :global(svg) { transform: translateX(4px); } }
 
   .topics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
   .topic {

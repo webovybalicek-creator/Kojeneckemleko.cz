@@ -22,7 +22,7 @@ const source = z.object({
 });
 
 /** Tematické klastry webu – pořadí odpovídá obsahové strategii. */
-export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska', 'lzicka', 'miska', 'mesic', 'vejce', 'brokolice', 'hrnec', 'lupa', 'trava'] as const;
+export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska', 'lzicka', 'miska', 'mesic', 'vejce', 'brokolice', 'hrnec', 'lupa', 'trava', 'pirko'] as const;
 
 export const clusters = ['mleka', 'krmeni', 'prikrmy'] as const;
 
@@ -44,7 +44,10 @@ const clanky = defineCollection({
     cover: z.object({
       motif: z.enum(coverMotifs),
       tone: z.enum(['sage', 'mint', 'keylime', 'slate']).default('sage'),
-    }).optional(),
+      /** Fotka místo ilustrace – jen rubrika Příkrmy (fotky a kresby se nemíchají). Soubor v public/images/foto/, zdroj v scripts/foto.json. */
+      photo: z.string().optional(),
+      alt: z.string().optional(),
+    }).refine((c) => !c.photo || c.alt, { message: 'Fotka potřebuje alt' }).optional(),
   }),
 });
 

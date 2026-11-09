@@ -10,12 +10,8 @@ export async function getStaticPaths() {
   const articles = await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft);
   const byDate = [...articles].sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
   return articles.map((entry) => {
-    // Související: nejdřív stejný klastr, doplnit nejnovějšími z ostatních
-    const others = byDate.filter((a) => a.id !== entry.id);
-    const related = [
-      ...others.filter((a) => a.data.cluster === entry.data.cluster),
-      ...others.filter((a) => a.data.cluster !== entry.data.cluster),
-    ].slice(0, 3);
+    // Související: jen ze stejného klastru (fotky a kresby se nemíchají)
+    const related = byDate.filter((a) => a.id !== entry.id && a.data.cluster === entry.data.cluster).slice(0, 3);
     return { params: { cluster: entry.data.cluster, slug: entry.id }, props: { entry, related } };
   });
 }

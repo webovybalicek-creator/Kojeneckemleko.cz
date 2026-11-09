@@ -57,6 +57,9 @@ const leaves: Record<string, Leaf[]> = {
     { x: 120, y: 128, a: -150, l: 40, t: 'sage' }, { x: 120, y: 116, a: -28, l: 40, t: 'mint' },
   ],
   hruska: [],
+  pirko: [
+    { x: 80, y: 142, a: -135, l: 36, t: 'sage' }, { x: 162, y: 142, a: -45, l: 30, t: 'mint' },
+  ],
 };
 const items = leaves[motif] ?? [];
 ---
@@ -123,6 +126,14 @@ const items = leaves[motif] ?? [];
       <g transform="translate(156 96) rotate(-30)"><path d={leafPath(32, 10)} class="f-sage s" /></g>
       <g transform="translate(156 78) rotate(-150)"><path d={leafPath(28, 9)} class="f-sage s" /></g>
       <g transform="translate(156 70) rotate(-70)"><path d={leafPath(20, 7)} class="f-mint s" /></g>
+    </g>
+  )}
+
+  {motif === 'pirko' && (
+    <g>
+      <path d="M152 34 C170 58 160 96 126 116 L102 126 C98 104 112 66 152 34 Z" class="f-mint s" />
+      <path d="M94 134 L150 40" class="s" fill="none" />
+      <path d="M140 58 C132 60 124 66 118 74 M146 70 C138 76 130 82 124 88 M132 92 C126 96 118 102 112 106 M126 68 C122 74 118 80 114 88" class="s thin" fill="none" />
     </g>
   )}
 

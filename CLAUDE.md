@@ -23,6 +23,7 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 - Radius 14 px karty a tlačítka, 999 px štítky.
 - Logo: textový wordmark „kojeneckemleko.cz“ v Inter 600 (19 px, letter-spacing -0.03em), „.cz“ tlumeně ve váze 400, bez ikony.
 - Obrázky: vlastní botanické SVG ilustrace (`src/components/Illustration.astro`: sprig, mleka, krmeni, prikrmy, zdroje) – listy v sage/mint/keylime, linky Forest Ink 1.5 px. Bez miminek s lahví a bez idealizace umělé výživy. Rozměr ilustrace určuje rodič selektorem `.rodic :global(.trida)`.
+- **Fotky jen v rubrice Příkrmy** (kresby a fotky se nemíchají): `cover.photo` + `cover.alt` ve frontmatteru, soubor `public/images/foto/<slug>.jpg`. Fotky z Pexels – ID do `scripts/foto.json`, push spustí workflow `foto.yml`, které je stáhne (1200×750) a commitne. Nebrat první výsledky hledání; jen jídlo a pomůcky (miminko max. zezadu/detail rukou), bez lahví s mlékem a značek, publikum v ČR. Úvod a související články skládají karty vždy po rubrikách.
 - Pohyb podle Emila Kowalského: ease-out, 150–250 ms, jen transform/opacity, hover jen pro `(hover: hover) and (pointer: fine)`, `:active` scale 0.97, respektovat `prefers-reduced-motion`.
 
 ## Obsah – povinná pravidla
