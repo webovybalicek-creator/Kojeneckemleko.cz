@@ -1,0 +1,150 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import GrowthPercentile from '../../components/GrowthPercentile.astro';
+
+const url = new URL('/nastroje/rustove-grafy/', Astro.site).toString();
+
+const steps = [
+  { t: 'Co je percentil', d: 'Percentil říká, kolik dětí ze sta stejného věku a pohlaví má ve standardu nižší hodnotu. 50. percentil je medián – polovina dětí váží méně a polovina víc.' },
+  { t: 'Odkud jsou data', d: 'Ze standardů Světové zdravotnické organizace z roku 2006. Vznikly ze studie zhruba 8 500 dětí v Brazílii, Ghaně, Indii, Norsku, Ománu a USA, které vyrůstaly v příznivých podmínkách a byly kojené.' },
+  { t: 'Co výsledek neříká', d: 'Kalkulačka neposuzuje, jestli miminko roste dobře. Ukáže jen polohu jednoho měření v tabulce. Růst v čase hodnotí pediatr.' },
+];
+
+const faq = [
+  {
+    q: 'Jaký percentil je „správný“?',
+    a: 'Žádný percentil není sám o sobě správný nebo špatný. Děti jsou různě velké a zdravé dítě může být na nízkém i vysokém percentilu. Podle britské NHS je důležité, jak se hmotnost vyvíjí v čase. Výklad patří pediatrovi.',
+  },
+  {
+    q: 'Platí standardy WHO i pro děti krmené umělým mlékem?',
+    a: 'Ano. Podle WHO standardy popisují, jak mají děti růst v příznivých podmínkách, a platí pro všechny děti bez ohledu na způsob krmení. Za normu růstu berou kojené dítě.',
+  },
+  {
+    q: 'Do jakého věku kalkulačka počítá?',
+    a: 'Od narození do 24 měsíců. Počítá s věkem ve dnech od data narození.',
+  },
+  {
+    q: 'Narodilo se nám miminko předčasně. Můžu kalkulačku použít?',
+    a: 'Kalkulačka počítá jen s věkem od data narození a předčasné narození nezohledňuje. Růst předčasně narozených dětí posuzuje pediatr.',
+  },
+  {
+    q: 'Ukládáte zadané údaje?',
+    a: 'Ne. Výpočet běží jen ve vašem prohlížeči. Datum narození ani hmotnost se nikam neodesílají a neukládají se ani ve vašem zařízení.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+      { '@type': 'ListItem', position: 2, name: 'Nástroje', item: new URL('/nastroje/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: 'Růstové grafy WHO', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Percentil hmotnosti a délky miminka podle WHO',
+    url,
+    applicationCategory: 'HealthApplication',
+    operatingSystem: 'Web',
+    inLanguage: 'cs-CZ',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'CZK' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<Base
+  title="Percentil váhy a délky miminka – kalkulačka WHO"
+  description="Kalkulačka percentilu hmotnosti a délky miminka od narození do 2 let podle růstových standardů WHO. S grafem, zdarma, bez registrace a bez ukládání dat."
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <header class="stack head">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/nastroje/">Nástroje</a></nav>
+      <p class="eyebrow">Nástroj · zdarma, bez registrace</p>
+      <h1>Růstové grafy WHO</h1>
+      <p class="lead">Zadejte věk a hmotnost miminka. Uvidíte percentil podle standardů WHO a polohu v růstovém grafu.</p>
+    </header>
+
+    <GrowthPercentile />
+
+    <section class="block" aria-labelledby="jak">
+      <h2 id="jak">Jak výsledek číst</h2>
+      <ol class="steps">
+        {steps.map((s) => (
+          <li><span class="heading-sm">{s.t}</span><span>{s.d}</span></li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="block" aria-labelledby="otazky">
+      <h2 id="otazky">Časté otázky</h2>
+      <dl class="faq">
+        {faq.map((f) => (
+          <div>
+            <dt class="heading-sm">{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="block" aria-labelledby="zdroje">
+      <h2 id="zdroje">Zdroje</h2>
+      <ul class="links">
+        <li><a href="https://www.who.int/tools/child-growth-standards/standards" rel="noopener">WHO – The WHO Child Growth Standards <Arrow /></a></li>
+        <li><a href="https://www.who.int/news-room/questions-and-answers/item/child-growth-standards" rel="noopener">WHO – Child growth standards: otázky a odpovědi <Arrow /></a></li>
+        <li><a href="https://www.who.int/tools/child-growth-standards/who-multicentre-growth-reference-study" rel="noopener">WHO – Multicentre Growth Reference Study <Arrow /></a></li>
+        <li><a href="https://www.nhs.uk/baby/babys-development/height-weight-and-reviews/baby-height-and-weight/" rel="noopener">NHS – Your baby's weight and height <Arrow /></a></li>
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="dal">
+      <h2 id="dal">Může se hodit</h2>
+      <ul class="links">
+        <li><a href="/krmeni/vaha-miminka/">Váha a přírůstky miminka podle měsíců <Arrow /></a></li>
+        <li><a href="/krmeni/pije-miminko-dost/">Jak poznat, že miminko pije dost <Arrow /></a></li>
+        <li><a href="/mleka/kolik-mleka-podle-veku/">Kolik mléka dát miminku podle věku <Arrow /></a></li>
+      </ul>
+    </section>
+
+    <p class="muted small disclaimer">
+      Kalkulačka je informační pomůcka. Nenahrazuje vyšetření ani radu pediatra. Pokud máte o růst nebo krmení miminka obavy, obraťte se na dětského lékaře.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page { max-width: calc(40rem + 2 * var(--gutter)); padding-top: var(--space-5); }
+  .head { margin-bottom: var(--space-4); }
+  @media (max-width: 640px) {
+    .page { padding-top: var(--space-3); }
+    .head { margin-bottom: var(--space-3); }
+    .head > * + * { margin-top: var(--space-1); }
+    .head h1 { font-size: 2rem; }
+    .head .lead { font-size: var(--fs-body); }
+  }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .block { margin-top: var(--space-6); display: grid; gap: var(--space-2); }
+  .steps { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; gap: var(--space-1); }
+  .steps li { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); display: grid; gap: 0.3rem; }
+  .faq { display: grid; margin-top: var(--space-2); border-top: 1px solid var(--line); }
+  .faq > div { padding-block: var(--space-3); border-bottom: 1px solid var(--line); display: grid; gap: var(--space-1); }
+  .faq dd { margin: 0; color: var(--color-charcoal); }
+  .links { list-style: none; padding: 0; display: grid; gap: var(--space-1); }
+  .links a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .links :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .links a:hover :global(svg) { transform: translateX(3px); } }
+  .disclaimer { margin-top: var(--space-4); }
+  .small { font-size: var(--fs-small); }
+</style>

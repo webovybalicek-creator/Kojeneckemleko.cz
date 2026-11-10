@@ -1,0 +1,258 @@
+---
+/**
+ * Percentil hmotnosti a délky podle WHO Child Growth Standards (0–24 měsíců).
+ * Data: public/data/who-rust.json – hodnoty L, M, S po dnech z oficiálního balíčku WHO „anthro“.
+ * Nástroj jen porovnává s tabulkou WHO, nic nehodnotí. Vše běží v prohlížeči, nic se neukládá ani neodesílá.
+ */
+---
+<div class="gp" data-growth>
+  <form class="gp__inner" novalidate>
+    <div class="gp__head">
+      <p class="eyebrow">Růstové standardy WHO · 0–24 měsíců</p>
+      <h2 class="heading-sm gp__title">Percentil hmotnosti a délky</h2>
+    </div>
+
+    <fieldset class="gp__field">
+      <legend>Pohlaví</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="gp-sex" value="f" /><span>Dívka</span></label>
+        <label class="chip"><input type="radio" name="gp-sex" value="m" /><span>Chlapec</span></label>
+      </div>
+    </fieldset>
+
+    <div class="gp__grid">
+      <label class="gp__field">
+        <span class="gp__label">Datum narození</span>
+        <input type="date" name="gp-born" required />
+      </label>
+      <label class="gp__field">
+        <span class="gp__label">Datum vážení</span>
+        <input type="date" name="gp-date" required />
+      </label>
+      <label class="gp__field">
+        <span class="gp__label">Hmotnost</span>
+        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-kg" placeholder="např. 6,4" autocomplete="off" /><span>kg</span></span>
+      </label>
+      <label class="gp__field">
+        <span class="gp__label">Délka <small>(nepovinné)</small></span>
+        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-cm" placeholder="např. 63" autocomplete="off" /><span>cm</span></span>
+      </label>
+    </div>
+
+    <p class="gp__msg" data-msg role="status">Vyplňte pohlaví, obě data a hmotnost.</p>
+
+    <div class="gp__out" data-out hidden>
+      <div class="gp__cards" data-cards></div>
+      <div class="gp__chart" data-chart></div>
+      <p class="gp__note">
+        Percentil jen říká, kde se údaj nachází ve srovnání se standardem WHO. Není to hodnocení zdraví.
+        Jedno měření mnoho neřekne, důležitý je vývoj v čase – ten sleduje pediatr při preventivních prohlídkách.
+      </p>
+    </div>
+
+    <noscript><p class="gp__msg">Výpočet potřebuje zapnutý JavaScript.</p></noscript>
+
+    <p class="gp__foot">
+      Výpočet podle <a href="https://www.who.int/tools/child-growth-standards/standards" rel="noopener">růstových standardů WHO</a> (2006).
+      Běží jen ve vašem prohlížeči, nic se neukládá ani neodesílá.
+    </p>
+  </form>
+</div>
+
+<script>
+  type LMS = [number, number, number];
+  interface Data { vaha: Record<string, LMS[]>; delka: Record<string, LMS[]> }
+
+  const MAX_DAY = 730;
+  const nf1 = new Intl.NumberFormat('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const nf2 = new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 2 });
+
+  /** Distribuční funkce normálního rozdělení (Abramowitz–Stegun 7.1.26). */
+  const phi = (z: number) => {
+    const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2);
+    const erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(z * z) / 2);
+    return z >= 0 ? (1 + erf) / 2 : (1 - erf) / 2;
+  };
+  /** Hodnota pro dané z-skóre (LMS metoda). */
+  const lmsValue = ([l, m, s]: LMS, z: number) => (l === 0 ? m * Math.exp(s * z) : m * Math.pow(1 + l * s * z, 1 / l));
+  /** z-skóre; u hmotnosti s úpravou WHO za hranicí ±3 SD. */
+  const zscore = (lms: LMS, y: number, adjust: boolean) => {
+    const [l, m, s] = lms;
+    const z = l === 0 ? Math.log(y / m) / s : (Math.pow(y / m, l) - 1) / (l * s);
+    if (!adjust) return z;
+    if (z > 3) { const sd3 = lmsValue(lms, 3); return 3 + (y - sd3) / (sd3 - lmsValue(lms, 2)); }
+    if (z < -3) { const sd3 = lmsValue(lms, -3); return -3 + (y - sd3) / (lmsValue(lms, -2) - sd3); }
+    return z;
+  };
+  const pctLabel = (p: number) => {
+    const v = p * 100;
+    if (v < 0.1) return 'pod 0,1.';
+    if (v > 99.9) return 'nad 99,9.';
+    return (v < 1 || v > 99 ? nf1.format(v) : String(Math.round(v))) + '.';
+  };
+  const ageLabel = (days: number) => {
+    if (days < 14) return days === 1 ? '1 den' : days >= 2 && days <= 4 ? `${days} dny` : `${days} dní`;
+    if (days < 91) { const w = Math.floor(days / 7); return w >= 2 && w <= 4 ? `${w} týdny` : `${w} týdnů`; }
+    const mo = Math.floor(days / 30.4375);
+    return mo === 1 ? '1 měsíc' : mo >= 2 && mo <= 4 ? `${mo} měsíce` : `${mo} měsíců`;
+  };
+  const parseNum = (s: string) => parseFloat(s.replace(/\s/g, '').replace(',', '.'));
+  const isoToday = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+
+  const CURVES: { z: number; label: string }[] = [
+    { z: -1.88079, label: '3.' }, { z: -1.03643, label: '15.' }, { z: 0, label: '50.' }, { z: 1.03643, label: '85.' }, { z: 1.88079, label: '97.' },
+  ];
+
+  function chart(rows: LMS[], day: number, value: number, unit: string, title: string) {
+    const W = 640, H = 380, L = 44, R = 40, T = 16, B = 40;
+    const lo = Math.floor(Math.min(lmsValue(rows[0], -2.4), value) / (unit === 'kg' ? 1 : 5)) * (unit === 'kg' ? 1 : 5);
+    const hi = Math.ceil(Math.max(lmsValue(rows[MAX_DAY], 2.4), value) / (unit === 'kg' ? 1 : 5)) * (unit === 'kg' ? 1 : 5);
+    const x = (d: number) => L + (d / MAX_DAY) * (W - L - R);
+    const y = (v: number) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const step = unit === 'kg' ? (hi - lo > 12 ? 2 : 1) : 10;
+    let g = '';
+    for (let v = lo; v <= hi; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="grid"/><text x="${L - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" class="tick">${v}</text>`;
+    for (let m = 0; m <= 24; m += 3) { const d = Math.min(MAX_DAY, Math.round(m * 30.4375)); g += `<line x1="${x(d).toFixed(1)}" x2="${x(d).toFixed(1)}" y1="${T}" y2="${H - B}" class="grid"/><text x="${x(d).toFixed(1)}" y="${H - B + 18}" text-anchor="middle" class="tick">${m}</text>`; }
+    let curves = '';
+    for (const c of CURVES) {
+      let path = '';
+      for (let d = 0; d <= MAX_DAY; d += 10) path += `${d ? 'L' : 'M'}${x(d).toFixed(1)} ${y(lmsValue(rows[d], c.z)).toFixed(1)}`;
+      curves += `<path d="${path}" class="curve${c.z === 0 ? ' curve--mid' : ''}"/><text x="${W - R + 6}" y="${(y(lmsValue(rows[MAX_DAY], c.z)) + 4).toFixed(1)}" class="tick">${c.label}</text>`;
+    }
+    const px = x(day).toFixed(1), py = y(value).toFixed(1);
+    return `<figure class="gp__fig"><figcaption>${title}</figcaption>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}: křivky 3., 15., 50., 85. a 97. percentilu podle WHO a zadaná hodnota.">
+        ${g}${curves}
+        <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="axis">věk v měsících</text>
+        <circle cx="${px}" cy="${py}" r="9" class="halo"/><circle cx="${px}" cy="${py}" r="5" class="dot"/>
+      </svg></figure>`;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-growth]').forEach((root) => {
+    const form = root.querySelector('form')!;
+    const born = form.querySelector<HTMLInputElement>('[name="gp-born"]')!;
+    const date = form.querySelector<HTMLInputElement>('[name="gp-date"]')!;
+    const kgIn = form.querySelector<HTMLInputElement>('[name="gp-kg"]')!;
+    const cmIn = form.querySelector<HTMLInputElement>('[name="gp-cm"]')!;
+    const msg = root.querySelector<HTMLElement>('[data-msg]')!;
+    const out = root.querySelector<HTMLElement>('[data-out]')!;
+    const cards = root.querySelector<HTMLElement>('[data-cards]')!;
+    const chartEl = root.querySelector<HTMLElement>('[data-chart]')!;
+    date.value = isoToday();
+    date.max = isoToday();
+    born.max = isoToday();
+
+    let data: Data | null = null;
+    let loading: Promise<void> | null = null;
+    const load = () => (loading ??= fetch('/data/who-rust.json').then((r) => r.json()).then((d) => { data = d; }));
+
+    const fail = (text: string) => { msg.textContent = text; msg.hidden = false; out.hidden = true; };
+
+    async function update() {
+      const sex = form.querySelector<HTMLInputElement>('[name="gp-sex"]:checked')?.value;
+      const kg = parseNum(kgIn.value);
+      const cm = parseNum(cmIn.value);
+      if (!sex || !born.value || !date.value || !kgIn.value.trim()) return fail('Vyplňte pohlaví, obě data a hmotnost.');
+      const day = Math.round((Date.parse(date.value) - Date.parse(born.value)) / 864e5);
+      if (!Number.isFinite(day) || day < 0) return fail('Datum vážení musí být stejné nebo pozdější než datum narození.');
+      if (day > MAX_DAY) return fail('Kalkulačka pracuje s věkem od narození do 24 měsíců.');
+      if (!(kg >= 0.5 && kg <= 30)) return fail('Zadejte hmotnost v kilogramech, například 6,4.');
+      if (cmIn.value.trim() && !(cm >= 30 && cm <= 110)) return fail('Zadejte délku v centimetrech, například 63.');
+      try { await load(); } catch { return fail('Tabulky WHO se nepodařilo načíst. Zkuste to prosím znovu.'); }
+      if (!data) return;
+
+      const kdo = sex === 'f' ? 'dívek' : 'chlapců';
+      const items: string[] = [];
+      let charts = '';
+      const add = (rows: LMS[], value: number, unit: string, name: string, verb: string, adjust: boolean) => {
+        const p = phi(zscore(rows[day], value, adjust));
+        const n = Math.min(99, Math.max(1, Math.round(p * 100)));
+        const med = lmsValue(rows[day], 0);
+        items.push(`<div class="gp__card"><span class="gp__card-k">${name}</span>
+          <span class="gp__card-v tabular">${pctLabel(p)} percentil</span>
+          <span class="gp__card-d">Ze 100 ${kdo} stejného věku ve standardu WHO jich asi ${n} ${verb} méně. Medián pro tento věk je ${unit === 'kg' ? nf2.format(Math.round(med * 100) / 100) : nf1.format(med)} ${unit}.</span></div>`);
+        charts += chart(rows, day, value, unit, `${name} podle věku – ${sex === 'f' ? 'dívky' : 'chlapci'} (${unit})`);
+      };
+      add(data.vaha[sex], kg, 'kg', 'Hmotnost', 'váží', true);
+      if (cmIn.value.trim()) add(data.delka[sex], cm, 'cm', 'Délka', 'měří', false);
+
+      cards.innerHTML = `<p class="gp__age">Věk při vážení: <strong>${ageLabel(day)}</strong> (${day}. den)</p>${items.join('')}`;
+      chartEl.innerHTML = charts;
+      msg.hidden = true;
+      out.hidden = false;
+    }
+
+    form.addEventListener('input', update);
+    form.addEventListener('submit', (e) => e.preventDefault());
+  });
+</script>
+
+<style>
+  .gp { background: var(--color-slate-hush); border-radius: var(--radius-card); padding: var(--space-3); }
+  .gp__inner { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .gp__head { display: grid; gap: 0.35rem; }
+  .gp__head > * { margin: 0; }
+  .gp__title { font-size: 1.375rem; }
+  .gp :global(p) { margin-block: 0; }
+  .gp__field { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 0.4rem; }
+  legend, .gp__label { padding: 0; font-weight: 600; color: var(--ink); font-size: var(--fs-small); }
+  legend { margin-bottom: 0.4rem; }
+  .gp__label small { font-weight: 400; color: var(--text-muted); font-size: inherit; }
+  .gp__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-2); }
+  .gp input[type='date'], .gp input[type='text'] {
+    width: 100%; min-width: 0; min-height: 2.875rem; padding: 0.6rem 0.9rem; font: inherit; font-size: 1rem; color: var(--text);
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); background: var(--color-cream-paper);
+    font-variant-numeric: tabular-nums; transition: border-color var(--dur-fast) var(--ease-out);
+  }
+  .gp input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+  .gp__unit { display: flex; align-items: center; gap: 0.6rem; color: var(--text-muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip { position: relative; display: inline-flex; cursor: pointer; flex: 1 1 8rem; }
+  .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: inline-flex; justify-content: center; align-items: center; width: 100%; min-height: 2.75rem; padding: 0.7rem 1rem;
+    border-radius: var(--radius-card); background: var(--color-keylime-wash); color: var(--ink);
+    font-size: var(--fs-small); font-weight: 500;
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .chip:active span { transform: scale(0.97); }
+  .chip input:checked + span { background: var(--ink); color: var(--color-cream-paper); }
+  .chip input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) { .chip:hover input:not(:checked) + span { background: var(--color-mint-veil); } }
+
+  .gp__msg { font-size: var(--fs-small); color: var(--text-muted); }
+  .gp__msg[hidden], .gp__out[hidden] { display: none; }
+  .gp__out { display: grid; gap: var(--space-3); animation: gp-in var(--dur-base) var(--ease-out); }
+  .gp__cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .gp__cards :global(.gp__age) { grid-column: 1 / -1; font-size: var(--fs-small); color: var(--text-muted); }
+  .gp__cards :global(.gp__card) { background: var(--color-keylime-wash); border-radius: 10px; padding: var(--space-3); display: grid; gap: 0.3rem; align-content: start; }
+  .gp__cards :global(.gp__card:only-of-type) { grid-column: 1 / -1; }
+  .gp__cards :global(.gp__card-k) { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .gp__cards :global(.gp__card-v) { font-family: var(--font-serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1.15; color: var(--ink); }
+  .gp__cards :global(.gp__card-d) { font-size: var(--fs-small); color: var(--text); line-height: 1.5; }
+
+  .gp__chart { display: grid; gap: var(--space-3); }
+  .gp__chart :global(.gp__fig) { margin: 0; display: grid; gap: 0.5rem; }
+  .gp__chart :global(figcaption) { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .gp__chart :global(svg) { width: 100%; height: auto; display: block; }
+  .gp__chart :global(.grid) { stroke: var(--color-border-mist); stroke-width: 1; }
+  .gp__chart :global(.tick) { font-size: 12px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .gp__chart :global(.axis) { font-size: 12px; fill: var(--text-muted); }
+  .gp__chart :global(.curve) { fill: none; stroke: #5d8f66; stroke-width: 1.5; }
+  .gp__chart :global(.curve--mid) { stroke: var(--ink); stroke-width: 2; }
+  .gp__chart :global(.halo) { fill: var(--color-cream-paper); stroke: var(--ink); stroke-width: 1.5; }
+  .gp__chart :global(.dot) { fill: var(--ink); }
+  .gp__note { font-size: var(--fs-small); color: var(--text); line-height: 1.55; }
+  .gp__foot { font-size: var(--fs-small); color: var(--text-muted); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+  @keyframes gp-in { from { opacity: 0; transform: translateY(6px); } }
+  @media (max-width: 640px) {
+    .gp { padding: var(--space-1); }
+    .gp__inner { padding: var(--space-3); }
+    .gp__cards { grid-template-columns: 1fr; }
+    .gp__grid { grid-template-columns: 1fr; }
+    .gp__chart :global(.tick), .gp__chart :global(.axis) { font-size: 17px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .gp__out { animation: none; } }
+</style>

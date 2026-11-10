@@ -216,7 +216,7 @@ const faqLd = {
       <a href="/nastroje/" class="latest-group__all">Všechny nástroje <Arrow /></a>
     </div>
     <ul class="tools__list">
-      {nastroje.map((n) => (
+      {nastroje.slice(0, 3).map((n) => (
         <li>
           <a href={n.href} class:list={['tool', 'panel', `panel--${n.tone}`]}>
             <h3 class="heading-sm">{n.title}</h3>

@@ -3,7 +3,7 @@ export interface Nastroj {
   href: string;
   title: string;
   text: string;
-  motif: 'lupa' | 'hodiny' | 'kapka';
+  motif: 'lupa' | 'hodiny' | 'kapka' | 'trava' | 'vlocka';
   tone: 'sage' | 'mint' | 'keylime' | 'slate';
   cta: string;
 }
@@ -20,6 +20,18 @@ export const nastroje: Nastroj[] = [
     title: 'Deník krmení a časovač kojení',
     text: 'Kdy miminko naposledy pilo, z kterého prsu a kolik z lahve. Bez registrace, záznamy zůstávají ve vašem telefonu.',
     motif: 'hodiny', tone: 'sage', cta: 'Otevřít deník',
+  },
+  {
+    href: '/nastroje/rustove-grafy/',
+    title: 'Růstové grafy WHO',
+    text: 'Percentil hmotnosti a délky miminka do 2 let podle standardů WHO, s grafem. Nic se neukládá.',
+    motif: 'trava', tone: 'mint', cta: 'Zjistit percentil',
+  },
+  {
+    href: '/nastroje/do-kdy-spotrebovat/',
+    title: 'Do kdy spotřebovat',
+    text: 'Odpočet, do kdy spotřebovat připravené umělé mléko nebo odstříkané mateřské mléko. Lhůty podle WHO, CDC a NHS.',
+    motif: 'vlocka', tone: 'slate', cta: 'Spustit odpočet',
   },
   {
     href: '/mleka/kolik-mleka-podle-veku/#výpočet-podle-hmotnosti',

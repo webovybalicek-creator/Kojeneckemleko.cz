@@ -1,0 +1,147 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import UseByTimer from '../../components/UseByTimer.astro';
+
+const url = new URL('/nastroje/do-kdy-spotrebovat/', Astro.site).toString();
+
+const steps = [
+  { t: 'Vyberte mléko a situaci', d: 'Umělé mléko po přípravě, v lednici nebo v chladicí tašce. Odstříkané mateřské mléko v pokoji, v lednici nebo po rozmrazení.' },
+  { t: 'Zadejte čas', d: 'Předvyplněný je aktuální čas. Když jste mléko připravili dřív, upravte ho.' },
+  { t: 'Uvidíte, do kdy ho spotřebovat', d: 'Odpočet ukáže konkrétní hodinu a zdroj lhůty. Zůstane uložený ve vašem prohlížeči, dokud ho neodeberete.' },
+];
+
+const faq = [
+  {
+    q: 'Jak dlouho vydrží připravené umělé mléko?',
+    a: 'Při pokojové teplotě ho spotřebujte do 2 hodin od přípravy. Od chvíle, kdy miminko začne pít, by se mělo krmení podle CDC dokončit do 1 hodiny. V lednici do 5 °C vydrží mléko připravené dopředu nejdéle 24 hodin.',
+  },
+  {
+    q: 'Jak dlouho vydrží odstříkané mateřské mléko v lednici?',
+    a: 'Podle NHS až 8 dní při 4 °C a nižší teplotě, při vyšší nebo nejisté teplotě do 3 dnů. Americké CDC uvádí do 4 dnů. Nástroj ukazuje obě lhůty.',
+  },
+  {
+    q: 'Pošle mi nástroj upozornění, až lhůta vyprší?',
+    a: 'Ne. Nástroj neposílá žádná upozornění ani připomínky. Čas, do kdy mléko spotřebovat, uvidíte po otevření stránky.',
+  },
+  {
+    q: 'Kde jsou odpočty uložené?',
+    a: 'Jen v úložišti vašeho prohlížeče. Na náš server se nic neposílá. Odpočet smažete tlačítkem Odebrat nebo vymazáním dat prohlížeče.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+      { '@type': 'ListItem', position: 2, name: 'Nástroje', item: new URL('/nastroje/', Astro.site).toString() },
+      { '@type': 'ListItem', position: 3, name: 'Do kdy spotřebovat', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Do kdy spotřebovat připravené nebo odstříkané mléko',
+    url,
+    applicationCategory: 'HealthApplication',
+    operatingSystem: 'Web',
+    inLanguage: 'cs-CZ',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'CZK' },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+<Base
+  title="Do kdy spotřebovat umělé nebo odstříkané mléko"
+  description="Odpočet, do kdy spotřebovat připravené umělé mléko nebo odstříkané mateřské mléko – v pokoji, v lednici i na cestách. Lhůty podle WHO, CDC a NHS. Zdarma."
+  jsonLd={jsonLd}
+>
+  <div class="container page">
+    <header class="stack head">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/nastroje/">Nástroje</a></nav>
+      <p class="eyebrow">Nástroj · zdarma, bez registrace</p>
+      <h1>Do kdy spotřebovat</h1>
+      <p class="lead">Připravené umělé mléko i odstříkané mateřské mléko mají své lhůty. Zadejte, co s mlékem je, a uvidíte přesný čas.</p>
+    </header>
+
+    <UseByTimer />
+
+    <section class="block" aria-labelledby="jak">
+      <h2 id="jak">Jak nástroj funguje</h2>
+      <ol class="steps">
+        {steps.map((s) => (
+          <li><span class="heading-sm">{s.t}</span><span>{s.d}</span></li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="block" aria-labelledby="otazky">
+      <h2 id="otazky">Časté otázky</h2>
+      <dl class="faq">
+        {faq.map((f) => (
+          <div>
+            <dt class="heading-sm">{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <section class="block" aria-labelledby="zdroje">
+      <h2 id="zdroje">Zdroje lhůt</h2>
+      <ul class="links">
+        <li><a href="https://www.who.int/publications/i/item/9789241595414" rel="noopener">WHO a FAO – Safe preparation, storage and handling of powdered infant formula <Arrow /></a></li>
+        <li><a href="https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/preparation-and-storage.html" rel="noopener">CDC – Infant Formula Preparation and Storage <Arrow /></a></li>
+        <li><a href="https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/breastfeeding/expressing-breast-milk/" rel="noopener">NHS – Expressing and storing breast milk <Arrow /></a></li>
+        <li><a href="https://www.cdc.gov/breastfeeding/breast-milk-preparation-and-storage/handling-breastmilk.html" rel="noopener">CDC – Breast Milk Storage and Preparation <Arrow /></a></li>
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="dal">
+      <h2 id="dal">Podrobně v článcích</h2>
+      <ul class="links">
+        <li><a href="/mleka/jak-dlouho-vydrzi-umele-mleko/">Jak dlouho vydrží umělé mléko <Arrow /></a></li>
+        <li><a href="/krmeni/odstrikavani-materskeho-mleka/">Odstříkávání a skladování mateřského mléka <Arrow /></a></li>
+        <li><a href="/mleka/priprava-umeleho-mleka/">Jak připravit umělé mléko <Arrow /></a></li>
+      </ul>
+    </section>
+
+    <p class="muted small disclaimer">
+      Nástroj je informační pomůcka a počítá jen s obecnými lhůtami. U umělého mléka se vždy řiďte návodem na balení.
+      Mléko, o kterém máte pochybnosti, miminku nepodávejte.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .page { max-width: calc(40rem + 2 * var(--gutter)); padding-top: var(--space-5); }
+  .head { margin-bottom: var(--space-4); }
+  @media (max-width: 640px) {
+    .page { padding-top: var(--space-3); }
+    .head { margin-bottom: var(--space-3); }
+    .head > * + * { margin-top: var(--space-1); }
+    .head h1 { font-size: 2rem; }
+    .head .lead { font-size: var(--fs-body); }
+  }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .block { margin-top: var(--space-6); display: grid; gap: var(--space-2); }
+  .steps { list-style: none; padding: 0; margin-top: var(--space-2); display: grid; gap: var(--space-1); }
+  .steps li { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3) var(--space-4); display: grid; gap: 0.3rem; }
+  .faq { display: grid; margin-top: var(--space-2); border-top: 1px solid var(--line); }
+  .faq > div { padding-block: var(--space-3); border-bottom: 1px solid var(--line); display: grid; gap: var(--space-1); }
+  .faq dd { margin: 0; color: var(--color-charcoal); }
+  .links { list-style: none; padding: 0; display: grid; gap: var(--space-1); }
+  .links a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .links :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .links a:hover :global(svg) { transform: translateX(3px); } }
+  .disclaimer { margin-top: var(--space-4); }
+  .small { font-size: var(--fs-small); }
+</style>

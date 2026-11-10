@@ -1,0 +1,248 @@
+---
+/**
+ * „Do kdy spotřebovat“ – odpočet lhůt pro připravené umělé mléko a odstříkané mateřské mléko.
+ * Lhůty jen z ověřených zdrojů (WHO/FAO 2007, CDC, NHS) – stejné jako v článcích
+ * /mleka/jak-dlouho-vydrzi-umele-mleko/ a /krmeni/odstrikavani-materskeho-mleka/.
+ * Kde se instituce liší, ukazuje obě lhůty. Běží jen v prohlížeči, odpočty v localStorage `km-spotreba-v1`.
+ * Žádná upozornění ani připomínky.
+ */
+const H = 3600e3;
+const D = 24 * H;
+const situace = [
+  { id: 'u-pokoj', typ: 'umele', label: 'Připravené, stojí při pokojové teplotě', od: 'Kdy jste mléko připravili?',
+    lhuty: [{ ms: 2 * H, zdroj: 'WHO a CDC', text: 'spotřebovat do 2 hodin od přípravy' }],
+    pozn: 'Pokud mléko do 2 hodin nezačnete podávat, patří podle CDC hned do lednice.' },
+  { id: 'u-krmeni', typ: 'umele', label: 'Miminko z lahve začalo pít', od: 'Kdy miminko začalo pít?',
+    lhuty: [{ ms: 1 * H, zdroj: 'CDC', text: 'krmení dokončit do 1 hodiny od začátku' }],
+    pozn: 'Co miminko nedopije, vylijte. Zbytek se neschovává na příště.' },
+  { id: 'u-lednice', typ: 'umele', label: 'Připravené dopředu, je v lednici', od: 'Kdy jste mléko dali do lednice?',
+    lhuty: [{ ms: 24 * H, zdroj: 'WHO a CDC', text: 'v lednici do 5 °C nejdéle 24 hodin' }],
+    pozn: 'Platí pro mléko zchlazené a uložené do lednice hned po přípravě.' },
+  { id: 'u-taska', typ: 'umele', label: 'Vychlazené mléko v chladicí tašce', od: 'Kdy jste mléko vyndali z lednice?',
+    lhuty: [{ ms: 2 * H, zdroj: 'WHO', text: 'spotřebovat do 2 hodin' }],
+    pozn: 'Platí pro mléko vychlazené v lednici a převážené s chladicími vložkami.' },
+  { id: 'm-pokoj', typ: 'materske', label: 'Čerstvě odstříkané, při pokojové teplotě', od: 'Kdy jste mléko odstříkala?',
+    lhuty: [{ ms: 4 * H, zdroj: 'CDC', text: 'při pokojové teplotě do 25 °C do 4 hodin' }],
+    pozn: '' },
+  { id: 'm-lednice', typ: 'materske', label: 'Čerstvě odstříkané, je v lednici', od: 'Kdy jste mléko odstříkala?',
+    lhuty: [
+      { ms: 4 * D, zdroj: 'CDC', text: 'v lednici do 4 dnů' },
+      { ms: 8 * D, zdroj: 'NHS', text: 'až 8 dní při 4 °C a méně; při vyšší nebo nejisté teplotě do 3 dnů' },
+    ],
+    pozn: 'Instituce se liší. Pokud chcete mít jistotu, držte se kratší lhůty.' },
+  { id: 'm-taska', typ: 'materske', label: 'Vychlazené, v chladicí tašce s ledovými vložkami', od: 'Kdy jste mléko vyndala z lednice?',
+    lhuty: [{ ms: 24 * H, zdroj: 'NHS', text: 'do 24 hodin' }],
+    pozn: '' },
+  { id: 'm-rozmrazene', typ: 'materske', label: 'Rozmražené v lednici', od: 'Kdy bylo mléko úplně rozmražené?',
+    lhuty: [{ ms: 24 * H, zdroj: 'CDC', text: 'do 24 hodin od úplného rozmrazení' }],
+    pozn: 'Rozmražené mléko se znovu nezmrazuje.' },
+  { id: 'm-krmeni', typ: 'materske', label: 'Miminko z lahve začalo pít', od: 'Kdy miminko začalo pít?',
+    lhuty: [{ ms: 1 * H, zdroj: 'NHS', text: 'spotřebovat do 1 hodiny, zbytek vylít' }],
+    pozn: '' },
+];
+---
+<div class="ub" data-useby data-situace={JSON.stringify(situace)}>
+  <div class="ub__inner">
+    <div class="ub__head">
+      <p class="eyebrow">Odpočet lhůty</p>
+      <h2 class="heading-sm ub__title">Do kdy mléko spotřebovat?</h2>
+    </div>
+
+    <fieldset class="ub__step">
+      <legend><span class="ub__num">1</span> O jaké mléko jde?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="ub-typ" value="umele" /><span>Umělé mléko</span></label>
+        <label class="chip"><input type="radio" name="ub-typ" value="materske" /><span>Odstříkané mateřské mléko</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="ub__step" data-step="2" hidden>
+      <legend><span class="ub__num">2</span> Co s ním právě je?</legend>
+      <div class="chips chips--col" data-sit></div>
+    </fieldset>
+
+    <fieldset class="ub__step" data-step="3" hidden>
+      <legend><span class="ub__num">3</span> <span data-q3>Kdy to bylo?</span></legend>
+      <div class="ub__when">
+        <input type="datetime-local" name="ub-od" aria-label="Datum a čas" />
+        <button type="button" class="btn" data-start>Spustit odpočet</button>
+      </div>
+      <p class="ub__hint">Předvyplněný je aktuální čas. Když to bylo dřív, upravte ho.</p>
+    </fieldset>
+
+    <div class="ub__list" data-list aria-live="polite"></div>
+
+    <noscript><p class="ub__hint">Odpočet potřebuje zapnutý JavaScript. Lhůty najdete v článku <a href="/mleka/jak-dlouho-vydrzi-umele-mleko/">Jak dlouho vydrží umělé mléko</a>.</p></noscript>
+
+    <p class="ub__foot">
+      Lhůty podle WHO, CDC a NHS. Vždy se řiďte také návodem na balení. Odpočty zůstávají jen ve vašem prohlížeči
+      a nástroj neposílá žádná upozornění.
+    </p>
+  </div>
+</div>
+
+<script>
+  interface Lhuta { ms: number; zdroj: string; text: string }
+  interface Situace { id: string; typ: string; label: string; od: string; lhuty: Lhuta[]; pozn: string }
+  interface Odpocet { id: number; sit: string; od: number }
+  const KEY = 'km-spotreba-v1';
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const localIso = (t: number) => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const dny = ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'];
+  const kdy = (t: number) => {
+    const d = new Date(t), now = new Date();
+    const hm = `${d.getHours()}:${pad(d.getMinutes())}`;
+    const same = d.toDateString() === now.toDateString();
+    return same ? `dnes v ${hm}` : `${dny[d.getDay()]} ${d.getDate()}. ${d.getMonth() + 1}. v ${hm}`;
+  };
+  const doKdy = (t: number) => {
+    const d = new Date(t), now = new Date();
+    const hm = `${d.getHours()}:${pad(d.getMinutes())}`;
+    return d.toDateString() === now.toDateString() ? `dnes do ${hm}` : `do ${dny[d.getDay()]} ${d.getDate()}. ${d.getMonth() + 1}. ${hm}`;
+  };
+  const zbyva = (ms: number) => {
+    const min = Math.ceil(ms / 60e3);
+    if (min < 60) return `${min} min`;
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h < 24) return m ? `${h} h ${m} min` : `${h} h`;
+    const d = Math.floor(h / 24), hh = h % 24;
+    return hh ? `${d} d ${hh} h` : `${d} d`;
+  };
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+  document.querySelectorAll<HTMLElement>('[data-useby]').forEach((root) => {
+    const situace: Situace[] = JSON.parse(root.dataset.situace || '[]');
+    const step2 = root.querySelector<HTMLElement>('[data-step="2"]')!;
+    const step3 = root.querySelector<HTMLElement>('[data-step="3"]')!;
+    const sitEl = root.querySelector<HTMLElement>('[data-sit]')!;
+    const q3 = root.querySelector<HTMLElement>('[data-q3]')!;
+    const odIn = root.querySelector<HTMLInputElement>('[name="ub-od"]')!;
+    const list = root.querySelector<HTMLElement>('[data-list]')!;
+
+    let items: Odpocet[] = [];
+    try { items = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { /* úložiště nedostupné */ }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch { /* ignore */ } };
+
+    function render() {
+      const now = Date.now();
+      list.innerHTML = items.map((it) => {
+        const s = situace.find((x) => x.id === it.sit);
+        if (!s) return '';
+        const main = s.lhuty[0];
+        const left = it.od + main.ms - now;
+        const over = left <= 0;
+        const dalsi = s.lhuty.slice(1).map((l) => {
+          const lf = it.od + l.ms - now;
+          return `<span class="ub__alt">${esc(l.zdroj)}: ${esc(l.text)} – ${lf > 0 ? `tedy ${doKdy(it.od + l.ms)}` : `lhůta uplynula ${kdy(it.od + l.ms)}`}.</span>`;
+        }).join('');
+        return `<article class="ub__item${over ? ' ub__item--over' : ''}">
+          <div class="ub__item-top">
+            <span class="ub__item-k">${s.typ === 'umele' ? 'Umělé mléko' : 'Mateřské mléko'} · ${esc(s.label.toLowerCase())}</span>
+            <button type="button" class="ub__del" data-del="${it.id}" aria-label="Odebrat odpočet">Odebrat</button>
+          </div>
+          <span class="ub__item-v tabular">${over ? `Lhůta uplynula ${kdy(it.od + main.ms)}` : `Spotřebovat ${doKdy(it.od + main.ms)}`}</span>
+          <span class="ub__item-d">${over ? '' : `Zbývá ${zbyva(left)}. `}${esc(main.zdroj)}: ${esc(main.text)}. Počítáno od ${kdy(it.od)}.</span>
+          ${dalsi}
+          ${over && s.typ === 'umele' ? '<span class="ub__item-d">Umělé mléko po uplynutí lhůty podle WHO vylijte.</span>' : ''}
+          ${s.pozn ? `<span class="ub__alt">${esc(s.pozn)}</span>` : ''}
+        </article>`;
+      }).join('');
+    }
+
+    root.addEventListener('change', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.name === 'ub-typ') {
+        sitEl.innerHTML = situace.filter((s) => s.typ === t.value)
+          .map((s) => `<label class="chip"><input type="radio" name="ub-sit" value="${s.id}" /><span>${esc(s.label)}</span></label>`).join('');
+        step2.hidden = false;
+        step3.hidden = true;
+      } else if (t.name === 'ub-sit') {
+        const s = situace.find((x) => x.id === t.value);
+        if (!s) return;
+        q3.textContent = s.od;
+        odIn.value = localIso(Date.now());
+        odIn.max = localIso(Date.now());
+        step3.hidden = false;
+      }
+    });
+
+    root.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement).closest<HTMLElement>('[data-start],[data-del]');
+      if (!t) return;
+      if (t.dataset.del) {
+        items = items.filter((x) => String(x.id) !== t.dataset.del);
+      } else {
+        const sit = root.querySelector<HTMLInputElement>('[name="ub-sit"]:checked')?.value;
+        const od = Math.min(Date.parse(odIn.value) || Date.now(), Date.now());
+        if (!sit) return;
+        items.unshift({ id: Date.now(), sit, od });
+      }
+      save();
+      render();
+    });
+
+    render();
+    setInterval(render, 20e3);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+  });
+</script>
+
+<style>
+  .ub { background: var(--color-slate-hush); border-radius: var(--radius-card); padding: var(--space-3); }
+  .ub__inner { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .ub__head { display: grid; gap: 0.35rem; }
+  .ub__head > * { margin: 0; }
+  .ub__title { font-size: 1.375rem; }
+  .ub :global(p) { margin-block: 0; }
+  .ub__step { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: var(--space-2); }
+  .ub__step[hidden] { display: none; }
+  .ub__step:not([hidden])[data-step] { animation: ub-in var(--dur-base) var(--ease-out); }
+  legend { padding: 0; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 0.6rem; margin-bottom: var(--space-2); }
+  .ub__num { flex: none; display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--color-keylime-wash); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+  .ub__hint { font-size: var(--fs-small); color: var(--text-muted); }
+  .ub__when { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+  .ub__when input {
+    min-height: 2.875rem; padding: 0.6rem 0.9rem; font: inherit; font-size: 1rem; color: var(--text); flex: 1 1 13rem; min-width: 0;
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); background: var(--color-cream-paper); font-variant-numeric: tabular-nums;
+  }
+  .ub__when input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chips--col { display: grid; }
+  .ub :global(.chip) { position: relative; display: inline-flex; cursor: pointer; }
+  .ub :global(.chip input) { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .ub :global(.chip span) {
+    display: inline-flex; align-items: center; width: 100%; min-height: 2.75rem; padding: 0.7rem 1rem;
+    border-radius: var(--radius-card); background: var(--color-keylime-wash); color: var(--ink);
+    font-size: var(--fs-small); font-weight: 500; line-height: 1.3;
+    transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  }
+  .ub :global(.chip:active span) { transform: scale(0.97); }
+  .ub :global(.chip input:checked + span) { background: var(--ink); color: var(--color-cream-paper); }
+  .ub :global(.chip input:focus-visible + span) { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (hover: hover) and (pointer: fine) { .ub :global(.chip:hover input:not(:checked) + span) { background: var(--color-mint-veil); } }
+
+  .ub__list { display: grid; gap: var(--space-2); }
+  .ub__list:empty { display: none; }
+  .ub__list :global(.ub__item) { background: var(--color-keylime-wash); border-radius: 10px; padding: var(--space-3); display: grid; gap: 0.35rem; animation: ub-in var(--dur-base) var(--ease-out); }
+  .ub__list :global(.ub__item--over) { background: var(--color-alert-wash); border: 1px solid var(--color-alert-line); border-left: 3px solid var(--color-alert-ink); }
+  .ub__list :global(.ub__item-top) { display: flex; justify-content: space-between; gap: var(--space-2); align-items: baseline; }
+  .ub__list :global(.ub__item-k) { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .ub__list :global(.ub__item-v) { font-family: var(--font-serif); font-weight: 300; font-size: var(--fs-h2); line-height: 1.15; color: var(--ink); }
+  .ub__list :global(.ub__item--over .ub__item-v), .ub__list :global(.ub__item--over .ub__item-k) { color: var(--color-alert-ink); }
+  .ub__list :global(.ub__item-d) { font-size: var(--fs-small); color: var(--text); line-height: 1.5; }
+  .ub__list :global(.ub__alt) { font-size: var(--fs-small); color: var(--text-muted); line-height: 1.5; }
+  .ub__list :global(.ub__del) { flex: none; background: none; border: 0; padding: 0.25rem 0; font: inherit; font-size: var(--fs-small); color: var(--text-muted); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+  .ub__list :global(.ub__del:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .ub__foot { font-size: var(--fs-small); color: var(--text-muted); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+  @keyframes ub-in { from { opacity: 0; transform: translateY(6px); } }
+  @media (max-width: 640px) {
+    .ub { padding: var(--space-1); }
+    .ub__inner { padding: var(--space-3); }
+    .ub :global(.chip), .ub__when .btn { width: 100%; justify-content: center; }
+    .ub__list :global(.ub__item-v) { font-size: 1.75rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ub__step, .ub__list :global(.ub__item) { animation: none !important; } }
+</style>

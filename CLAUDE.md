@@ -46,6 +46,9 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/nastroje.ts` (rozcestník i sekce na úvodu).
 - **Kontrola staženého mléka** `/nastroje/kontrola-mleka/` – `RecallCheck.astro` (i v článku o stažených mlécích). Čte `src/data/stazeni.ts`; u každé položky vyplnit `dmt` (ISO data) a případně `sarze`, jinak nástroj nabídne jen ruční porovnání podle `identifikace`.
 - **Deník krmení** `/nastroje/denik-krmeni/` – `FeedingLog.astro`: časovač kojení (L/P, přepnutí = stále jeden záznam), lahev v ml, přehled dne, úprava/zpětné přidání, CSV. Data jen v localStorage `km-denik-v1` (při změně struktury zvýšit verzi a migrovat). Nic neposílat na server.
+- **Růstové grafy WHO** `/nastroje/rustove-grafy/` – `GrowthPercentile.astro`: percentil hmotnosti a délky 0–24 měsíců + graf. Data `public/data/who-rust.json` (L, M, S po dnech z oficiálního balíčku WHO `anthro`, neupravovat ručně). Nic neukládá. Jen poloha v tabulce, žádné hodnocení růstu.
+- **Do kdy spotřebovat** `/nastroje/do-kdy-spotrebovat/` – `UseByTimer.astro`: odpočet lhůt pro připravené umělé a odstříkané mateřské mléko. Lhůty musí odpovídat článkům `jak-dlouho-vydrzi-umele-mleko` a `odstrikavani-materskeho-mleka` (WHO, CDC, NHS); kde se instituce liší, ukázat obě. localStorage `km-spotreba-v1`, žádná upozornění.
+- Úvodní stránka ukazuje první 3 karty z `nastroje.ts`, rozcestník všechny.
 - Nástroje nic nedoporučují (žádné „kdy krmit“, žádné připomínky krmení) – jen zapisují a porovnávají s oficiálním seznamem.
 
 ## Regulace (nic nezákonného kolem kojeneckých mlék)
