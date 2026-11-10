@@ -49,6 +49,8 @@ Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/na
 - **Růstové grafy WHO** `/nastroje/rustove-grafy/` – `GrowthPercentile.astro`: percentil hmotnosti a délky 0–24 měsíců + graf. Data `public/data/who-rust.json` (L, M, S po dnech z oficiálního balíčku WHO `anthro`, neupravovat ručně). Nic neukládá. Jen poloha v tabulce, žádné hodnocení růstu.
 - **Do kdy spotřebovat** `/nastroje/do-kdy-spotrebovat/` – `UseByTimer.astro`: odpočet lhůt pro připravené umělé a odstříkané mateřské mléko. Lhůty musí odpovídat článkům `jak-dlouho-vydrzi-umele-mleko` a `odstrikavani-materskeho-mleka` (WHO, CDC, NHS); kde se instituce liší, ukázat obě. localStorage `km-spotreba-v1`, žádná upozornění.
 - Úvodní stránka ukazuje první 3 karty z `nastroje.ts`, rozcestník všechny.
+- OG obrázky nástrojů: šablony `/og/nastroj-<slug>/` a `/og/nastroje/` se berou z `nastroje.ts`; nový nástroj = vygenerovat PNG a nastavit `ogImage` na stránce.
+- Deník jde přidat na plochu: `public/denik-manifest.json` + ikony `public/images/ikona-*.png`, manifest se linkuje jen na stránce deníku (slot `head` v `Base.astro`).
 - Nástroje nic nedoporučují (žádné „kdy krmit“, žádné připomínky krmení) – jen zapisují a porovnávají s oficiálním seznamem.
 
 ## Regulace (nic nezákonného kolem kojeneckých mlék)

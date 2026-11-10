@@ -53,7 +53,9 @@ const baseLd = [
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#fffefc" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/images/ikona-180.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <slot name="head" />
 
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="cs_CZ" />

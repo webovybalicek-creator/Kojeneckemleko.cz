@@ -36,11 +36,18 @@ const breadcrumbs = {
     { '@type': 'ListItem', position: 3, name: 'Srovnání kojeneckých mlék', item: new URL('/mleka/srovnani/', Astro.site).toString() },
   ],
 };
+const itemList = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Srovnání kojeneckých mlék',
+  numberOfItems: milks.length,
+  itemListElement: groups.flatMap((g) => g.milks).map((m, i) => ({ '@type': 'ListItem', position: i + 1, name: m.data.name })),
+};
 ---
 <Base
   title="Srovnání kojeneckých mlék"
   description="Srovnání počátečních, pokračovacích a speciálních (HA, AR, bez laktózy) kojeneckých mlék v ČR: HMO, palmový olej, probiotika, ceny. Bez hodnocení."
-  jsonLd={[breadcrumbs]}
+  jsonLd={[breadcrumbs, itemList]}
 >
   <section class="container head">
     <nav class="crumbs" aria-label="Drobečková navigace">

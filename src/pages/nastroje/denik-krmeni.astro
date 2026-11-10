@@ -26,7 +26,7 @@ const faq = [
   },
   {
     q: 'Jak si deník přidám na plochu telefonu?',
-    a: 'V prohlížeči otevřete nabídku sdílení nebo menu a zvolte „Přidat na plochu“. Deník se pak otevírá jedním klepnutím jako aplikace.',
+    a: 'Na iPhonu klepněte v Safari na Sdílet a zvolte „Přidat na plochu“. Na Androidu otevřete v Chromu nabídku se třemi tečkami a zvolte „Přidat na plochu“ nebo „Instalovat aplikaci“. Deník se pak otevírá jedním klepnutím v samostatném okně.',
   },
   {
     q: 'Poradí mi deník, kdy a kolik krmit?',
@@ -66,7 +66,9 @@ const jsonLd = [
   title="Deník krmení a časovač kojení online"
   description="Jednoduchý deník krmení zdarma: časovač kojení pro levý a pravý prs, záznam lahve v ml a přehled dne. Bez registrace, data zůstávají ve vašem telefonu."
   jsonLd={jsonLd}
+  ogImage="/images/og/nastroj-denik-krmeni.png"
 >
+  <link slot="head" rel="manifest" href="/denik-manifest.json" />
   <div class="container page">
     <header class="stack head">
       <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/nastroje/">Nástroje</a></nav>
