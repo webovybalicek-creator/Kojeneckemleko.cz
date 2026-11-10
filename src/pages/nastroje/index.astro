@@ -45,6 +45,7 @@ const breadcrumbs = {
         </li>
       ))}
     </ul>
+    <p class="tisk"><a href="/tisk/">Přehledy k vytištění: příprava mléka, trvanlivost a co nedávat do 1 roku <Arrow /></a></p>
   </section>
 </Base>
 
@@ -54,6 +55,9 @@ const breadcrumbs = {
   .hub-head > * { max-width: 40rem; }
   .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
   .crumbs a { color: var(--text-muted); }
+  .tisk { margin-top: var(--space-5); }
+  .tisk a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .tisk :global(svg) { width: 1em; }
 
   .cards { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
   .cards > li { min-width: 0; animation: card-in 420ms var(--ease-out) both; animation-delay: calc(var(--i) * 50ms); }

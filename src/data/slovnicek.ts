@@ -1,6 +1,6 @@
 /**
  * Slovníček pojmů – /slovnicek/#<id>. Každá definice musí stát na zdrojích níže (čísla = pořadí v `glossarySources`).
- * Ověřeno 7. 11. 2026 (hesla DHA, A2, kolika, dyschezie, laktózová intolerance, BLW, anafylaxe 9. 11. 2026), viz claude/zdroje-registr.md v projektu.
+ * Ověřeno 7. 11. 2026 (hesla DHA, A2, kolika, dyschezie, laktózová intolerance, BLW, anafylaxe 9. 11. 2026; probiotika a palmový olej 10. 11. 2026), viz claude/zdroje-registr.md v projektu.
  */
 
 export interface GlossarySource { title: string; publisher: string; url: string; year?: number; kind?: 'studie' | 'doporuceni' | 'legislativa'; doi?: string; authors?: { name: string; url?: string; role?: string }[] }
@@ -45,7 +45,20 @@ export const glossarySources: GlossarySource[] = [
   { title: "Your baby's first solid foods", publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/babys-first-solid-foods/', year: 2026, kind: 'doporuceni' },
   { title: 'Food allergies in babies and young children', publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/food-allergies-in-babies-and-young-children/', year: 2024, kind: 'doporuceni' },
   { title: 'Lactose intolerance (new parent and baby)', publisher: 'NHS – Healthier Together', url: 'https://www.healthiertogether.nhs.uk/new-parent-and-baby/lactose-intolerance', kind: 'doporuceni' },
-  { title: 'Colic – breastfeeding challenges', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/breastfeeding/breastfeeding-challenges/colic/', year: 2026, kind: 'doporuceni' },
+  { title: 'Colic – breastfeeding challenges', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/feeding-your-baby/breastfeeding/breastfeeding-challenges/colic/', year: 2026, kind: 'doporuceni' },  {
+    title: 'Supplementation of infant formula with probiotics and/or prebiotics: a systematic review and comment by the ESPGHAN Committee on Nutrition',
+    publisher: 'Journal of Pediatric Gastroenterology and Nutrition 52(2): 238–250',
+    url: 'https://pure.amsterdamumc.nl/en/publications/supplementation-of-infant-formula-with-probiotics-andor-prebiotic/',
+    year: 2011, kind: 'studie', doi: '10.1097/MPG.0b013e3181fb9e80',
+    authors: [{ name: 'Christian Braegger' }, { name: 'Anna Chmielewska' }, { name: 'Tamás Decsi' }, { name: 'a další' }],
+  },
+  {
+    title: 'Palm Oil and Beta-palmitate in Infant Formula: A Position Paper by the ESPGHAN Committee on Nutrition',
+    publisher: 'Journal of Pediatric Gastroenterology and Nutrition 68(5): 742–760',
+    url: 'https://air.unimi.it/handle/2434/749689',
+    year: 2019, kind: 'studie', doi: '10.1097/MPG.0000000000002307',
+    authors: [{ name: 'Jiří Bronský' }, { name: 'Cristina Campoy' }, { name: 'Nicholas Embleton' }, { name: 'a další' }],
+  },
 ];
 
 export type GlossaryGroup = 'typy' | 'specialni' | 'slozeni' | 'krmeni' | 'bezpecnost';
@@ -194,6 +207,24 @@ export const glossary: GlossaryTerm[] = [
       'Dokosahexaenová kyselina (DHA) patří mezi omega-3 mastné kyseliny. Evropské nařízení 2016/127 ji stanovuje jako povinnou složku počátečních i pokračovacích mlék, v množství 20–50 mg na 100 kcal [9].',
     ],
     link: { label: 'Jak vybrat kojenecké mléko', href: '/mleka/jak-vybrat-kojenecke-mleko/' },
+  },
+  {
+    id: 'probiotika', term: 'Probiotika', aka: 'přidané bakteriální kultury', group: 'slozeni',
+    short: 'Bakteriální kultury, které někteří výrobci přidávají do kojeneckého mléka. Rutinně je ESPGHAN nedoporučuje.',
+    body: [
+      'Některá kojenecká mléka obsahují přidaná probiotika, prebiotika nebo obojí. Podle výboru pro výživu ESPGHAN nevzbuzují hodnocená mléka s těmito složkami u zdravých kojenců obavy o růst ani o nežádoucí účinky [18].',
+      'Výbor zároveň uvádí, že není dost dat, aby mléka s probiotiky nebo prebiotiky doporučil k rutinnímu používání. Účinky jednoho výrobku nelze přenášet na jiné a většinu studií financovali výrobci [18].',
+    ],
+    link: { label: 'Srovnání kojeneckých mlék', href: '/mleka/srovnani/' },
+  },
+  {
+    id: 'palmovy-olej', term: 'Palmový olej', aka: 'beta-palmitát, sn-2 palmitát', group: 'slozeni',
+    short: 'Zdroj tuku v některých kojeneckých mlécích. Podle ESPGHAN není dost důkazů, aby se mu bylo potřeba vyhýbat.',
+    body: [
+      'Palmový olej se do kojenecké výživy přidává, aby se obsah kyseliny palmitové přiblížil mateřskému mléku. Studie ho spojují s tvrdší stolicí a nižším vstřebáváním vápníku, růst kojenců neovlivňuje [19].',
+      'Podle výboru pro výživu ESPGHAN není dost důkazů pro to, aby se palmovému oleji bylo potřeba ze zdravotních důvodů vyhýbat. Výrobci mají snižovat obsah látek vznikajících při rafinaci olejů [19].',
+    ],
+    link: { label: 'Palmový olej v kojeneckém mléce', href: '/mleka/palmovy-olej/' },
   },
   {
     id: 'a2', term: 'A2 mléko', aka: 'beta-kasein A2', group: 'slozeni',

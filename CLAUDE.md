@@ -53,6 +53,9 @@ Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/na
 - Deník jde přidat na plochu: `public/denik-manifest.json` + ikony `public/images/ikona-*.png`, manifest se linkuje jen na stránce deníku (slot `head` v `Base.astro`).
 - Nástroje nic nedoporučují (žádné „kdy krmit“, žádné připomínky krmení) – jen zapisují a porovnávají s oficiálním seznamem.
 
+## Přehledy k vytištění (`/tisk/`)
+Data v `src/data/tisk.ts`, šablona `src/pages/tisk/[slug].astro` (tiskové styly A4), PDF v `public/tisk/<slug>.pdf`. Obsah jen z ověřených článků; po změně článku upravit přehled a PDF vygenerovat znovu (Playwright `page.pdf()` z náhledu, `emulateMedia('print')`).
+
 ## Regulace (nic nezákonného kolem kojeneckých mlék)
 EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké výživy; v ČR navíc zákon o regulaci reklamy, dozor SZPI. Proto:
 - žádné affiliate odkazy, kupony, vzorky ani reklama na mléka bez právní kontroly,
@@ -65,7 +68,8 @@ EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké vý
 - Počítadlo: `public/api/hit.php` + `_lib.php` (SQLite v `api/data/`, mimo git i deploy), beacon v `src/layouts/Base.astro`, přehled `public/navstevnost/index.php` pod heslem.
 - Bez cookies, bez IP v DB, denní rotující sůl, respektuje DNT/GPC.
 - Vlastní návštěvy provozovatele se nepočítají: přihlášení na `/navstevnost/` uloží značku `km-nemerit` do localStorage a otisk aktuální IP (HMAC, tabulka `excluded_ip`, max 20) – `hit.php` takové požadavky zahodí. IP se mění, proto se otisk obnovuje při každém otevření přehledu.
-- Vynulování statistik: změnit konstantu `KM_RESET` v `_lib.php` (data se smažou při prvním požadavku po deployi). Naposledy 10. 11. 2026. Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
+- Vynulování statistik: změnit konstantu `KM_RESET` v `_lib.php` (data se smažou při prvním požadavku po deployi). Naposledy 10. 11. 2026.
+- Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
 
 ## Příkazy
 `npm run dev` · `npm run build` · `npm run preview`

@@ -1,0 +1,61 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import { prehledy } from '../../data/tisk';
+
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Přehledy k vytištění', item: new URL('/tisk/', Astro.site).toString() },
+  ],
+};
+---
+<Base
+  title="Přehledy k vytištění"
+  description="Jednostránkové přehledy zdarma ke stažení a tisku: příprava umělého mléka, jak dlouho vydrží mléko a co nedávat miminku do 1 roku. Podle WHO, NHS a CDC."
+  jsonLd={[breadcrumbs]}
+>
+  <section class="container">
+    <header class="hub-head panel panel--keylime">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <span>Přehledy k vytištění</span></nav>
+      <h1>Přehledy k vytištění</h1>
+      <p class="lead">To nejdůležitější na jedné stránce A4. Na lednici, do kuchyně nebo pro babičku. Zdarma, i pro ordinace a poradny.</p>
+    </header>
+  </section>
+
+  <section class="container section">
+    <ul class="list">
+      {prehledy.map((p) => (
+        <li class="item panel panel--cream">
+          <h2 class="heading-sm">{p.title}</h2>
+          <p>{p.lead}</p>
+          <p class="item__links">
+            <a href={`/tisk/${p.slug}/`}>Zobrazit a vytisknout <Arrow /></a>
+            <a href={`/tisk/${p.slug}.pdf`} download>Stáhnout PDF</a>
+          </p>
+        </li>
+      ))}
+    </ul>
+    <p class="muted small note">Přehledy vycházejí z článků na webu, kde najdete podrobnosti a citace zdrojů. Můžete je volně tisknout a šířit v nezměněné podobě.</p>
+  </section>
+</Base>
+
+<style>
+  .hub-head { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); padding-block: var(--space-6); }
+  .hub-head h1 { font-size: var(--fs-display); line-height: 1.05; }
+  .hub-head > * { max-width: 40rem; }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .item { border: 1px solid var(--color-sage-mist); display: flex; flex-direction: column; gap: var(--space-2); }
+  .item h2 { margin: 0; }
+  .item p { margin: 0; color: var(--text-muted); font-size: var(--fs-small); line-height: 1.55; }
+  .item__links { margin-top: auto !important; padding-top: var(--space-2); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+  .item__links a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; color: var(--ink); }
+  .item__links :global(svg) { width: 1em; }
+  .note { margin-top: var(--space-4); max-width: 40rem; }
+  .small { font-size: var(--fs-small); }
+  @media (max-width: 900px) { .list { grid-template-columns: 1fr; } }
+</style>

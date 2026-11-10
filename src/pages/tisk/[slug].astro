@@ -1,0 +1,110 @@
+---
+/** Tisknutelný přehled – obrazovka i tisk (A4). PDF: public/tisk/<slug>.pdf (generuje se Playwrightem, viz CLAUDE.md). */
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import { prehledy, type TiskPrehled } from '../../data/tisk';
+
+export function getStaticPaths() {
+  return prehledy.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+const { p } = Astro.props as { p: TiskPrehled };
+const url = new URL(`/tisk/${p.slug}/`, Astro.site).toString();
+const jsonLd = [{
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Přehledy k vytištění', item: new URL('/tisk/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: p.title, item: url },
+  ],
+}];
+---
+<Base title={`${p.title} – k vytištění`} description={p.description} jsonLd={jsonLd}>
+  <div class="container page">
+    <nav class="crumbs no-print" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/tisk/">Přehledy k vytištění</a></nav>
+
+    <div class="actions no-print">
+      <button type="button" class="btn" data-print>Vytisknout</button>
+      <a class="btn btn--ghost" href={`/tisk/${p.slug}.pdf`} download>Stáhnout PDF</a>
+    </div>
+
+    <article class="sheet">
+      <header class="sheet__head">
+        <p class="eyebrow">kojeneckemleko.cz · přehled k vytištění</p>
+        <h1>{p.title}</h1>
+        <p class="sheet__lead">{p.lead}</p>
+      </header>
+
+      {p.bloky.map((b) => (
+        <section class="blok">
+          <h2 class="heading-sm">{b.title}</h2>
+          {b.steps && <ol class="steps">{b.steps.map((s) => <li>{s}</li>)}</ol>}
+          {b.items && <ul class="items">{b.items.map((s) => <li>{s}</li>)}</ul>}
+          {b.table && (
+            <table>
+              <thead><tr>{b.table[0].map((h) => <th scope="col">{h}</th>)}</tr></thead>
+              <tbody>{b.table.slice(1).map((r) => <tr>{r.map((c, i) => i === 0 ? <th scope="row">{c}</th> : <td>{c}</td>)}</tr>)}</tbody>
+            </table>
+          )}
+          {b.note && <p class="blok__note">{b.note}</p>}
+        </section>
+      ))}
+
+      <footer class="sheet__foot">
+        {p.who && <p>Světová zdravotnická organizace doporučuje prvních 6 měsíců výhradně kojit. Přehled je pro rodiče, kteří krmí umělým mlékem – částečně nebo úplně.</p>}
+        <p><strong>Zdroje:</strong> {p.zdroje.map((z, i) => <>{i > 0 && ' · '}<a href={z.url} rel="noopener">{z.publisher} – {z.title}</a></>)}</p>
+        <p>Přehled je informační a nenahrazuje radu pediatra. Podrobnosti a citace: kojeneckemleko.cz{p.clanek.href}</p>
+      </footer>
+    </article>
+
+    <p class="more no-print"><a href={p.clanek.href}>Celý článek: {p.clanek.label} <Arrow /></a></p>
+  </div>
+</Base>
+
+<script>
+  document.querySelectorAll('[data-print]').forEach((b) => b.addEventListener('click', () => window.print()));
+</script>
+
+<style>
+  .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-5); display: grid; gap: var(--space-3); }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .sheet { background: var(--color-cream-paper); border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); padding: var(--space-5); display: grid; gap: var(--space-4); }
+  .sheet__head { display: grid; gap: var(--space-2); }
+  .sheet__head h1 { font-size: var(--fs-h2); line-height: 1.15; }
+  .sheet__lead { color: var(--text); }
+  .blok { display: grid; gap: var(--space-2); }
+  .blok h2 { margin: 0; }
+  .steps, .items { margin: 0; padding-left: 1.4rem; display: grid; gap: 0.45rem; }
+  .steps li::marker { font-weight: 600; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+  th, td { text-align: left; vertical-align: top; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--color-sage-mist); }
+  thead th { font-size: var(--fs-caption); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); background: var(--color-keylime-wash); }
+  tbody th { font-weight: 600; color: var(--ink); width: 40%; }
+  .blok__note { font-size: var(--fs-small); color: var(--text-muted); margin: 0; }
+  .sheet__foot { border-top: 1px solid var(--line); padding-top: var(--space-3); display: grid; gap: 0.4rem; font-size: var(--fs-caption); color: var(--text-muted); line-height: 1.5; }
+  .sheet__foot p { margin: 0; max-width: none; }
+  .sheet__lead, .blok__note { max-width: none; }
+  .sheet__foot a { color: inherit; }
+  .more a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .more :global(svg) { width: 1em; }
+  @media (max-width: 640px) { .sheet { padding: var(--space-3); } tbody th { width: 45%; } }
+
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    :global(.site-header), :global(.site-footer), :global(.recall-bar), :global(.skip-link), .no-print { display: none !important; }
+    .page { max-width: none; padding: 0; }
+    .sheet { border: 0; padding: 0; gap: 4mm; }
+    .sheet__head h1 { font-size: 21pt; }
+    .sheet__head { gap: 2mm; }
+    th, td { padding: 1.5mm 2mm; }
+    .blok { gap: 2.5mm; }
+    .steps, .items { gap: 1.6mm; font-size: 11pt; }
+    table { font-size: 10pt; }
+    .blok { break-inside: avoid; }
+    thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sheet__foot { font-size: 8pt; }
+    .sheet__foot a { text-decoration: none; }
+  }
+</style>
