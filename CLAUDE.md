@@ -57,6 +57,13 @@ Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/na
 ## Přehledy k vytištění (`/tisk/`)
 Data v `src/data/tisk.ts`, šablona `src/pages/tisk/[slug].astro` (tiskové styly A4), PDF v `public/tisk/<slug>.pdf`. Obsah jen z ověřených článků; po změně článku upravit přehled a PDF vygenerovat znovu (Playwright `page.pdf()` z náhledu, `emulateMedia('print')`).
 
+## Komentáře pod články
+- `src/components/Comments.astro` (pod každým článkem, sbalený formulář; seznam se ukáže, až existuje schválený komentář) → `public/api/komentare.php` (GET schválené, POST nový) → schvalování v `/navstevnost/komentare.php` (stejné přihlášení jako návštěvnost, CSRF token).
+- Tabulky `comments` a `comment_rate` ve stejné SQLite jako počítadlo; vynulování statistik je nemaže.
+- **Vždy schvalování předem.** Ochrana: skryté pole, min. 4 s vyplňování, 3 odeslání/hod z jednoho zdroje, zákaz odkazů a e-mailů, 10–1500 znaků. Bez cookies, bez e-mailu, bez IP.
+- Neschvalovat: zdravotní rady pro konkrétní dítě, reklamu, doporučování značek mléka, osobní údaje. Odpověď redakce jen z ověřených zdrojů článku. **Nikdy nepsat vymyšlené komentáře.**
+- Upozornění e-mailem jen při nastaveném secretu `KOMENTARE_EMAIL` (volitelné).
+
 ## Regulace (nic nezákonného kolem kojeneckých mlék)
 EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké výživy; v ČR navíc zákon o regulaci reklamy, dozor SZPI. Proto:
 - žádné affiliate odkazy, kupony, vzorky ani reklama na mléka bez právní kontroly,

@@ -6,6 +6,7 @@
 #   FTP_PASSWORD     – FTP heslo
 #   FTP_SERVER_DIR   – (volitelné) cílová složka s lomítkem na konci, např. "www/" – výchozí "./"
 #   STATS_PASSWORD   – heslo ke stránce /navstevnost/
+#   KOMENTARE_EMAIL  – (volitelné) e-mail pro upozornění na nový komentář ke schválení
 
 name: Deploy
 
@@ -35,7 +36,8 @@ jobs:
       - name: Konfigurace počítadla návštěvnosti
         env:
           STATS_PASSWORD: ${{ secrets.STATS_PASSWORD }}
-        run: php -r 'file_put_contents("dist/api/config.php", "<?php\nreturn " . var_export(["stats_password" => (string) getenv("STATS_PASSWORD")], true) . ";\n");'
+          KOMENTARE_EMAIL: ${{ secrets.KOMENTARE_EMAIL }}
+        run: php -r 'file_put_contents("dist/api/config.php", "<?php\nreturn " . var_export(["stats_password" => (string) getenv("STATS_PASSWORD"), "notify_email" => (string) getenv("KOMENTARE_EMAIL")], true) . ";\n");'
 
       - name: Nahrání na FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.4.0

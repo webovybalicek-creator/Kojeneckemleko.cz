@@ -6,6 +6,7 @@ import { clusterMeta } from '../../data/clusters';
 import { annotate } from '../../data/terms.mjs';
 import ArticleCards from '../../components/ArticleCards.astro';
 import ArticleCover from '../../components/ArticleCover.astro';
+import Comments from '../../components/Comments.astro';
 
 export async function getStaticPaths() {
   const articles = await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft);
@@ -106,6 +107,8 @@ const breadcrumbs = {
     <p class="disclaimer muted">
       Článek má informativní charakter a nenahrazuje konzultaci s pediatrem. Máte-li o zdraví dítěte obavy, obraťte se na lékaře.
     </p>
+
+    <Comments path={Astro.url.pathname} />
   </article>
 
   {related.length > 0 && (

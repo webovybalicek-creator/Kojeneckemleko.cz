@@ -1,0 +1,144 @@
+---
+/**
+ * Komentáře pod článkem. Zobrazují se jen schválené (API /api/komentare.php), formulář je sbalený.
+ * Seznam se ukáže, až je co zobrazit. Bez cookies, bez e-mailu; text se vkládá přes textContent.
+ */
+interface Props { path: string }
+const { path } = Astro.props;
+---
+<section class="km" data-comments data-path={path} aria-labelledby="komentare">
+  <div class="km__list-wrap" data-list-wrap hidden>
+    <h2 id="komentare" class="heading-sm">Dotazy a zkušenosti čtenářů</h2>
+    <ul class="km__list" data-list></ul>
+  </div>
+
+  <details class="km__form-wrap">
+    <summary><span>Zeptejte se nebo doplňte zkušenost</span></summary>
+    <form class="km__form" novalidate>
+      <p class="km__rules">
+        Komentář zveřejníme po kontrole. Nepište prosím odkazy, kontakty ani osobní údaje dítěte.
+        Neposkytujeme zdravotní rady pro konkrétní dítě – s potížemi se obraťte na pediatra.
+        Komentáře doporučující konkrétní značku mléka nezveřejňujeme.
+      </p>
+      <label>
+        <span>Přezdívka</span>
+        <input type="text" name="jmeno" maxlength="40" required autocomplete="nickname" />
+      </label>
+      <label>
+        <span>Váš dotaz nebo zkušenost</span>
+        <textarea name="text" rows="5" maxlength="1500" required></textarea>
+      </label>
+      <label class="km__hp" aria-hidden="true">
+        <span>Web (nevyplňujte)</span>
+        <input type="text" name="web" tabindex="-1" autocomplete="off" />
+      </label>
+      <div class="km__row">
+        <button type="submit" class="btn">Odeslat ke schválení</button>
+        <p class="km__msg" data-msg role="status"></p>
+      </div>
+      <p class="km__note">Ukládáme jen přezdívku a text. Podrobnosti v <a href="/ochrana-soukromi/#komentare">ochraně soukromí</a>.</p>
+    </form>
+  </details>
+</section>
+
+<script>
+  interface Komentar { id: number; jmeno: string; text: string; datum: string; odpoved: string | null }
+
+  document.querySelectorAll<HTMLElement>('[data-comments]').forEach((root) => {
+    const path = root.dataset.path!;
+    const wrap = root.querySelector<HTMLElement>('[data-list-wrap]')!;
+    const list = root.querySelector<HTMLElement>('[data-list]')!;
+    const details = root.querySelector<HTMLDetailsElement>('details')!;
+    const form = root.querySelector<HTMLFormElement>('form')!;
+    const msg = root.querySelector<HTMLElement>('[data-msg]')!;
+    const btn = form.querySelector<HTMLButtonElement>('button')!;
+    let opened = 0;
+
+    const el = (tag: string, cls: string, text?: string) => { const e = document.createElement(tag); e.className = cls; if (text != null) e.textContent = text; return e; };
+
+    fetch(`/api/komentare.php?p=${encodeURIComponent(path)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { komentare?: Komentar[] } | null) => {
+        const items = d?.komentare ?? [];
+        if (!items.length) return;
+        for (const k of items) {
+          const li = el('li', 'km__item');
+          const head = el('p', 'km__head');
+          head.append(el('strong', '', k.jmeno), el('span', '', ` · ${k.datum}`));
+          li.append(head, el('p', 'km__text', k.text));
+          if (k.odpoved) {
+            const rep = el('div', 'km__reply');
+            rep.append(el('p', 'km__reply-who', 'Redakce kojeneckemleko.cz'), el('p', 'km__text', k.odpoved));
+            li.append(rep);
+          }
+          list.append(li);
+        }
+        wrap.hidden = false;
+      })
+      .catch(() => { /* komentáře jsou doplněk, chyba se nezobrazuje */ });
+
+    details.addEventListener('toggle', () => { if (details.open && !opened) opened = Date.now(); });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const jmeno = String(fd.get('jmeno') || '').trim();
+      const text = String(fd.get('text') || '').trim();
+      if (jmeno.length < 2) { msg.textContent = 'Vyplňte přezdívku.'; return; }
+      if (text.length < 10) { msg.textContent = 'Napište prosím aspoň pár slov.'; return; }
+      btn.disabled = true;
+      msg.textContent = 'Odesílám…';
+      try {
+        const r = await fetch('/api/komentare.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p: path, jmeno, text, web: String(fd.get('web') || ''), t: opened ? Date.now() - opened : 0 }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.ok) {
+          form.reset();
+          msg.textContent = 'Děkujeme. Komentář se zobrazí po schválení.';
+        } else {
+          msg.textContent = d.error || 'Komentář se nepodařilo odeslat. Zkuste to prosím později.';
+        }
+      } catch {
+        msg.textContent = 'Komentář se nepodařilo odeslat. Zkontrolujte připojení.';
+      }
+      btn.disabled = false;
+    });
+  });
+</script>
+
+<style>
+  .km { margin-top: var(--space-5); display: grid; gap: var(--space-3); }
+  .km__list-wrap[hidden] { display: none; }
+  .km__list-wrap { display: grid; gap: var(--space-2); }
+  .km__list-wrap h2 { margin: 0; }
+  .km__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+  .km__list :global(.km__item) { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3); display: grid; gap: 0.4rem; }
+  .km__list :global(.km__head) { margin: 0; font-size: var(--fs-small); color: var(--text-muted); }
+  .km__list :global(.km__head strong) { color: var(--ink); font-weight: 600; }
+  .km__list :global(.km__text) { margin: 0; white-space: pre-line; overflow-wrap: anywhere; max-width: none; }
+  .km__list :global(.km__reply) { margin-top: 0.4rem; padding: var(--space-2) var(--space-3); background: var(--color-cream-paper); border-radius: 10px; display: grid; gap: 0.3rem; }
+  .km__list :global(.km__reply-who) { margin: 0; font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); }
+
+  .km__form-wrap { border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); }
+  .km__form-wrap summary { cursor: pointer; list-style: none; padding: var(--space-3); font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); border-radius: var(--radius-card); }
+  .km__form-wrap summary::-webkit-details-marker { display: none; }
+  .km__form-wrap summary::after { content: '+'; font-weight: 400; font-size: 1.4rem; line-height: 1; transition: transform var(--dur-fast) var(--ease-out); }
+  .km__form-wrap[open] summary::after { transform: rotate(45deg); }
+  .km__form-wrap summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .km__form { padding: 0 var(--space-3) var(--space-3); display: grid; gap: var(--space-2); }
+  .km__form label { display: grid; gap: 0.35rem; font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .km__form input, .km__form textarea {
+    width: 100%; min-height: 2.875rem; padding: 0.6rem 0.9rem; font: inherit; font-size: 1rem; font-weight: 400; color: var(--text);
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); background: var(--color-cream-paper); resize: vertical;
+  }
+  .km__form input:focus-visible, .km__form textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--ink); }
+  .km__hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .km__rules, .km__note { margin: 0; font-size: var(--fs-small); color: var(--text-muted); line-height: 1.55; max-width: none; }
+  .km__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+  .km__msg { margin: 0; font-size: var(--fs-small); color: var(--ink); }
+  @media (max-width: 640px) { .km__row .btn { width: 100%; justify-content: center; } }
+  @media (prefers-reduced-motion: reduce) { .km__form-wrap summary::after { transition: none; } }
+</style>

@@ -74,6 +74,8 @@ if ($authed) {
         km_ip_exclude($pdo);
     }
     $ipExcluded = km_ip_excluded($pdo);
+    km_comments_schema($pdo);
+    $commentsPending = (int) $pdo->query('SELECT COUNT(*) FROM comments WHERE status = 0')->fetchColumn();
     $from = date('Y-m-d', strtotime('-' . ($range - 1) . ' days'));
 
     $q = $pdo->prepare('SELECT day, views, visitors FROM daily WHERE day >= ? ORDER BY day');
@@ -192,6 +194,7 @@ $fmt = fn (int $n): string => number_format($n, 0, ',', "\u{00A0}");
       <h1>Návštěvnost</h1>
     </div>
     <nav class="ranges" aria-label="Období">
+      <a href="komentare.php">Komentáře<?= !empty($commentsPending) ? ' (' . $commentsPending . ')' : '' ?></a>
       <?php foreach ([7 => '7 dní', 30 => '30 dní', 90 => '90 dní', 365 => 'Rok'] as $n => $label): ?>
         <a href="?dni=<?= $n ?>"<?= $n === $range ? ' aria-current="page"' : '' ?>><?= $label ?></a>
       <?php endforeach; ?>

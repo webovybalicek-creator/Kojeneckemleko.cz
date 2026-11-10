@@ -93,6 +93,19 @@ function km_ip_include(PDO $pdo): void
     $pdo->prepare('DELETE FROM excluded_ip WHERE hash = ?')->execute([km_ip_hash()]);
 }
 
+/** Komentáře pod články: status 0 = čeká na schválení, 1 = zveřejněno. Tabulky se při vynulování statistik nemažou. */
+function km_comments_schema(PDO $pdo): void
+{
+    $pdo->exec('
+        CREATE TABLE IF NOT EXISTS comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT NOT NULL, name TEXT NOT NULL, body TEXT NOT NULL,
+            created INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0, reply TEXT
+        );
+        CREATE INDEX IF NOT EXISTS comments_path ON comments (path, status);
+        CREATE TABLE IF NOT EXISTS comment_rate (hash TEXT NOT NULL, ts INTEGER NOT NULL);
+    ');
+}
+
 function km_today(): string
 {
     return date('Y-m-d');
