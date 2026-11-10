@@ -1,0 +1,192 @@
+---
+/**
+ * Zápisník alergenů – co už miminko ochutnalo. Seznam alergenů podle NHS (stejný jako v článku /prikrmy/alergeny/).
+ * Jen zapisuje: datum, poznámka, podezření na reakci. Nic nedoporučuje ani nepřipomíná.
+ * Data jen v localStorage `km-alergeny-v1` (při změně struktury zvýšit verzi a migrovat). Nic se neposílá na server.
+ */
+const alergeny = [
+  { id: 'mleko', label: 'Kravské mléko', hint: 'v jídle; jako hlavní nápoj až od 1 roku' },
+  { id: 'vejce', label: 'Vejce', hint: 'dobře tepelně upravené' },
+  { id: 'lepek', label: 'Lepek', hint: 'pšenice, ječmen, žito' },
+  { id: 'arasidy', label: 'Arašídy', hint: 'jen jemně mleté nebo jako arašídové máslo' },
+  { id: 'orechy', label: 'Ořechy', hint: 'jen jemně mleté nebo jako ořechové máslo' },
+  { id: 'sezam', label: 'Sezam a semínka', hint: 'jemně mletá' },
+  { id: 'soja', label: 'Sója', hint: '' },
+  { id: 'ryby', label: 'Ryby', hint: '' },
+  { id: 'korysi', label: 'Korýši', hint: 'ne syroví ani nedovaření' },
+  { id: 'lusteniny', label: 'Luštěniny', hint: '' },
+  { id: 'celer', label: 'Celer', hint: '' },
+  { id: 'horcice', label: 'Hořčice', hint: '' },
+];
+---
+<div class="al" data-allergens data-alergeny={JSON.stringify(alergeny)}>
+  <div class="al__inner">
+    <div class="al__head">
+      <p class="eyebrow">Zápisník · data zůstávají ve vašem zařízení</p>
+      <h2 class="heading-sm al__title">Co už miminko ochutnalo</h2>
+      <p class="al__sum" data-sum aria-live="polite"></p>
+    </div>
+
+    <ul class="al__list" data-list></ul>
+
+    <noscript><p class="al__hint">Zápisník potřebuje zapnutý JavaScript.</p></noscript>
+
+    <div class="al__tools">
+      <button type="button" class="btn btn--ghost" data-csv>Stáhnout záznamy (CSV)</button>
+      <button type="button" class="al__link" data-clear>Smazat vše</button>
+    </div>
+    <p class="al__confirm" data-confirm hidden>
+      Opravdu smazat všechny záznamy? <button type="button" class="al__link" data-clear-yes>Ano, smazat</button> <button type="button" class="al__link" data-clear-no>Ne</button>
+    </p>
+
+    <p class="al__foot">
+      Seznam alergenů podle <a href="https://www.nhs.uk/baby/weaning-and-feeding/food-allergies-in-babies-and-young-children/" rel="noopener">NHS</a>.
+      Zápisník nic nedoporučuje ani nepřipomíná. Záznamy se ukládají jen v tomto prohlížeči.
+    </p>
+  </div>
+</div>
+
+<script>
+  interface Alergen { id: string; label: string; hint: string }
+  interface Zaznam { id: number; a: string; d: string; n: string; r: boolean }
+  const KEY = 'km-alergeny-v1';
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+  const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  const fmt = (iso: string) => { const [y, m, d] = iso.split('-').map(Number); return `${d}. ${m}. ${y}`; };
+
+  document.querySelectorAll<HTMLElement>('[data-allergens]').forEach((root) => {
+    const alergeny: Alergen[] = JSON.parse(root.dataset.alergeny || '[]');
+    const list = root.querySelector<HTMLElement>('[data-list]')!;
+    const sum = root.querySelector<HTMLElement>('[data-sum]')!;
+    const confirmEl = root.querySelector<HTMLElement>('[data-confirm]')!;
+    let items: Zaznam[] = [];
+    let open: string | null = null;
+    let storageOk = true;
+    try { items = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { storageOk = false; }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch { storageOk = false; } };
+
+    function render() {
+      const done = new Set(items.map((i) => i.a)).size;
+      sum.textContent = (done ? `Zapsáno ${done} z ${alergeny.length} alergenů.` : 'Zatím nic zapsáno. Klepněte na potravinu a přidejte první záznam.')
+        + (storageOk ? '' : ' Prohlížeč neumožňuje ukládání – záznamy po zavření stránky zmizí.');
+      list.innerHTML = alergeny.map((a) => {
+        const rec = items.filter((i) => i.a === a.id).sort((x, y) => (x.d < y.d ? 1 : -1));
+        const any = rec.length > 0, reak = rec.some((r) => r.r), isOpen = open === a.id;
+        const stav = any ? `${rec.length}× · naposledy ${fmt(rec[0].d)}` : 'zatím nezapsáno';
+        return `<li class="al__item${any ? ' is-done' : ''}${reak ? ' is-reak' : ''}">
+          <button type="button" class="al__row" data-open="${a.id}" aria-expanded="${isOpen}">
+            <span class="al__check" aria-hidden="true">${any ? '✓' : ''}</span>
+            <span class="al__name"><strong>${esc(a.label)}</strong>${a.hint ? `<small>${esc(a.hint)}</small>` : ''}</span>
+            <span class="al__stav">${stav}${reak ? ' · podezření na reakci' : ''}</span>
+          </button>
+          ${isOpen ? `<div class="al__detail">
+            <form class="al__form" data-form="${a.id}">
+              <label><span>Datum</span><input type="date" name="d" value="${today()}" max="${today()}" required /></label>
+              <label class="al__grow"><span>Poznámka <small>(nepovinné)</small></span><input type="text" name="n" maxlength="120" placeholder="např. lžička v kaši" autocomplete="off" /></label>
+              <label class="al__cb"><input type="checkbox" name="r" /> <span>Podezření na reakci</span></label>
+              <button type="submit" class="btn">Zapsat</button>
+            </form>
+            ${rec.length ? `<ul class="al__recs">${rec.map((r) => `<li${r.r ? ' class="is-reak"' : ''}><span>${fmt(r.d)}${r.n ? ` – ${esc(r.n)}` : ''}${r.r ? ' – podezření na reakci' : ''}</span><button type="button" class="al__link" data-del="${r.id}">Smazat</button></li>`).join('')}</ul>` : ''}
+            ${reak ? '<p class="al__warn">Při podezření na alergickou reakci se poraďte s pediatrem. Při potížích s dýcháním nebo otoku jazyka či hrdla volejte 155.</p>' : ''}
+          </div>` : ''}
+        </li>`;
+      }).join('');
+    }
+
+    root.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement).closest<HTMLElement>('[data-open],[data-del],[data-csv],[data-clear],[data-clear-yes],[data-clear-no]');
+      if (!t) return;
+      if (t.dataset.open) open = open === t.dataset.open ? null : t.dataset.open;
+      else if (t.dataset.del) { items = items.filter((i) => String(i.id) !== t.dataset.del); save(); }
+      else if ('clear' in t.dataset) { confirmEl.hidden = false; return; }
+      else if ('clearNo' in t.dataset) { confirmEl.hidden = true; return; }
+      else if ('clearYes' in t.dataset) { items = []; open = null; save(); confirmEl.hidden = true; }
+      else if ('csv' in t.dataset) {
+        const name = (id: string) => alergeny.find((a) => a.id === id)?.label ?? id;
+        const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+        const rows = [...items].sort((x, y) => (x.d < y.d ? -1 : 1)).map((i) => [i.d, name(i.a), i.n, i.r ? 'ano' : 'ne'].map(q).join(';'));
+        const blob = new Blob(['﻿' + ['"Datum";"Alergen";"Poznámka";"Podezření na reakci"', ...rows].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'zapisnik-alergenu.csv'; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        return;
+      }
+      render();
+    });
+
+    root.addEventListener('submit', (e) => {
+      const f = (e.target as HTMLElement).closest<HTMLFormElement>('[data-form]');
+      if (!f) return;
+      e.preventDefault();
+      const fd = new FormData(f);
+      const d = String(fd.get('d') || today());
+      items.push({ id: Date.now(), a: f.dataset.form!, d: d > today() ? today() : d, n: String(fd.get('n') || '').trim().slice(0, 120), r: fd.get('r') === 'on' });
+      save();
+      render();
+    });
+
+    render();
+  });
+</script>
+
+<style>
+  .al { background: var(--color-sage-mist); border-radius: var(--radius-card); padding: var(--space-3); }
+  .al__inner { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .al__head { display: grid; gap: 0.35rem; }
+  .al__head > * { margin: 0; }
+  .al__title { font-size: 1.375rem; }
+  .al :global(p) { margin-block: 0; }
+  .al__sum, .al__hint { font-size: var(--fs-small); color: var(--text-muted); }
+  .al__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .al__list :global(.al__item) { background: var(--color-keylime-wash); border-radius: var(--radius-card); overflow: hidden; }
+  .al__list :global(.al__item.is-reak) { background: var(--color-alert-wash); box-shadow: inset 0 0 0 1px var(--color-alert-line); }
+  .al__list :global(.al__row) {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem; width: 100%; min-height: 3.25rem;
+    padding: 0.7rem 1rem; background: none; border: 0; font: inherit; color: var(--text); text-align: left; cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .al__list :global(.al__row:active) { transform: scale(0.99); }
+  .al__list :global(.al__row:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-card); }
+  .al__list :global(.al__check) {
+    display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; font-size: 0.9rem; font-weight: 600;
+    background: var(--color-cream-paper); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--color-sage-mist);
+  }
+  .al__list :global(.is-done .al__check) { background: var(--ink); color: var(--color-cream-paper); box-shadow: none; }
+  .al__list :global(.al__name) { display: grid; gap: 0.1rem; min-width: 0; }
+  .al__list :global(.al__name strong) { font-weight: 600; color: var(--ink); }
+  .al__list :global(.al__name small) { font-size: var(--fs-caption); color: var(--text-muted); }
+  .al__list :global(.al__stav) { font-size: var(--fs-small); color: var(--text-muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .al__list :global(.is-reak .al__stav) { color: var(--color-alert-ink); }
+  .al__list :global(.al__detail) { padding: 0 1rem 1rem; display: grid; gap: var(--space-2); animation: al-in var(--dur-base) var(--ease-out); }
+  .al__list :global(.al__form) { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; }
+  .al__list :global(.al__form label) { display: grid; gap: 0.3rem; font-size: var(--fs-small); font-weight: 600; color: var(--ink); min-width: 0; }
+  .al__list :global(.al__form small) { font-weight: 400; color: var(--text-muted); font-size: inherit; }
+  .al__list :global(.al__grow) { flex: 1 1 12rem; }
+  .al__list :global(.al__form input[type='date']), .al__list :global(.al__form input[type='text']) {
+    min-height: 2.75rem; padding: 0.5rem 0.8rem; font: inherit; font-size: 1rem; font-weight: 400; color: var(--text); width: 100%; min-width: 0;
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); background: var(--color-cream-paper);
+  }
+  .al__list :global(.al__form input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .al__list :global(.al__cb) { display: flex !important; align-items: center; gap: 0.5rem; min-height: 2.75rem; font-weight: 500 !important; cursor: pointer; }
+  .al__list :global(.al__cb input) { width: 1.15rem; height: 1.15rem; accent-color: var(--color-forest-ink); }
+  .al__list :global(.al__recs) { list-style: none; padding: 0; margin: 0; display: grid; }
+  .al__list :global(.al__recs li) { display: flex; justify-content: space-between; gap: var(--space-2); align-items: baseline; padding-block: 0.45rem; border-top: 1px solid var(--color-sage-mist); font-size: var(--fs-small); }
+  .al__list :global(.al__recs .is-reak span) { color: var(--color-alert-ink); }
+  .al__list :global(.al__warn) { font-size: var(--fs-small); color: var(--color-alert-ink); font-weight: 500; }
+  .al :global(.al__link) { flex: none; background: none; border: 0; padding: 0.25rem 0; font: inherit; font-size: var(--fs-small); color: var(--text-muted); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+  .al :global(.al__link:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .al__tools { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+  .al__confirm { font-size: var(--fs-small); display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: baseline; }
+  .al__confirm[hidden] { display: none; }
+  .al__foot { font-size: var(--fs-small); color: var(--text-muted); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+  @keyframes al-in { from { opacity: 0; transform: translateY(-4px); } }
+  @media (max-width: 640px) {
+    .al { padding: var(--space-1); }
+    .al__inner { padding: var(--space-3); }
+    .al__list :global(.al__row) { grid-template-columns: auto 1fr; }
+    .al__list :global(.al__stav) { grid-column: 2; text-align: left; }
+    .al__list :global(.al__form .btn) { width: 100%; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .al__list :global(.al__detail) { animation: none; } }
+</style>

@@ -3,7 +3,7 @@ export interface Nastroj {
   href: string;
   title: string;
   text: string;
-  motif: 'lupa' | 'hodiny' | 'kapka' | 'trava' | 'vlocka';
+  motif: 'lupa' | 'hodiny' | 'kapka' | 'trava' | 'vlocka' | 'vejce';
   tone: 'sage' | 'mint' | 'keylime' | 'slate';
   cta: string;
 }
@@ -32,6 +32,12 @@ export const nastroje: Nastroj[] = [
     title: 'Do kdy spotřebovat',
     text: 'Odpočet, do kdy spotřebovat připravené umělé mléko nebo odstříkané mateřské mléko. Lhůty podle WHO, CDC a NHS.',
     motif: 'vlocka', tone: 'slate', cta: 'Spustit odpočet',
+  },
+  {
+    href: '/nastroje/zapisnik-alergenu/',
+    title: 'Zápisník alergenů',
+    text: 'Co už miminko ochutnalo a kdy: vejce, arašídy, lepek, ryby a další. Záznamy zůstávají ve vašem telefonu.',
+    motif: 'vejce', tone: 'sage', cta: 'Otevřít zápisník',
   },
   {
     href: '/mleka/kolik-mleka-podle-veku/#výpočet-podle-hmotnosti',
