@@ -45,6 +45,10 @@ if ($refHost === '' || $refHost === preg_replace('/^www\./', '', $host)) {
 
 try {
     $pdo = km_db();
+    if (km_ip_excluded($pdo)) {
+        http_response_code(204);
+        exit;
+    }
     $day = km_today();
     $salt = km_salt($pdo, $day);
     $hash = hash('sha256', $salt . '|' . ($_SERVER['REMOTE_ADDR'] ?? '') . '|' . $ua . '|' . $host);

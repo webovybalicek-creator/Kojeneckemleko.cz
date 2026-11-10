@@ -63,7 +63,9 @@ EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké vý
 ## Hosting, deploy a návštěvnost
 - Hosting přes FTP s PHP. Deploy: `.github/workflows/deploy.yml` – automaticky při každém pushi do `main` (push = nasazení na ostrý web!), secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR, STATS_PASSWORD. Secrets nečíst ani nevypisovat.
 - Počítadlo: `public/api/hit.php` + `_lib.php` (SQLite v `api/data/`, mimo git i deploy), beacon v `src/layouts/Base.astro`, přehled `public/navstevnost/index.php` pod heslem.
-- Bez cookies, bez IP v DB, denní rotující sůl, respektuje DNT/GPC. Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
+- Bez cookies, bez IP v DB, denní rotující sůl, respektuje DNT/GPC.
+- Vlastní návštěvy provozovatele se nepočítají: přihlášení na `/navstevnost/` uloží značku `km-nemerit` do localStorage a otisk aktuální IP (HMAC, tabulka `excluded_ip`, max 20) – `hit.php` takové požadavky zahodí. IP se mění, proto se otisk obnovuje při každém otevření přehledu.
+- Vynulování statistik: změnit konstantu `KM_RESET` v `_lib.php` (data se smažou při prvním požadavku po deployi). Naposledy 10. 11. 2026. Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
 
 ## Příkazy
 `npm run dev` · `npm run build` · `npm run preview`

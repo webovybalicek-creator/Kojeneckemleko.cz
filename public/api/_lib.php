@@ -13,6 +13,12 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === '_lib.php') {
 }
 
 const KM_TZ = 'Europe/Prague';
+/**
+ * Jednorázové vynulování statistik: když se hodnota liší od té uložené v DB,
+ * smažou se při prvním požadavku po nasazení všechna nasbíraná data. Pro další vynulování změň datum.
+ */
+const KM_RESET = '2026-11-10';
+const KM_EXCLUDED_MAX = 20;
 date_default_timezone_set(KM_TZ);
 
 function km_config(): array
@@ -45,8 +51,46 @@ function km_db(): PDO
         CREATE TABLE IF NOT EXISTS today_visitors (day TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (day, hash));
         CREATE TABLE IF NOT EXISTS salt (day TEXT PRIMARY KEY, value TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS login_fail (hash TEXT NOT NULL, ts INTEGER NOT NULL);
+        CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS excluded_ip (hash TEXT PRIMARY KEY, added INTEGER NOT NULL);
     ');
+    $reset = $pdo->query("SELECT value FROM meta WHERE key = 'reset'")->fetchColumn();
+    if ($reset !== KM_RESET) {
+        $pdo->beginTransaction();
+        $pdo->exec('DELETE FROM pageviews; DELETE FROM daily; DELETE FROM referrers; DELETE FROM today_visitors;');
+        $pdo->prepare("INSERT INTO meta (key, value) VALUES ('reset', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")->execute([KM_RESET]);
+        $pdo->commit();
+    }
     return $pdo;
+}
+
+/**
+ * Vynechání provozovatele z měření podle IP adresy.
+ * Neukládá se IP, jen její otisk (HMAC s klíčem odvozeným z hesla k přehledu). Otisk se zapíše po přihlášení na /navstevnost/.
+ */
+function km_ip_hash(): string
+{
+    $secret = (string) (km_config()['stats_password'] ?? '');
+    return hash_hmac('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 'km-ip-exclude|' . $secret);
+}
+
+function km_ip_excluded(PDO $pdo): bool
+{
+    $q = $pdo->prepare('SELECT 1 FROM excluded_ip WHERE hash = ?');
+    $q->execute([km_ip_hash()]);
+    return (bool) $q->fetchColumn();
+}
+
+function km_ip_exclude(PDO $pdo): void
+{
+    $pdo->prepare('INSERT INTO excluded_ip (hash, added) VALUES (?, ?) ON CONFLICT(hash) DO UPDATE SET added = excluded.added')
+        ->execute([km_ip_hash(), time()]);
+    $pdo->exec('DELETE FROM excluded_ip WHERE hash NOT IN (SELECT hash FROM excluded_ip ORDER BY added DESC LIMIT ' . KM_EXCLUDED_MAX . ')');
+}
+
+function km_ip_include(PDO $pdo): void
+{
+    $pdo->prepare('DELETE FROM excluded_ip WHERE hash = ?')->execute([km_ip_hash()]);
 }
 
 function km_today(): string

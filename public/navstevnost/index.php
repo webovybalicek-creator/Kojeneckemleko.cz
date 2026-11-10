@@ -55,8 +55,25 @@ if (!in_array($range, [7, 30, 90, 365], true)) {
 }
 
 $data = null;
+$ipExcluded = false;
 if ($authed) {
     $pdo = km_db();
+    // Vlastní IP adresa se nepočítá: otisk se obnoví při každém otevření přehledu (IP se může měnit).
+    if (isset($_GET['ip']) && $_GET['ip'] === 'pocitat') {
+        km_ip_include($pdo);
+        $_SESSION['ip_pocitat'] = true;
+        header('Location: ./');
+        exit;
+    }
+    if (isset($_GET['ip']) && $_GET['ip'] === 'nepocitat') {
+        unset($_SESSION['ip_pocitat']);
+        header('Location: ./');
+        exit;
+    }
+    if (empty($_SESSION['ip_pocitat'])) {
+        km_ip_exclude($pdo);
+    }
+    $ipExcluded = km_ip_excluded($pdo);
     $from = date('Y-m-d', strtotime('-' . ($range - 1) . ' days'));
 
     $q = $pdo->prepare('SELECT day, views, visitors FROM daily WHERE day >= ? ORDER BY day');
@@ -230,6 +247,9 @@ $fmt = fn (int $n): string => number_format($n, 0, ',', "\u{00A0}");
     · <a href="?odhlasit=1">Odhlásit</a>
     <br><span id="nemerit">Tento prohlížeč se nezapočítává do statistik.</span>
     <a href="#" id="nemerit-toggle">Znovu počítat</a>
+    <br><?php if ($ipExcluded): ?>Návštěvy z vaší současné IP adresy se nepočítají (ukládá se jen její otisk). <a href="?ip=pocitat">Počítat</a>
+    <?php else: ?>Návštěvy z vaší současné IP adresy se počítají. <a href="?ip=nepocitat">Nepočítat</a><?php endif; ?>
+    <br>Statistiky vynulovány <?= km_e(date('j. n. Y', strtotime(KM_RESET))) ?>.
   </footer>
   <script>
     // Přihlášením se tento prohlížeč vyřadí z měření (značka v localStorage pro celý web).
