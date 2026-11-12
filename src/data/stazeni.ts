@@ -30,7 +30,7 @@ export interface Stazeni {
 }
 
 /** Kdy jsme naposledy ověřili weby SZPI, MZd a výrobců (ISO) */
-export const posledniKontrola = '2026-11-09';
+export const posledniKontrola = '2026-11-12';
 
 export const stazeni: Stazeni[] = [
   {
