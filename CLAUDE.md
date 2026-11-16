@@ -37,6 +37,14 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 8. Každý fakt i odkaz ověřit fetchnutím zdroje; když zdroj tvrzení neříká, tvrzení vypustit nebo přeformulovat. Observační studie = „souvislost“, ne příčina.
 9. Na začátku článku o mléce krátká poznámka o doporučení WHO ke kojení (bez moralizování).
 
+## Rozcestníky a úvod
+- **Výběr věku na úvodu** (`AgePicker.astro`, bez JS – radio + CSS) a stránka **`/prvni-rok/`** čerpají z `src/data/prvni-rok.ts`. Každá věta má zdroj převzatý z ověřeného článku – při změně článku upravit i tento soubor.
+- **`/zacnete-tady/`** + sekce „Co právě řešíte?“ na úvodu: `src/data/situace.ts` (ID článků v pořadí čtení; neexistující ID shodí build).
+- Stažená mléka jsou na úvodu sbalená (`<details>`), plný seznam v článku a nástroji. Počet = různé výrobky (jako `RecallBar`).
+- Karty článků na úvodu: `ArticleCards feature` (hlavní karta + 2 menší). Lístky v ilustracích „vyrostou“ při zobrazení (`.leaf`, třída `anim` na `<html>`, jen transform/opacity).
+- Pod nadpisem článku štítek „Ověřeno · počet zdrojů: instituce“ (zkratky z `publisher`, mapování v `[slug].astro`), odkaz na `#zdroje`.
+- `/mleka/srovnani/`: filtry (fáze, HMO, bez palmového oleje, probiotika), řazení podle ceny za 100 g prášku a porovnání 2–3 mlék v dialogu. Cena za 100 ml se neuvádí (není ověřená spotřeba prášku).
+
 ## Slovníček a tooltipy
 - Slovníček `/slovnicek/` = data v `src/data/slovnicek.ts` (heslo, krátká definice, odstavce s `[n]` odkazy na `glossarySources`). Každá definice musí mít zdroj. Štítky (HA, AR, Comfort, Kozí; typy v tabulce mlék) vedou na `/slovnicek/#id` přes `tagToTerm`.
 - Tooltipy: `src/data/terms.mjs` (zkratky institucí = jen vysvětlivka; pojmy = vysvětlivka + odkaz do slovníčku). V MDX článcích je doplní rehype plugin `src/lib/rehype-terms.mjs` u prvního výskytu; v prostých textech (perexy, FAQ) funkce `annotate()` přes `set:html`. Nový pojem = přidat do `terms.mjs` (a případně do slovníčku).

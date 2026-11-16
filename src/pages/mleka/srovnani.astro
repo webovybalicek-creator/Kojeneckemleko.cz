@@ -27,6 +27,31 @@ const groups = [
 const brands = [...new Set(milks.map((m) => m.data.brand))]
   .sort((a, b) => a.localeCompare(b, 'cs'))
   .map((label) => ({ label }));
+// Data pro porovnání vybraných mlék vedle sebe (klient)
+const stageLabel = { pocatecni: 'Počáteční', pokracovaci: 'Pokračovací', batoleci: 'Batolecí' } as const;
+const baseLabel = { kravske: 'Kravské', kozi: 'Kozí', sojove: 'Sójové', hydrolyzovane: 'Hydrolyzované', aminokyselinove: 'Aminokyselinové' } as const;
+const typeLabel: Record<string, string> = { 'bez-laktozy': 'bez laktózy', bio: 'BIO', standard: 'standardní', comfort: 'Comfort' };
+const yn = (v?: boolean) => (v === undefined ? 'neuvedeno' : v ? 'Ano' : 'Ne');
+const czk = (v: number) => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(v);
+const dFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
+const compareData = Object.fromEntries(milks.map(({ id, data }) => [id, {
+  brand: data.brand, name: data.name, url: data.officialUrl,
+  rows: [
+    ['Fáze', stageLabel[data.stage]],
+    ['Základ', baseLabel[data.base]],
+    ['Typ', data.types.map((t) => typeLabel[t] ?? t).join(', ')],
+    ['HMO', yn(data.hmo)],
+    ['Palmový olej', yn(data.palmOil)],
+    ['Probiotika', yn(data.probiotics)],
+    ['Pod dohledem lékaře', data.medical ? 'Ano' : 'Ne'],
+    ['Orientační cena', data.price ? `${czk(data.price.czk)} / ${data.price.packG} g` : 'neuvedeno'],
+    ['Za 100 g prášku', data.price ? czk(data.price.czk / data.price.packG * 100) : 'neuvedeno'],
+    ['Ověřeno', dFmt.format(data.verified)],
+  ],
+}]));
+const hasBio = milks.some((m) => m.data.types.includes('bio'));
+const hasGoat = milks.some((m) => m.data.base === 'kozi');
+
 const breadcrumbs = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -72,15 +97,64 @@ const itemList = {
     {groups.map((g) => <a href={`#${g.id}`} class="tag">{g.title} <span>{g.milks.length}</span></a>)}
   </nav>
 
+  <section class="container" aria-label="Filtry">
+    <form class="filters panel panel--keylime" id="filtry" onsubmit="return false">
+      <fieldset class="filters__group">
+        <legend class="eyebrow">Fáze</legend>
+        <div class="seg">
+          <label><input type="radio" name="faze" value="" checked /><span>Vše</span></label>
+          <label><input type="radio" name="faze" value="pocatecni" /><span>Počáteční</span></label>
+          <label><input type="radio" name="faze" value="pokracovaci" /><span>Pokračovací</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="filters__group">
+        <legend class="eyebrow">Složení podle výrobce</legend>
+        <div class="checks">
+          <label><input type="checkbox" name="hmo" /><span>S HMO</span></label>
+          <label><input type="checkbox" name="palm" /><span>Bez palmového oleje</span></label>
+          <label><input type="checkbox" name="pro" /><span>S probiotiky</span></label>
+          {hasBio && <label><input type="checkbox" name="bio" /><span>BIO</span></label>}
+          {hasGoat && <label><input type="checkbox" name="kozi" /><span>Kozí základ</span></label>}
+        </div>
+      </fieldset>
+      <fieldset class="filters__group">
+        <legend class="eyebrow">Řazení</legend>
+        <select name="razeni" class="select" aria-label="Řazení">
+          <option value="">Podle značky</option>
+          <option value="cena">Podle ceny za 100 g prášku</option>
+        </select>
+      </fieldset>
+      <p class="filters__count" aria-live="polite"><span id="pocet">{milks.length}</span> z {milks.length} mlék · <button type="reset" class="linkbtn">Zrušit filtry</button></p>
+    </form>
+    <p class="hint muted">Zaškrtnutím u názvu vyberete 2–3 mléka a porovnáte je vedle sebe.</p>
+  </section>
+
   {groups.map((g) => (
     <section class="container group" id={g.id} aria-labelledby={`${g.id}-h`}>
       <div class="group__head">
         <h2 id={`${g.id}-h`}>{g.title}</h2>
         <p class="muted">{g.sub}</p>
       </div>
-      <MilkTable milks={g.milks} caption={g.title} />
+      <MilkTable milks={g.milks} caption={g.title} compare />
     </section>
   ))}
+  <p class="container empty-msg muted" id="nic" hidden>Filtrům neodpovídá žádné mléko. <button type="button" class="linkbtn" data-reset>Zrušit filtry</button></p>
+
+  <div class="tray" id="tray" hidden>
+    <p class="tray__text"><strong id="tray-n">0</strong> vybráno <span class="muted">(max. 3)</span></p>
+    <button type="button" class="btn" id="tray-open">Porovnat vedle sebe</button>
+    <button type="button" class="linkbtn" id="tray-clear">Zrušit výběr</button>
+  </div>
+
+  <dialog class="cmpdlg" id="cmpdlg" aria-labelledby="cmpdlg-h">
+    <div class="cmpdlg__head">
+      <h2 id="cmpdlg-h" class="heading-sm">Porovnání vybraných mlék</h2>
+      <button type="button" class="cmpdlg__close" id="cmpdlg-close" aria-label="Zavřít">×</button>
+    </div>
+    <div class="cmpdlg__body" id="cmpdlg-body"></div>
+    <p class="muted cmpdlg__note">Údaje ze složení na webech výrobců, ceny orientačně (Dr.Max). Tabulka neříká, které mléko je lepší. Připravujte podle návodu na balení.</p>
+  </dialog>
+  <script type="application/json" id="mleka-data" set:html={JSON.stringify(compareData)}></script>
 
   <section class="container">
     <div class="notes">
@@ -125,4 +199,142 @@ const itemList = {
   .group__head p { margin: 0; }
   .notes { display: grid; gap: var(--space-2); margin-top: var(--space-3); max-width: 70ch; }
   .note { font-size: var(--fs-small); }
+
+  .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3) var(--space-5); padding: var(--space-3) var(--space-4); }
+  .filters__group { border: 0; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+  .filters__group legend { padding: 0; margin-bottom: 0.4rem; }
+  .seg, .checks { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .seg label, .checks label { position: relative; cursor: pointer; }
+  .seg input, .checks input { position: absolute; opacity: 0; inset: 0; z-index: 1; margin: 0; cursor: pointer; }
+  .seg span, .checks span {
+    display: inline-block; padding: 0.4rem 0.8rem; border-radius: var(--radius-pill);
+    background: var(--color-cream-paper); border: 1px solid color-mix(in srgb, var(--color-forest-ink) 25%, transparent);
+    font-size: var(--fs-small); font-weight: 500; color: var(--ink);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .seg label:active span, .checks label:active span { transform: scale(0.97); }
+  .seg input:checked + span, .checks input:checked + span { background: var(--color-forest-ink); color: var(--color-cream-paper); border-color: var(--color-forest-ink); }
+  .checks input:checked + span::before { content: '✓ '; }
+  .seg input:focus-visible + span, .checks input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .select { font: inherit; font-size: var(--fs-small); padding: 0.45rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid color-mix(in srgb, var(--color-forest-ink) 25%, transparent); background: var(--color-cream-paper); color: var(--ink); }
+  .filters__count { margin: 0 0 0 auto; font-size: var(--fs-small); color: var(--text-muted); }
+  .linkbtn { font: inherit; background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; }
+  .hint { font-size: var(--fs-small); margin: var(--space-2) 0 var(--space-5); }
+  .group[hidden] { display: none; }
+  .empty-msg { margin-top: var(--space-4); }
+
+  .tray {
+    position: fixed; left: 50%; bottom: 1rem; z-index: 20; transform: translateX(-50%);
+    display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; justify-content: center;
+    padding: 0.6rem 0.75rem 0.6rem 1.1rem; border-radius: var(--radius-card);
+    background: var(--color-cream-paper); border: 1px solid color-mix(in srgb, var(--color-forest-ink) 20%, transparent);
+    animation: tray-in var(--dur-base) var(--ease-out);
+    max-width: calc(100% - 2rem);
+  }
+  .tray[hidden] { display: none; }
+  .tray__text { margin: 0; font-size: var(--fs-small); }
+  @keyframes tray-in { from { opacity: 0; transform: translate(-50%, 8px); } }
+
+  .cmpdlg { margin: auto; width: min(60rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); border: 0; border-radius: var(--radius-card); padding: 0; background: var(--color-cream-paper); color: var(--text); }
+  .cmpdlg[open] { animation: dlg-in var(--dur-base) var(--ease-out); }
+  .cmpdlg::backdrop { background: rgba(15, 62, 23, 0.35); }
+  @keyframes dlg-in { from { opacity: 0; transform: translateY(8px); } }
+  .cmpdlg__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--color-cream-paper); }
+  .cmpdlg__head h2 { margin: 0; }
+  .cmpdlg__close { font: inherit; font-size: 1.5rem; line-height: 1; width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 0; background: var(--color-keylime-wash); color: var(--ink); cursor: pointer; }
+  .cmpdlg__body { padding: var(--space-3) var(--space-4); overflow-x: auto; }
+  .cmpdlg__note { font-size: var(--fs-caption); padding: 0 var(--space-4) var(--space-3); margin: 0; }
+  .cmpdlg :global(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+  .cmpdlg :global(th), .cmpdlg :global(td) { text-align: left; padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .cmpdlg :global(thead th) { font-weight: 600; color: var(--ink); }
+  .cmpdlg :global(thead th small) { display: block; font-weight: 400; color: var(--text-muted); font-size: var(--fs-caption); }
+  .cmpdlg :global(tbody th) { font-size: var(--fs-caption); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+  .cmpdlg :global(tr.diff td) { background: var(--color-keylime-wash); }
+  @media (max-width: 640px) {
+    .filters { padding: var(--space-3); gap: var(--space-3); }
+    .filters__count { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tray, .cmpdlg[open] { animation: none; } .seg span, .checks span { transition: none; } }
 </style>
+
+<script>
+  const form = document.getElementById('filtry') as HTMLFormElement | null;
+  const data = JSON.parse(document.getElementById('mleka-data')?.textContent || '{}') as Record<string, { brand: string; name: string; url: string; rows: [string, string][] }>;
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('tbody tr[data-id]')];
+  rows.forEach((r, i) => (r.dataset.i = String(i)));
+  const groups = [...document.querySelectorAll<HTMLElement>('.group')];
+  const pocet = document.getElementById('pocet');
+  const nic = document.getElementById('nic');
+
+  function apply() {
+    if (!form) return;
+    const f = new FormData(form);
+    const faze = String(f.get('faze') || '');
+    let shown = 0;
+    for (const r of rows) {
+      const d = r.dataset;
+      const ok = (!faze || d.stage === faze)
+        && (!f.get('hmo') || d.hmo === 'true')
+        && (!f.get('palm') || d.palm === 'ne')
+        && (!f.get('pro') || d.pro === 'true')
+        && (!f.get('bio') || (d.types || '').split(' ').includes('bio'))
+        && (!f.get('kozi') || d.base === 'kozi');
+      r.hidden = !ok;
+      if (ok) shown++;
+    }
+    const byPrice = f.get('razeni') === 'cena';
+    document.querySelectorAll('tbody').forEach((tb) => {
+      const trs = [...tb.querySelectorAll<HTMLTableRowElement>('tr[data-id]')];
+      trs.sort((a, b) => {
+        if (byPrice) {
+          const pa = a.dataset.price ? Number(a.dataset.price) : Infinity;
+          const pb = b.dataset.price ? Number(b.dataset.price) : Infinity;
+          if (pa !== pb) return pa - pb;
+        }
+        return Number(a.dataset.i) - Number(b.dataset.i);
+      }).forEach((tr) => tb.appendChild(tr));
+    });
+    groups.forEach((g) => { g.hidden = !g.querySelector('tbody tr[data-id]:not([hidden])'); });
+    if (pocet) pocet.textContent = String(shown);
+    if (nic) nic.hidden = shown > 0;
+  }
+  form?.addEventListener('change', apply);
+  form?.addEventListener('reset', () => setTimeout(apply));
+  document.querySelector('[data-reset]')?.addEventListener('click', () => form?.reset());
+
+  // Porovnání
+  const tray = document.getElementById('tray');
+  const trayN = document.getElementById('tray-n');
+  const dlg = document.getElementById('cmpdlg') as HTMLDialogElement | null;
+  const body = document.getElementById('cmpdlg-body');
+  const boxes = [...document.querySelectorAll<HTMLInputElement>('.cmp__box')];
+  const selected = () => boxes.filter((b) => b.checked).map((b) => b.value);
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+
+  function syncTray() {
+    const sel = selected();
+    boxes.forEach((b) => { b.disabled = !b.checked && sel.length >= 3; });
+    if (tray) tray.hidden = sel.length === 0;
+    if (trayN) trayN.textContent = String(sel.length);
+    const open = document.getElementById('tray-open') as HTMLButtonElement | null;
+    if (open) open.disabled = sel.length < 2;
+  }
+  boxes.forEach((b) => b.addEventListener('change', syncTray));
+  document.getElementById('tray-clear')?.addEventListener('click', () => { boxes.forEach((b) => (b.checked = false)); syncTray(); });
+  document.getElementById('tray-open')?.addEventListener('click', () => {
+    const sel = selected().map((id) => data[id]).filter(Boolean);
+    if (!body || !dlg || sel.length < 2) return;
+    const labels = sel[0].rows.map((r) => r[0]);
+    body.innerHTML = `<table><thead><tr><td></td>${sel.map((m) => `<th scope="col"><small>${esc(m.brand)}</small><a href="${esc(m.url)}" rel="noopener nofollow">${esc(m.name)}</a></th>`).join('')}</tr></thead><tbody>${
+      labels.map((l, i) => {
+        const vals = sel.map((m) => m.rows[i][1]);
+        const diff = new Set(vals).size > 1;
+        return `<tr${diff ? ' class="diff"' : ''}><th scope="row">${esc(l)}</th>${vals.map((v) => `<td>${esc(v)}</td>`).join('')}</tr>`;
+      }).join('')
+    }</tbody></table><p class="muted" style="font-size:var(--fs-caption);margin:0.75rem 0 0">Zvýrazněné řádky se mezi vybranými mléky liší.</p>`;
+    dlg.showModal();
+  });
+  document.getElementById('cmpdlg-close')?.addEventListener('click', () => dlg?.close());
+  dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  syncTray();
+</script>

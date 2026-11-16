@@ -91,10 +91,12 @@ const items = leaves[name] ?? [];
   )}
   {name === 'prikrmy' && <path d="M112 112 C110 100 108 88 104 70" class="s" fill="none" />}
 
-  {items.map((lf) => (
+  {items.map((lf, i) => (
     <g transform={`translate(${lf.x} ${lf.y}) rotate(${lf.a})`}>
-      <path d={leafPath(lf.l, lf.w ?? lf.l * 0.3)} class={`f-${lf.t ?? 'sage'} s`} />
-      <path d={`M${lf.l * 0.12} 0 L${lf.l * 0.82} 0`} class="s thin" />
+      <g class="leaf" style={`--d:${i}`}>
+        <path d={leafPath(lf.l, lf.w ?? lf.l * 0.3)} class={`f-${lf.t ?? 'sage'} s`} />
+        <path d={`M${lf.l * 0.12} 0 L${lf.l * 0.82} 0`} class="s thin" />
+      </g>
     </g>
   ))}
 

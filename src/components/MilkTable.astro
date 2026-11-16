@@ -5,8 +5,11 @@ import { tagToTerm, termHref } from '../data/slovnicek';
 interface Props {
   milks: CollectionEntry<'mleka'>[];
   caption?: string;
+  /** Sloupec „Porovnat“ + data atributy pro filtry (stránka /mleka/srovnani/) */
+  compare?: boolean;
 }
-const { milks, caption = 'Srovnání kojeneckých mlék' } = Astro.props;
+const { milks, caption = 'Srovnání kojeneckých mlék', compare = false } = Astro.props;
+const per100 = (d: CollectionEntry<'mleka'>['data']) => (d.price ? d.price.czk / d.price.packG * 100 : undefined);
 
 const stageLabel = { pocatecni: 'Počáteční', pokracovaci: 'Pokračovací', batoleci: 'Batolecí' } as const;
 const baseLabel = {
@@ -34,6 +37,7 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
         <caption class="visually-hidden">{caption}</caption>
         <thead>
           <tr>
+            {compare && <th scope="col" class="cmp-col"><span class="visually-hidden">Porovnat</span></th>}
             <th scope="col">Mléko</th>
             <th scope="col">Fáze</th>
             <th scope="col">Základ</th>
@@ -46,8 +50,25 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
           </tr>
         </thead>
         <tbody>
-          {milks.map(({ data }) => (
-            <tr>
+          {milks.map(({ id, data }) => (
+            <tr
+              data-id={id}
+              data-stage={data.stage}
+              data-base={data.base}
+              data-types={data.types.join(' ')}
+              data-hmo={String(data.hmo === true)}
+              data-palm={String(data.palmOil === false ? 'ne' : data.palmOil ? 'ano' : '?')}
+              data-pro={String(data.probiotics === true)}
+              data-name={`${data.brand} ${data.name}`}
+              data-price={per100(data)?.toFixed(2) ?? ''}
+            >
+              {compare && (
+                <td class="cmp-col">
+                  <label class="cmp" title="Přidat do porovnání">
+                    <input type="checkbox" class="cmp__box" value={id} aria-label={`Porovnat: ${data.brand} ${data.name}`} />
+                  </label>
+                </td>
+              )}
               <th scope="row">
                 <span class="brand">{data.brand}</span>
                 <a href={data.officialUrl} rel="noopener nofollow">{data.name}</a>
@@ -101,6 +122,11 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
     tbody tr:hover { background: var(--color-keylime-wash); }
     tbody th a:hover { text-decoration: underline; }
   }
+  .cmp-col { width: 2.75rem; padding-right: 0; }
+  .cmp { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; cursor: pointer; }
+  .cmp__box { width: 1.15rem; height: 1.15rem; accent-color: var(--color-forest-ink); cursor: pointer; }
+  tr[hidden] { display: none; }
+  tr:has(.cmp__box:checked) { background: var(--color-keylime-wash); }
   .empty { text-align: left; }
   .empty__title { margin-block: var(--space-1) var(--space-2); max-width: 30ch; }
 </style>

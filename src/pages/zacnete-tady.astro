@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+import { getCollection } from 'astro:content';
+import { situace } from '../data/situace';
+
+const all = await getCollection('clanky', ({ data }) => !data.draft);
+const byId = new Map(all.map((a) => [a.id, a]));
+const cesty = situace.map((s) => ({
+  ...s,
+  items: s.clanky.map((id) => {
+    const a = byId.get(id);
+    if (!a) throw new Error(`situace.ts: článek „${id}“ neexistuje`);
+    return { href: `/${a.data.cluster}/${a.id}/`, title: a.data.title.split(':')[0], desc: a.data.description };
+  }),
+}));
+
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Začněte tady', item: new URL('/zacnete-tady/', Astro.site).toString() },
+  ],
+};
+---
+<Base
+  title="Začněte tady: krmení miminka podle situace"
+  description="Nevíte, kde začít? Vyberte svou situaci – čekáte miminko, nedaří se kojení, krmíte umělým mlékem, vracíte se do práce nebo začínáte s příkrmy – a čtěte články v doporučeném pořadí."
+  jsonLd={[breadcrumbs]}
+>
+  <section class="container">
+    <header class="hub-head panel panel--keylime">
+      <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <span>Začněte tady</span></nav>
+      <h1>Začněte tady</h1>
+      <p class="lead">Vyberte, co právě řešíte. U každé situace jsou články seřazené tak, jak dává smysl je číst.</p>
+      <ul class="jump">
+        {cesty.map((s) => <li><a href={`#${s.id}`} class="tag tag--soft">{s.title}</a></li>)}
+      </ul>
+    </header>
+  </section>
+
+  <section class="container section paths" aria-label="Situace">
+    {cesty.map((s) => (
+      <article id={s.id} class:list={['path', 'panel', `panel--${s.tone}`]}>
+        <div class="path__head">
+          <h2 class="serif">{s.title}</h2>
+          <p>{s.text}</p>
+        </div>
+        <ol class="path__list">
+          {s.items.map((it) => (
+            <li>
+              <a href={it.href} class="path__item">
+                <span class="path__title">{it.title} <Arrow /></span>
+                <span class="path__desc">{it.desc}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </article>
+    ))}
+    <p class="more">
+      Hledáte přehled podle věku? <a href="/prvni-rok/">První rok krmení měsíc po měsíci <Arrow /></a>
+    </p>
+  </section>
+</Base>
+
+<style>
+  .hub-head { display: grid; gap: var(--space-3); justify-items: start; margin-top: var(--space-4); padding-block: var(--space-6); }
+  .hub-head h1 { font-size: var(--fs-display); line-height: 1.05; }
+  .hub-head > * { max-width: 44rem; }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); }
+  .crumbs a { color: var(--text-muted); }
+  .jump { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .jump a { text-decoration: none; color: var(--ink); background: var(--color-cream-paper); transition: transform var(--dur-fast) var(--ease-out); }
+  .jump a:active { transform: scale(0.97); }
+
+  .paths { display: grid; gap: var(--space-3); }
+  .path { display: grid; grid-template-columns: 1fr 1.6fr; gap: var(--space-4); padding: var(--space-5); scroll-margin-top: 6rem; }
+  .path__head h2 { font-size: var(--fs-h2); line-height: 1.1; }
+  .path__head p { margin-top: var(--space-2); color: var(--color-charcoal); max-width: 30ch; }
+  .path__list { list-style: none; counter-reset: krok; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .path__list li { counter-increment: krok; }
+  .path__item {
+    display: grid; grid-template-columns: 2rem 1fr; gap: 0.15rem var(--space-2);
+    padding: var(--space-2) var(--space-3); background: var(--color-cream-paper); border-radius: var(--radius-card);
+    text-decoration: none; color: var(--text); transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .path__item::before {
+    content: counter(krok); grid-row: span 2; align-self: start;
+    width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center;
+    border: 1.5px solid var(--color-forest-ink); color: var(--ink); font-weight: 600; font-size: var(--fs-small);
+  }
+  .path__item:active { transform: scale(0.98); }
+  .path__title { font-weight: 600; color: var(--ink); display: inline-flex; align-items: center; gap: 0.4em; }
+  .path__title :global(svg) { width: 1em; flex: none; transition: transform var(--dur-base) var(--ease-out); }
+  .path__desc { font-size: var(--fs-small); color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  @media (hover: hover) and (pointer: fine) {
+    .path__item:hover .path__title { text-decoration: underline; text-underline-offset: 0.2em; }
+    .path__item:hover .path__title :global(svg) { transform: translateX(3px); }
+    .jump a:hover { background: var(--color-mint-veil); }
+  }
+  .more { margin-top: var(--space-3); }
+  .more a { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; }
+  .more :global(svg) { width: 1em; }
+  @media (max-width: 860px) {
+    .path { grid-template-columns: 1fr; padding: var(--space-4) var(--space-3); gap: var(--space-3); }
+  }
+  @media (prefers-reduced-motion: reduce) { .path__item, .path__title :global(svg), .jump a { transition: none; } }
+</style>

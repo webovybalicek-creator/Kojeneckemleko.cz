@@ -14,14 +14,16 @@ interface Props {
   /** Zobrazit název klastru v eyebrow (na úvodu ano, v rozcestníku ne) */
   showCluster?: boolean;
   headingLevel?: 'h2' | 'h3';
+  /** První karta velká vlevo, ostatní menší vpravo pod sebou (úvod) */
+  feature?: boolean;
 }
-const { articles, showCluster = true, headingLevel = 'h3' } = Astro.props;
+const { articles, showCluster = true, headingLevel = 'h3', feature = false } = Astro.props;
 const Heading = headingLevel;
 const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
 ---
-<ul class="cards">
+<ul class:list={['cards', { 'cards--feature': feature && articles.length >= 3 }]}>
   {articles.map((a, i) => (
-    <li style={`--i:${i}`}>
+    <li style={`--i:${i}`} class:list={{ 'is-lead': i === 0 }}>
       <a href={`/${a.data.cluster}/${a.id}/`} class="card">
         {a.data.cover?.photo ? (
           <span class="card__cover card__cover--photo">
@@ -92,6 +94,19 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
   }
   .card:focus-visible { outline: 2px solid var(--color-forest-ink); outline-offset: 4px; border-radius: 14px; }
 
+  /* Úvod: hlavní karta + dvě menší vedle */
+  @media (min-width: 961px) {
+    .cards--feature { grid-template-columns: 1.35fr 1fr; grid-template-rows: auto auto; gap: var(--space-4) var(--space-4); align-items: start; }
+    .cards--feature > .is-lead { grid-row: span 2; }
+    .cards--feature > .is-lead .card__cover { aspect-ratio: 16 / 9; }
+    .cards--feature > .is-lead .card__title { font-size: 1.5rem; line-height: 1.25; }
+    .cards--feature > .is-lead .card__desc { font-size: var(--fs-body); -webkit-line-clamp: 4; }
+    .cards--feature > .is-lead :global(.card__illu) { width: min(70%, 22rem); }
+    .cards--feature > li:not(.is-lead) .card { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); align-items: start; gap: var(--space-3); }
+    .cards--feature > li:not(.is-lead) .card__cover { aspect-ratio: 1 / 1; }
+    .cards--feature > li:not(.is-lead) :global(.card__illu) { width: 100%; }
+    .cards--feature > li:not(.is-lead) .card__desc { -webkit-line-clamp: 2; }
+  }
   @media (max-width: 960px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 600px) { .cards { grid-template-columns: 1fr; gap: var(--space-4); } }
   @media (prefers-reduced-motion: reduce) {

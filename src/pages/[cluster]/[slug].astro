@@ -25,6 +25,22 @@ const meta = clusterMeta[data.cluster];
 const url = new URL(Astro.url.pathname, Astro.site).toString();
 const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
 
+// Štítek „Ověřeno“ pod nadpisem: počet zdrojů a hlavní instituce (zkratky z pole publisher)
+const INSTITUCE: [RegExp, string][] = [
+  [/\bWHO\b|Světová zdravotnická/, 'WHO'], [/UNICEF/, 'UNICEF'], [/ESPGHAN/, 'ESPGHAN'], [/EFSA/, 'EFSA'],
+  [/\bNHS\b/, 'NHS'], [/\bNICE\b/, 'NICE'], [/American Academy of Pediatrics|\bAAP\b/, 'AAP'], [/\bCDC\b|Centers for Disease/, 'CDC'],
+  [/\bFDA\b/, 'FDA'], [/Cochrane/, 'Cochrane'], [/First Steps/, 'First Steps'], [/\bBfR\b/, 'BfR'], [/EAACI/, 'EAACI'],
+  [/SZPI/, 'SZPI'], [/\bSZÚ\b|Státní zdravotní ústav/, 'SZÚ'], [/Ministerstvo zdravotnictví/, 'MZd'],
+];
+const instituce = [...new Set(data.sources.flatMap((s) => {
+  const hit = INSTITUCE.find(([re]) => re.test(s.publisher));
+  return hit && s.kind !== 'studie' ? [hit[1]] : [];
+}))];
+const pocetStudii = data.sources.filter((s) => s.kind === 'studie').length;
+const zdrojuSlovo = (n: number) => (n === 1 ? 'zdroj' : n >= 2 && n <= 4 ? 'zdroje' : 'zdrojů');
+const studiiSlovo = (n: number) => (n === 1 ? 'studie' : n >= 2 && n <= 4 ? 'studie' : 'studií');
+const shrnuti = [instituce.slice(0, 4).join(', '), pocetStudii ? `${pocetStudii} ${studiiSlovo(pocetStudii)}` : ''].filter(Boolean).join(' + ');
+
 const articleLd = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -65,9 +81,15 @@ const breadcrumbs = {
         <a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href={`/${data.cluster}/`}>{meta.title}</a>
       </nav>
       <h1>{data.title}</h1>
+      <a href="#zdroje" class="verified">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Ověřeno <time datetime={data.updated.toISOString()}>{dateFmt.format(data.updated)}</time></span>
+        <span class="verified__sep" aria-hidden="true">·</span>
+        <span>{data.sources.length} {zdrojuSlovo(data.sources.length)}{shrnuti && <span class="verified__list">: {shrnuti}</span>}</span>
+      </a>
       <p class="lead" set:html={annotate(data.description)} />
       <p class="byline muted">
-        {data.author} · aktualizováno <time datetime={data.updated.toISOString()}>{dateFmt.format(data.updated)}</time>
+        {data.author} · publikováno <time datetime={data.published.toISOString()}>{dateFmt.format(data.published)}</time>
         · <a href="/jak-tvorime-obsah/">jak tvoříme obsah</a>
       </p>
       {data.cover?.photo ? (
@@ -127,6 +149,18 @@ const breadcrumbs = {
   .article__cover :global(.article__illu) { width: min(52%, 22rem); height: auto; }
   .article__head { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
   .crumbs, .byline { font-size: var(--fs-small); }
+  .verified {
+    justify-self: start; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.45rem;
+    padding: 0.4rem 0.85rem; border-radius: var(--radius-pill); background: var(--color-keylime-wash);
+    font-size: var(--fs-small); font-weight: 500; color: var(--ink); text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .verified svg { flex: none; }
+  .verified__list { font-weight: 400; color: var(--color-charcoal); }
+  .verified__sep { color: var(--text-muted); }
+  .verified:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) { .verified:hover { background: var(--color-mint-veil); } }
+  @media (prefers-reduced-motion: reduce) { .verified { transition: none; } }
   .crumbs a { color: var(--text-muted); }
 
   .prose { margin-bottom: var(--space-5); }

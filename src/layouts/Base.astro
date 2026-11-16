@@ -56,6 +56,10 @@ const baseLd = [
     <link rel="apple-touch-icon" href="/images/ikona-180.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
+    <script is:inline>
+      // Lístky v ilustracích „vyrostou“ při prvním zobrazení – jen s JS a bez prefers-reduced-motion
+      try { if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('anim'); } catch (e) {}
+    </script>
 
     <meta property="og:type" content={ogType} />
     <meta property="og:locale" content="cs_CZ" />
@@ -92,6 +96,14 @@ const baseLd = [
         }
         document.addEventListener('pointerover', fit, { passive: true });
         document.addEventListener('focusin', fit);
+      })();
+      (function () {
+        var root = document.documentElement;
+        if (!root.classList.contains('anim')) return;
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+        }, { rootMargin: '0px 0px -8% 0px' });
+        document.querySelectorAll('svg.illu, svg.cover').forEach(function (el) { io.observe(el); });
       })();
     </script>
     {!noindex && (

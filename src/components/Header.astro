@@ -32,6 +32,8 @@ const isActive = (href: string) => path.startsWith(href);
       </summary>
       <div class="mobile-nav__panel">
         <ul>
+          <li><a href="/zacnete-tady/">Začněte tady</a></li>
+          <li><a href="/prvni-rok/">První rok krmení</a></li>
           {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
           <li><a href="/mleka/srovnani/" class="btn">Srovnání mlék</a></li>
         </ul>

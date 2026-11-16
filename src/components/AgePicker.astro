@@ -1,0 +1,91 @@
+---
+/**
+ * Výběr věku na úvodu: „Mému miminku je…“ → mléko, množství, jídlo + odkazy.
+ * Bez JavaScriptu – přepíná se přes radio inputy a CSS. Data: src/data/prvni-rok.ts.
+ */
+import { obdobi } from '../data/prvni-rok';
+import Arrow from './Arrow.astro';
+
+const css = obdobi.map((o) =>
+  `#vek-${o.id}:checked ~ .age__tabs label[for="vek-${o.id}"]{background:var(--color-forest-ink);color:var(--color-cream-paper);border-color:var(--color-forest-ink)}` +
+  `#vek-${o.id}:focus-visible ~ .age__tabs label[for="vek-${o.id}"]{outline:2px solid var(--focus);outline-offset:2px}` +
+  `#vek-${o.id}:checked ~ .age__panels .age__panel--${o.id}{display:grid}`
+).join('');
+---
+<div class="age">
+  <p class="eyebrow age__ask" id="vek-otazka">Mému miminku je</p>
+  {obdobi.map((o, i) => (
+    <input type="radio" name="vek" id={`vek-${o.id}`} class="age__input visually-hidden" checked={i === 0} />
+  ))}
+  <div class="age__tabs" role="group" aria-labelledby="vek-otazka">
+    {obdobi.map((o) => <label for={`vek-${o.id}`}>{o.stitek}</label>)}
+  </div>
+  <div class="age__panels">
+    {obdobi.map((o) => (
+      <section class:list={['age__panel', `age__panel--${o.id}`, 'panel', 'panel--cream']} aria-label={o.nazev}>
+        <dl class="age__rows">
+          {[
+            { k: 'Mléko', f: o.mleko },
+            { k: o.kolikLabel ?? 'Množství', f: o.kolik },
+            { k: 'Jídlo', f: o.jidlo },
+          ].map((r) => (
+            <div class="age__row">
+              <dt class="eyebrow">{r.k}</dt>
+              <dd>
+                {r.f.text}
+                <span class="age__src">
+                  {r.f.zdroje.map((z, j) => <>{j > 0 && ', '}<a href={z.href} rel="noopener">{z.label}</a></>)}
+                </span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p class="age__foot">
+          <a href={o.odkazy[0].href} class="age__link">{o.odkazy[0].label} <Arrow /></a>
+          <a href={`/prvni-rok/#${o.id}`} class="age__all">Celý první rok</a>
+        </p>
+      </section>
+    ))}
+  </div>
+</div>
+
+<style is:inline set:html={css}></style>
+
+<style>
+  .age { display: grid; gap: var(--space-2); }
+  .age__ask { margin: 0; }
+  .age__tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .age__tabs label {
+    cursor: pointer; user-select: none;
+    padding: 0.42rem 0.7rem; border-radius: var(--radius-pill);
+    border: 1px solid color-mix(in srgb, var(--color-forest-ink) 30%, transparent);
+    background: var(--color-cream-paper); color: var(--ink);
+    font-size: var(--fs-small); font-weight: 500; font-variant-numeric: tabular-nums;
+    transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  }
+  .age__tabs label:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) {
+    .age__tabs label:hover { background: var(--color-keylime-wash); }
+  }
+  .age__panel { display: none; gap: var(--space-2); padding: var(--space-3) var(--space-4); animation: age-in var(--dur-base) var(--ease-out); }
+  @keyframes age-in { from { opacity: 0; transform: translateY(4px); } }
+  .age__rows { margin: 0; display: grid; gap: var(--space-2); }
+  .age__row { display: grid; gap: 0.2rem; padding-top: var(--space-2); border-top: 1px solid var(--line); }
+  .age__row:first-child { border-top: 0; padding-top: 0; }
+  .age__row dt { color: var(--text-muted); margin: 0; }
+  .age__row dd { margin: 0; color: var(--text); line-height: 1.5; }
+  .age__src { display: inline; margin-left: 0.35em; font-size: var(--fs-caption); color: var(--text-muted); }
+  .age__src a { color: inherit; }
+  .age__foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-2); margin: 0; font-size: var(--fs-small); }
+  .age__link { display: inline-flex; align-items: center; gap: 0.35em; font-weight: 500; text-decoration: none; }
+  .age__link :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .age__all { color: var(--text-muted); }
+  @media (hover: hover) and (pointer: fine) {
+    .age__link:hover { text-decoration: underline; }
+    .age__link:hover :global(svg) { transform: translateX(3px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .age__panel { animation: none; }
+    .age__tabs label, .age__link :global(svg) { transition: none; }
+  }
+</style>
