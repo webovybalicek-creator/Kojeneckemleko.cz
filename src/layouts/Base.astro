@@ -120,9 +120,48 @@ const baseLd = [
               if (q === '0') localStorage.removeItem('km-nemerit');
               if (localStorage.getItem('km-nemerit') === '1') return;
             } catch (e) {}
-            var d = JSON.stringify({ p: location.pathname, r: document.referrer });
-            if (!(navigator.sendBeacon && navigator.sendBeacon('/api/hit.php', d))) {
-              fetch('/api/hit.php', { method: 'POST', body: d, keepalive: true }).catch(function () {});
+            var send = function (url, d) {
+              if (!(navigator.sendBeacon && navigator.sendBeacon(url, d))) {
+                fetch(url, { method: 'POST', body: d, keepalive: true }).catch(function () {});
+              }
+            };
+            send('/api/hit.php', JSON.stringify({ p: location.pathname, r: document.referrer }));
+
+            // Cíle: anonymní počty akcí (bez cookies a identifikátorů), každá nejvýš jednou na zobrazení stránky.
+            // Seznam povolených názvů je v public/api/_lib.php (km_events).
+            var sent = {};
+            window.kmEvent = function (name) {
+              if (sent[name]) return;
+              sent[name] = 1;
+              send('/api/event.php', JSON.stringify({ e: name, p: location.pathname }));
+            };
+            var ev = window.kmEvent;
+            var tools = '[data-recall-check],[data-growth],[data-useby],[data-allergens],[data-feeding-log],.calc';
+            var onUse = function (e) {
+              var t = e.target;
+              if (!t || !t.closest) return;
+              if (t.closest(tools) && (e.type !== 'click' || t.closest('button,label,summary'))) ev('nastroj');
+              if (t.closest('.table-panel') && (e.type !== 'click' || t.closest('button,label,th,select'))) ev('srovnani');
+              if (e.type !== 'click') return;
+              var a = t.closest('a[href]');
+              if (t.closest('[data-print]')) ev('tisk');
+              if (t.closest('.faq summary')) ev('faq');
+              if (!a) return;
+              if (/\.pdf($|\?)/.test(a.getAttribute('href'))) ev('pdf');
+              else if (a.hostname && a.hostname !== h && a.closest('#zdroje, .prose, article')) ev('zdroj');
+              else if (a.closest('.related')) ev('dalsi');
+            };
+            document.addEventListener('click', onUse, true);
+            document.addEventListener('change', onUse, true);
+            var src = document.getElementById('zdroje');
+            if (src && 'IntersectionObserver' in window) {
+              var t0 = Date.now();
+              var io = new IntersectionObserver(function (es) {
+                if (!es[0].isIntersecting) return;
+                io.disconnect();
+                setTimeout(function () { ev('cteni'); }, Math.max(0, 20000 - (Date.now() - t0)));
+              });
+              io.observe(src);
             }
           } catch (e) {}
         })();

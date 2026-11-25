@@ -58,6 +58,7 @@ function km_db(): PDO
     if ($reset !== KM_RESET) {
         $pdo->beginTransaction();
         $pdo->exec('DELETE FROM pageviews; DELETE FROM daily; DELETE FROM referrers; DELETE FROM today_visitors;');
+        $pdo->exec('DROP TABLE IF EXISTS events');
         $pdo->prepare("INSERT INTO meta (key, value) VALUES ('reset', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")->execute([KM_RESET]);
         $pdo->commit();
     }
@@ -104,6 +105,30 @@ function km_comments_schema(PDO $pdo): void
         CREATE INDEX IF NOT EXISTS comments_path ON comments (path, status);
         CREATE TABLE IF NOT EXISTS comment_rate (hash TEXT NOT NULL, ts INTEGER NOT NULL);
     ');
+}
+
+/**
+ * Cíle (anonymní akce na stránce). Klíč = název posílaný z webu, hodnota = popis v přehledu.
+ * Nový cíl: přidat sem a zavolat window.kmEvent('nazev') nebo dát prvku atribut data-km="nazev".
+ */
+function km_events(): array
+{
+    return [
+        'cteni' => 'Dočtený článek (došel ke zdrojům, aspoň 20 s na stránce)',
+        'nastroj' => 'Použitý nástroj nebo kalkulačka',
+        'srovnani' => 'Práce se srovnáním mlék (filtr, řazení)',
+        'faq' => 'Rozbalená častá otázka',
+        'zdroj' => 'Klik na odborný zdroj',
+        'tisk' => 'Tisk přehledu',
+        'pdf' => 'Stažené PDF',
+        'komentar' => 'Odeslaný komentář',
+        'dalsi' => 'Klik na související článek',
+    ];
+}
+
+function km_events_schema(PDO $pdo): void
+{
+    $pdo->exec('CREATE TABLE IF NOT EXISTS events (day TEXT NOT NULL, name TEXT NOT NULL, path TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, name, path))');
 }
 
 function km_today(): string

@@ -95,7 +95,22 @@ if ($authed) {
     $refs = $pdo->prepare('SELECT host, SUM(views) AS views FROM referrers WHERE day >= ? GROUP BY host ORDER BY views DESC LIMIT 15');
     $refs->execute([$from]);
 
+    km_events_schema($pdo);
+    $ev = $pdo->prepare('SELECT name, SUM(n) AS n FROM events WHERE day >= ? GROUP BY name');
+    $ev->execute([$from]);
+    $evTotals = array_column($ev->fetchAll(), 'n', 'name');
+    $evTop = $pdo->prepare('SELECT name, path, SUM(n) AS n FROM events WHERE day >= ? GROUP BY name, path ORDER BY n DESC LIMIT 25');
+    $evTop->execute([$from]);
+    $av = $pdo->prepare("SELECT COALESCE(SUM(views), 0) FROM pageviews WHERE day >= ? AND (path LIKE '/mleka/%/' OR path LIKE '/krmeni/%/' OR path LIKE '/prikrmy/%/') AND path <> '/mleka/srovnani/'");
+    $av->execute([$from]);
+    $tv = $pdo->prepare("SELECT COALESCE(SUM(views), 0) FROM pageviews WHERE day >= ? AND path LIKE '/nastroje/%/'");
+    $tv->execute([$from]);
+
     $data = [
+        'events' => $evTotals,
+        'eventsTop' => $evTop->fetchAll(),
+        'articleViews' => (int) $av->fetchColumn(),
+        'toolViews' => (int) $tv->fetchColumn(),
         'days' => $days,
         'views' => array_sum(array_column($days, 'views')),
         'visitors' => array_sum(array_column($days, 'visitors')),
@@ -243,6 +258,34 @@ $fmt = fn (int $n): string => number_format($n, 0, ',', "\u{00A0}");
       </tbody></table>
       <?php endif; ?>
     </div>
+  </section>
+
+  <section class="panel card goals">
+    <h2>Cíle – co návštěvníci na webu dělají</h2>
+    <?php
+      $labels = km_events();
+      $e = $data['events'];
+      $rate = fn (int $a, int $b): string => $b > 0 ? ' · ' . number_format(100 * $a / $b, 0) . ' %' : '';
+    ?>
+    <table><tbody>
+      <?php foreach ($labels as $key => $label): $n = (int) ($e[$key] ?? 0); ?>
+        <tr>
+          <td><?= km_e($label) ?></td>
+          <td><?= $fmt($n) ?><?php
+            if ($key === 'cteni') { echo km_e($rate($n, $data['articleViews'])) . ' zobrazení článků'; }
+            if ($key === 'nastroj') { echo ' <span class="muted">(stránky nástrojů: ' . $fmt($data['toolViews']) . ' zobrazení)</span>'; }
+          ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody></table>
+    <?php if ($data['eventsTop']): ?>
+      <h2 style="margin-top:24px">Kde k tomu dochází nejčastěji</h2>
+      <table><tbody>
+        <?php foreach ($data['eventsTop'] as $r): ?>
+          <tr><td><?= km_e(explode(' (', $labels[$r['name']] ?? $r['name'])[0]) ?> · <a href="<?= km_e($r['path']) ?>" target="_blank" rel="noopener"><?= km_e($r['path']) ?></a></td><td><?= $fmt((int) $r['n']) ?></td></tr>
+        <?php endforeach; ?>
+      </tbody></table>
+    <?php else: ?><p class="muted" style="margin-top:12px">Akce se měří od 25. 11. 2026. Každá se počítá nejvýš jednou na jedno zobrazení stránky.</p><?php endif; ?>
   </section>
 
   <footer class="muted">

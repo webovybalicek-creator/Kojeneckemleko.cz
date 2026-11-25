@@ -85,7 +85,8 @@ EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké vý
 - Bez cookies, bez IP v DB, denní rotující sůl, respektuje DNT/GPC.
 - Vlastní návštěvy provozovatele se nepočítají: přihlášení na `/navstevnost/` uloží značku `km-nemerit` do localStorage a otisk aktuální IP (HMAC, tabulka `excluded_ip`, max 20) – `hit.php` takové požadavky zahodí. IP se mění, proto se otisk obnovuje při každém otevření přehledu.
 - Vynulování statistik: změnit konstantu `KM_RESET` v `_lib.php` (data se smažou při prvním požadavku po deployi). Naposledy 10. 11. 2026.
-- Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly.
+- **Cíle (akce na stránce):** `window.kmEvent('nazev')` v `Base.astro` → `public/api/event.php` → tabulka `events` (den, název, stránka, počet), přehled v sekci „Cíle“ na `/navstevnost/`. Povolené názvy a popisy: `km_events()` v `_lib.php` (cteni, nastroj, srovnani, faq, zdroj, tisk, pdf, komentar, dalsi). Každá akce nejvýš jednou na zobrazení stránky, bez cookies a identifikátorů; nikdy neposílat obsah zadaný do nástrojů. Měří se od 25. 11. 2026.
+- Žádné Google Analytics ani jiné trackery třetích stran bez cookie lišty a právní kontroly (rozhodnutí 25. 11. 2026: místo GA vlastní měření cílů).
 
 ## Příkazy
 `npm run dev` · `npm run build` · `npm run preview`

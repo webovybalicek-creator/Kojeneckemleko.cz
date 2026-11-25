@@ -98,6 +98,7 @@ const { path } = Astro.props;
         if (r.ok && d.ok) {
           form.reset();
           msg.textContent = 'Děkujeme. Komentář se zobrazí po schválení.';
+          (window as any).kmEvent?.('komentar');
         } else {
           msg.textContent = d.error || 'Komentář se nepodařilo odeslat. Zkuste to prosím později.';
         }
