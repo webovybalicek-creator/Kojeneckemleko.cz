@@ -13,9 +13,15 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Obrázek pro sdílení (cesta od kořene webu), výchozí /images/og/default.png */
   ogImage?: string;
+  /**
+   * false = na stránce se nikdy nesmí načíst reklama (AdSense ani jiná síť).
+   * Povinně u stránek o počátečních mlécích – viz CLAUDE.md, sekce Reklama.
+   * Reklamní skript se smí vykreslit jen pod podmínkou `ads`.
+   */
+  ads?: boolean;
 }
 
-const { title, description, jsonLd = [], noindex = false, ogType = 'website', ogImage = '/images/og/default.png' } = Astro.props;
+const { title, description, jsonLd = [], noindex = false, ogType = 'website', ogImage = '/images/og/default.png', ads = true } = Astro.props;
 const ogImageUrl = new URL(ogImage, Astro.site).toString();
 const siteName = 'Kojenecké mléko';
 const fullTitle = title === siteName ? `${siteName} – průvodce krmením miminka` : `${title} | ${siteName}`;
@@ -51,6 +57,7 @@ const baseLd = [
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!ads && <meta name="km-reklama" content="ne" />}
     <meta name="theme-color" content="#fffefc" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/images/ikona-180.png" />

@@ -63,7 +63,7 @@ const breadcrumbs = {
   ],
 };
 ---
-<Base title={title} description={description} jsonLd={[breadcrumbs]}>
+<Base title={title} description={description} jsonLd={[breadcrumbs]} ads={d.stage !== 'pocatecni'}>
   <article class="container card">
     <nav class="crumbs" aria-label="Drobečková navigace">
       <a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/mleka/">Kojenecká mléka</a>
