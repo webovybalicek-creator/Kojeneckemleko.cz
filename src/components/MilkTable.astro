@@ -71,7 +71,7 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
               )}
               <th scope="row">
                 <span class="brand">{data.brand}</span>
-                <a href={data.officialUrl} rel="noopener nofollow">{data.name}</a>
+                <a href={`/mleka/srovnani/${id}/`}>{data.name}</a>
                 {data.medical && <span class="medical">Pod dohledem lékaře</span>}
               </th>
               <td>{stageLabel[data.stage]}</td>

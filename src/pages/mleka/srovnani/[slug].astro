@@ -1,0 +1,209 @@
+---
+/**
+ * Faktická karta jednoho mléka ze srovnání.
+ * Pravidla (regulace – nařízení EU 2016/127, zákon o regulaci reklamy):
+ *  - stejná šablona a stejné pořadí údajů pro všechna mléka, nic se nezvýrazňuje,
+ *  - jen údaje z obalu / webu výrobce s datem ověření, žádné hodnocení ani doporučení,
+ *  - bez loga, bez fotek obalů, bez odkazů do e-shopů, bez Product schématu,
+ *  - nikdy netvrdit „nebylo staženo“ – jen ukázat shodu se seznamem a odkázat na nástroj.
+ */
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { tagToTerm, termHref } from '../../../data/slovnicek';
+import { stazeni, posledniKontrola } from '../../../data/stazeni';
+
+export async function getStaticPaths() {
+  const milks = await getCollection('mleka');
+  return milks.map((milk) => ({ params: { slug: milk.id }, props: { milk, milks } }));
+}
+interface Props { milk: CollectionEntry<'mleka'>; milks: CollectionEntry<'mleka'>[] }
+const { milk, milks } = Astro.props;
+const d = milk.data;
+
+const specialTypes = ['HA', 'AR', 'bez-laktozy'];
+const isSpecial = (m: CollectionEntry<'mleka'>) => m.data.types.some((t) => specialTypes.includes(t));
+const groupOf = (m: CollectionEntry<'mleka'>) => (isSpecial(m) ? 'specialni' : m.data.stage);
+const group = groupOf(milk);
+const groupTitle: Record<string, string> = {
+  pocatecni: 'Počáteční mléka', pokracovaci: 'Pokračovací mléka', batoleci: 'Batolecí mléka', specialni: 'Speciální mléka',
+};
+const stageLabel = { pocatecni: 'Počáteční', pokracovaci: 'Pokračovací', batoleci: 'Batolecí' } as const;
+const stageAdj = { pocatecni: 'Počáteční', pokracovaci: 'Pokračovací', batoleci: 'Batolecí' } as const;
+const stageAge = { pocatecni: 'od narození', pokracovaci: 'od ukončeného 6. měsíce', batoleci: 'od 1 roku' } as const;
+const baseLabel = { kravske: 'Kravské mléko', kozi: 'Kozí mléko', sojove: 'Sója', hydrolyzovane: 'Hydrolyzovaná bílkovina', aminokyselinove: 'Aminokyseliny' } as const;
+const baseText = { kravske: 'na základu z kravského mléka', kozi: 'na základu z kozího mléka', sojove: 'na sójovém základu', hydrolyzovane: 's hydrolyzovanou bílkovinou', aminokyselinove: 'na bázi aminokyselin' } as const;
+const typeLabel: Record<string, string> = { 'bez-laktozy': 'bez laktózy', bio: 'BIO', standard: 'standardní', comfort: 'Comfort' };
+const yn = (v?: boolean) => (v === undefined ? 'výrobce na webu neuvádí' : v ? 'Ano' : 'Ne');
+const czk = (v: number) => new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(v);
+const dFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
+
+const fullName = d.name.toLowerCase().startsWith(d.brand.toLowerCase()) ? d.name : `${d.brand} ${d.name}`;
+const verified = dFmt.format(d.verified);
+
+// Shoda se seznamem stažených mlék: stejná sada slov v názvu (bez ohledu na pořadí).
+const tokens = (s: string) => [...new Set(s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().split(' '))].sort().join(' ');
+const recalls = stazeni.filter((s) => tokens(s.vyrobek) === tokens(fullName));
+
+const others = milks
+  .filter((m) => m.id !== milk.id && groupOf(m) === group)
+  .sort((a, b) => a.data.brand.localeCompare(b.data.brand, 'cs') || a.data.name.localeCompare(b.data.name, 'cs'));
+
+const url = new URL(`/mleka/srovnani/${milk.id}/`, Astro.site).toString();
+const title = `${fullName}: složení, typ a cena`;
+const description = `${fullName} – ${stageAdj[d.stage].toLowerCase()} kojenecké mléko ${baseText[d.base]}. HMO, palmový olej, probiotika a orientační cena podle výrobce. Bez hodnocení.`;
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Úvod', item: Astro.site?.toString() },
+    { '@type': 'ListItem', position: 2, name: 'Kojenecká mléka', item: new URL('/mleka/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: 'Srovnání kojeneckých mlék', item: new URL('/mleka/srovnani/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 4, name: fullName, item: url },
+  ],
+};
+---
+<Base title={title} description={description} jsonLd={[breadcrumbs]}>
+  <article class="container card">
+    <nav class="crumbs" aria-label="Drobečková navigace">
+      <a href="/">Úvod</a> <span aria-hidden="true">/</span> <a href="/mleka/">Kojenecká mléka</a>
+      <span aria-hidden="true">/</span> <a href="/mleka/srovnani/">Srovnání</a>
+    </nav>
+    <p class="eyebrow">Karta mléka · údaje výrobce</p>
+    <h1>{fullName}</h1>
+    <p class="lead">
+      {stageAdj[d.stage]} kojenecké mléko {baseText[d.base]}, určené {stageAge[d.stage]}.
+      Karta shrnuje údaje ze složení tak, jak je uvádí výrobce. Mléko nehodnotíme ani nedoporučujeme.
+    </p>
+
+    <p class="note panel panel--keylime">
+      Kojení je podle WHO doporučený způsob výživy kojence. Pokud miminko kojené není nebo je kojené jen částečně,
+      o výběru mléka se poraďte s pediatrem.
+    </p>
+
+    {d.medical && (
+      <p class="note note--alert">
+        Výrobce toto mléko uvádí jako potravinu pro zvláštní lékařské účely. Používá se jen pod dohledem lékaře.
+      </p>
+    )}
+    {!d.medical && group === 'specialni' && (
+      <p class="note note--alert">Speciální mléko – používejte ho jen po poradě s pediatrem.</p>
+    )}
+
+    <h2>Údaje podle výrobce</h2>
+    <div class="facts panel panel--slate">
+      <dl>
+        <div><dt>Fáze</dt><dd><a href={termHref(d.stage)}>{stageLabel[d.stage]}</a> ({stageAge[d.stage]})</dd></div>
+        <div><dt>Základ</dt><dd>{baseLabel[d.base]}</dd></div>
+        <div><dt>Typ</dt><dd>{d.types.map((t, i) => (
+          <>{i > 0 && ', '}{tagToTerm[t] ? <a href={termHref(tagToTerm[t])}>{typeLabel[t] ?? t}</a> : (typeLabel[t] ?? t)}</>
+        ))}</dd></div>
+        <div><dt>HMO (oligosacharidy)</dt><dd>{yn(d.hmo)}</dd></div>
+        <div><dt><a href="/slovnicek/#palmovy-olej">Palmový olej</a></dt><dd>{yn(d.palmOil)}</dd></div>
+        <div><dt><a href="/slovnicek/#probiotika">Probiotika</a></dt><dd>{yn(d.probiotics)}</dd></div>
+        <div><dt>Potravina pro zvláštní lékařské účely</dt><dd>{d.medical ? 'Ano' : 'Ne'}</dd></div>
+        <div><dt>Složení ověřeno</dt><dd>{verified}, <a href={d.officialUrl} rel="noopener nofollow">web výrobce</a></dd></div>
+      </dl>
+    </div>
+    <p class="muted small">
+      Složení se může změnit. Rozhodující je vždy údaj na obalu balení, které máte doma.
+    </p>
+
+    <h2>Orientační cena</h2>
+    {d.price ? (
+      <div class="facts panel panel--slate">
+        <dl>
+          <div><dt>Balení</dt><dd>{czk(d.price.czk)} / {d.price.packG} g</dd></div>
+          <div><dt>Přepočet na 100 g prášku</dt><dd>{czk(d.price.czk / d.price.packG * 100)}</dd></div>
+          <div><dt>Zjištěno</dt><dd>{dFmt.format(d.price.date)}, {d.price.source}</dd></div>
+        </dl>
+      </div>
+    ) : (
+      <p>Cenu neuvádíme – v obchodě, ze kterého ceny pro srovnání bereme, toto mléko v době ověření nebylo.</p>
+    )}
+    <p class="muted small">
+      Ceny všech mlék bereme ze stejného obchodu a ke stejnému dni, aby šly porovnat. Nejde o nabídku ani odkaz k nákupu;
+      cena se v čase i mezi obchody liší.
+    </p>
+
+    <h2>Stažení z trhu</h2>
+    {recalls.length > 0 ? (
+      <div class="note note--alert">
+        <p><strong>Výrobek s tímto názvem je na seznamu stažených mlék.</strong> Týká se jen balení s uvedeným datem minimální trvanlivosti:</p>
+        <ul>
+          {recalls.map((r) => (
+            <li>{r.baleni} · {r.identifikace} · {r.duvod} · <a href={r.zdroj} rel="noopener">{r.vydal}</a>, {dFmt.format(new Date(r.datum))}</li>
+          ))}
+        </ul>
+        <p>Své balení zkontrolujete v nástroji <a href="/nastroje/kontrola-mleka/">Kontrola staženého mléka</a>.</p>
+      </div>
+    ) : (
+      <p>
+        Jestli se některé stažení týká vašeho balení, ověříte podle data minimální trvanlivosti v nástroji
+        <a href="/nastroje/kontrola-mleka/">Kontrola staženého mléka</a>. Úplný seznam je v článku
+        <a href="/mleka/stazena-kojenecka-mleka/">Stažená kojenecká mléka</a> (weby SZPI, ministerstva zdravotnictví
+        a výrobců jsme naposledy procházeli {dFmt.format(new Date(posledniKontrola))}).
+      </p>
+    )}
+
+    <h2>Co údaje znamenají</h2>
+    <ul class="links">
+      {d.stage === 'pocatecni' && <li>Každé počáteční mléko prodávané v EU musí splňovat stejné požadavky na složení – víc v článku <a href="/mleka/jak-vybrat-kojenecke-mleko/">Jak vybrat kojenecké mléko</a>.</li>}
+      {d.stage !== 'pocatecni' && <li>Čím se liší fáze mlék a kdy (a jestli) přecházet: <a href="/mleka/pocatecni-vs-pokracovaci/">Počáteční vs. pokračovací mléko</a>.</li>}
+      {d.types.includes('HA') && <li><a href="/mleka/ha-mleko/">HA mléko: co to je a kdy se používá</a></li>}
+      {d.types.includes('AR') && <li><a href="/mleka/ar-mleko/">AR mléko: co to je a kdy se používá</a></li>}
+      {d.types.includes('comfort') && <li><a href="/mleka/comfort-mleko/">Comfort mléko: co to je</a></li>}
+      {d.types.includes('bez-laktozy') && <li><a href="/mleka/mleko-bez-laktozy/">Mléko bez laktózy: kdy má smysl</a></li>}
+      {d.base === 'kozi' && <li><a href="/mleka/kozi-mleko/">Kozí mléko pro kojence</a></li>}
+      <li><a href="/mleka/palmovy-olej/">Palmový olej v kojeneckém mléce</a></li>
+      <li><a href="/mleka/priprava-umeleho-mleka/">Příprava umělého mléka krok za krokem</a> – vždy připravujte podle návodu na balení.</li>
+      <li><a href="/mleka/zmena-kojeneckeho-mleka/">Změna kojeneckého mléka</a></li>
+    </ul>
+
+    {others.length > 0 && (
+      <section aria-labelledby="dalsi">
+        <h2 id="dalsi">{groupTitle[group]} ve srovnání</h2>
+        <p class="muted small">Všechna mléka stejné skupiny, řazená abecedně.</p>
+        <ul class="others">
+          {others.map((m) => {
+            const n = m.data.name.toLowerCase().startsWith(m.data.brand.toLowerCase()) ? m.data.name : `${m.data.brand} ${m.data.name}`;
+            return <li><a href={`/mleka/srovnani/${m.id}/`}>{n}</a></li>;
+          })}
+        </ul>
+        <p><a class="btn btn--ghost" href={`/mleka/srovnani/#${group}`}>Zpět na srovnávací tabulku</a></p>
+      </section>
+    )}
+
+    <p class="muted small disclaimer">
+      Karta je věcný přehled údajů, ne reklama ani doporučení. Web nemá provize z prodeje ani spolupráci s výrobci
+      (<a href="/jak-tvorime-obsah/">jak tvoříme obsah</a>). Informace nenahrazují radu lékaře.
+    </p>
+  </article>
+</Base>
+
+<style>
+  .card { max-width: 46rem; padding-block: var(--space-6) var(--space-7); }
+  .crumbs { font-size: var(--fs-small); color: var(--text-muted); margin-bottom: var(--space-4); }
+  h1 { margin-block: var(--space-2) var(--space-4); }
+  h2 { margin-block: var(--space-7) var(--space-3); font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); }
+  .note { margin-block: var(--space-4); font-size: var(--fs-small); }
+  .note--alert {
+    padding: var(--space-4); border-radius: var(--radius-card);
+    background: var(--color-alert-wash); color: var(--color-alert-ink);
+  }
+  .note--alert a { color: inherit; }
+  .note--alert ul { margin: var(--space-2) 0; padding-left: 1.2em; }
+  .facts { padding: var(--space-3); }
+  dl { margin: 0; background: var(--color-cream-paper); border-radius: 10px; }
+  dl > div { display: grid; grid-template-columns: minmax(9rem, 2fr) 3fr; gap: var(--space-3); padding: 0.875rem 1rem; border-bottom: 1px solid var(--line); }
+  dl > div:last-child { border-bottom: 0; }
+  dt { font-size: var(--fs-small); color: var(--text-muted); }
+  dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .small { font-size: var(--fs-small); margin-top: var(--space-3); }
+  .links, .others { padding-left: 1.2em; display: grid; gap: var(--space-2); }
+  .others { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+  .disclaimer { margin-top: var(--space-7); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+  @media (max-width: 480px) {
+    dl > div { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
+</style>

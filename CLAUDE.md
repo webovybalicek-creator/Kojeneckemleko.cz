@@ -45,6 +45,13 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 - Pod nadpisem článku štítek „Ověřeno · počet zdrojů: instituce“ (zkratky z `publisher`, mapování v `[slug].astro`), odkaz na `#zdroje`.
 - `/mleka/srovnani/`: filtry (fáze, HMO, bez palmového oleje, probiotika), řazení podle ceny za 100 g prášku a porovnání 2–3 mlék v dialogu. Cena za 100 ml se neuvádí (není ověřená spotřeba prášku).
 
+## Karty mlék (`/mleka/srovnani/<id>/`)
+Šablona `src/pages/mleka/srovnani/[slug].astro`, jedna stránka na každý JSON v `src/content/mleka/`; název v tabulce srovnání vede na kartu, odkaz na web výrobce (nofollow) je až na kartě. Rozhodnutí 26. 11. 2026: karty ano, ale **nesmí to být reklama a nikoho nezvýhodňovat**:
+- stejná šablona a pořadí údajů pro všechna mléka, nic se nezvýrazňuje; „další mléka“ = celá skupina abecedně,
+- jen údaje z obalu / webu výrobce s datem ověření; žádné hodnocení, doporučení, loga, fotky obalů, odkazy do e-shopů ani Product schéma,
+- na každé kartě poznámka WHO o kojení, u speciálních mlék „po poradě s pediatrem“,
+- stažení: karta ukáže jen shodu názvu se `stazeni.ts` a odkáže na nástroj; nikdy netvrdí „nebylo staženo“.
+
 ## Slovníček a tooltipy
 - Slovníček `/slovnicek/` = data v `src/data/slovnicek.ts` (heslo, krátká definice, odstavce s `[n]` odkazy na `glossarySources`). Každá definice musí mít zdroj. Štítky (HA, AR, Comfort, Kozí; typy v tabulce mlék) vedou na `/slovnicek/#id` přes `tagToTerm`.
 - Tooltipy: `src/data/terms.mjs` (zkratky institucí = jen vysvětlivka; pojmy = vysvětlivka + odkaz do slovníčku). V MDX článcích je doplní rehype plugin `src/lib/rehype-terms.mjs` u prvního výskytu; v prostých textech (perexy, FAQ) funkce `annotate()` přes `set:html`. Nový pojem = přidat do `terms.mjs` (a případně do slovníčku).
