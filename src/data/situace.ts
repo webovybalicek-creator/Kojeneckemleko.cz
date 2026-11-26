@@ -33,7 +33,7 @@ export const situace: Situace[] = [
     id: 'navrat-do-prace', tone: 'slate',
     title: 'Vracím se do práce',
     text: 'Odstříkávání, skladování mléka a kombinace kojení s lahví.',
-    clanky: ['kojeni-a-navrat-do-prace', 'odstrikavani-materskeho-mleka', 'kombinovane-krmeni', 'jak-prestat-kojit'],
+    clanky: ['kojeni-a-navrat-do-prace', 'odstrikavani-materskeho-mleka', 'skladovani-materskeho-mleka', 'kombinovane-krmeni', 'jak-prestat-kojit'],
   },
   {
     id: 'obtize', tone: 'mint',
