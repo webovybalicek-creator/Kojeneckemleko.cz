@@ -77,6 +77,7 @@ export const obdobi: Obdobi[] = [
       { label: 'Kalkulačka množství mléka', href: '/mleka/kolik-mleka-podle-veku/' },
       { label: 'Kdy začít s příkrmy', href: '/prikrmy/kdy-zacit-s-prikrmy/' },
       { label: 'Váha miminka podle měsíců', href: '/krmeni/vaha-miminka/' },
+      { label: 'Délka miminka podle měsíců', href: '/krmeni/delka-miminka/' },
     ],
   },
   {

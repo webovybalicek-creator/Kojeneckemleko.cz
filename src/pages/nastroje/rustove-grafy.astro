@@ -8,6 +8,7 @@ const url = new URL('/nastroje/rustove-grafy/', Astro.site).toString();
 const steps = [
   { t: 'Co je percentil', d: 'Percentil říká, kolik dětí ze sta stejného věku a pohlaví má ve standardu nižší hodnotu. 50. percentil je medián – polovina dětí váží méně a polovina víc.' },
   { t: 'Odkud jsou data', d: 'Ze standardů Světové zdravotnické organizace z roku 2006. Vznikly ze studie zhruba 8 500 dětí v Brazílii, Ghaně, Indii, Norsku, Ománu a USA, které vyrůstaly v příznivých podmínkách a byly kojené.' },
+  { t: 'Grafy pro dívky a chlapce', d: 'Percentilové grafy jsou zvlášť pro dívky a pro chlapce – podle britské NHS proto, že chlapci bývají o něco těžší a vyšší. Kalkulačka použije tabulku podle zvoleného pohlaví.' },
   { t: 'Co výsledek neříká', d: 'Kalkulačka neposuzuje, jestli miminko roste dobře. Ukáže jen polohu jednoho měření v tabulce. Růst v čase hodnotí pediatr.' },
 ];
 
@@ -19,6 +20,10 @@ const faq = [
   {
     q: 'Platí standardy WHO i pro děti krmené umělým mlékem?',
     a: 'Ano. Podle WHO standardy popisují, jak mají děti růst v příznivých podmínkách, a platí pro všechny děti bez ohledu na způsob krmení. Za normu růstu berou kojené dítě.',
+  },
+  {
+    q: 'Musí být hmotnost a délka na stejném percentilu?',
+    a: 'Nemusí. Podle NHS je běžné, že je miminko u hmotnosti a délky na různých percentilech, obvykle ale bývají podobné.',
   },
   {
     q: 'Do jakého věku kalkulačka počítá?',
@@ -113,6 +118,7 @@ const jsonLd = [
       <h2 id="dal">Může se hodit</h2>
       <ul class="links">
         <li><a href="/krmeni/vaha-miminka/">Váha a přírůstky miminka podle měsíců <Arrow /></a></li>
+        <li><a href="/krmeni/delka-miminka/">Délka miminka podle měsíců <Arrow /></a></li>
         <li><a href="/krmeni/pije-miminko-dost/">Jak poznat, že miminko pije dost <Arrow /></a></li>
         <li><a href="/mleka/kolik-mleka-podle-veku/">Kolik mléka dát miminku podle věku <Arrow /></a></li>
       </ul>
