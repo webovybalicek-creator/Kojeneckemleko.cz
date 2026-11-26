@@ -24,7 +24,7 @@ const breadcrumbs = {
   ],
 };
 ---
-<Base title={meta.title} description={meta.description} jsonLd={[breadcrumbs]}>
+<Base title={meta.title} description={meta.description} jsonLd={[breadcrumbs]} ads={cluster !== 'mleka'}>
   <section class="container">
     <header class:list={['hub-head', 'panel', `panel--${meta.tone}`]}>
       <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Úvod</a> <span aria-hidden="true">/</span> <span>{meta.title}</span></nav>

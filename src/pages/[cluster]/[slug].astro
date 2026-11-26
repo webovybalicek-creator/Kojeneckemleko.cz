@@ -74,7 +74,7 @@ const breadcrumbs = {
   ],
 };
 ---
-<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${entry.id}.png`} jsonLd={[articleLd, breadcrumbs, ...faqLd]} noindex={data.draft}>
+<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${entry.id}.png`} jsonLd={[articleLd, breadcrumbs, ...faqLd]} noindex={data.draft} ads={data.cluster !== 'mleka'}>
   <article class="container article">
     <header class="article__head">
       <nav class="crumbs" aria-label="Drobečková navigace">

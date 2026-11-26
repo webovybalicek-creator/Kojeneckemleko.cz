@@ -89,8 +89,8 @@ EU nařízení 2016/127 (čl. 10) omezuje propagaci počáteční kojenecké vý
 ## Reklama (AdSense zatím není nasazený)
 Rozhodnutí 26. 11. 2026: pokud se někdy nasadí AdSense nebo jiná reklamní síť, **na stránkách počátečních mlék nesmí být žádná reklama** (nařízení EU 2016/127 omezuje reklamu na počáteční kojenecká mléka a nad tím, co síť zobrazí, nemáme kontrolu).
 - `Base.astro` má vlastnost `ads` (výchozí `true`). `ads={false}` vypíše `<meta name="km-reklama" content="ne">` a reklamní skript se smí vykreslit **jen pod podmínkou `ads`** – tedy ani automatické reklamy, ani ručně vložené bloky.
-- Bez reklamy: karty mlék se `stage: pocatecni` (včetně speciálních mlék od narození) a celá stránka `/mleka/srovnani/`.
-- Při nasazení reklam navíc v síti zablokovat kategorii kojenecké výživy pro celý web a zvážit `ads={false}` i u článků rubriky Mléka. Před spuštěním právní kontrola.
+- Bez reklamy je **celá rubrika Mléka**: rozcestník `/mleka/`, všechny články s `cluster: mleka`, stránka `/mleka/srovnani/` a všechny karty mlék (i pokračovací). Nová stránka o mlécích mimo tyto šablony musí dostat `ads={false}` ručně.
+- Při nasazení reklam navíc v síti zablokovat kategorii kojenecké výživy pro celý web. Před spuštěním cookie lišta a právní kontrola.
 
 ## Hosting, deploy a návštěvnost
 - Hosting přes FTP s PHP. Deploy: `.github/workflows/deploy.yml` – automaticky při každém pushi do `main` (push = nasazení na ostrý web!), secrets FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_SERVER_DIR, STATS_PASSWORD. Secrets nečíst ani nevypisovat.
