@@ -19,7 +19,11 @@ export async function getStaticPaths() {
 }
 
 const { entry, related } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+// Obsah článku (kotvy) jen u delších článků: nad 700 slov a aspoň 5 sekcí H2.
+const wordCount = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+const toc = headings.filter((h) => h.depth === 2);
+const showToc = wordCount > 700 && toc.length >= 5;
 const { data } = entry;
 const meta = clusterMeta[data.cluster];
 const url = new URL(Astro.url.pathname, Astro.site).toString();
@@ -103,6 +107,15 @@ const breadcrumbs = {
       ) : null}
     </header>
 
+    {showToc && (
+      <details class="toc">
+        <summary>Obsah článku <span class="toc__count">({toc.length} částí)</span></summary>
+        <ol>
+          {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+        </ol>
+      </details>
+    )}
+
     <div class="prose">
       <Content />
     </div>
@@ -164,6 +177,12 @@ const breadcrumbs = {
   .crumbs a { color: var(--text-muted); }
 
   .prose { margin-bottom: var(--space-5); }
+  .prose :global(h2), .prose :global(h3) { scroll-margin-top: 5rem; }
+  .toc { margin-bottom: var(--space-5); padding: var(--space-3) var(--space-4); background: var(--color-keylime-wash); border-radius: var(--radius-card); font-size: var(--fs-small); }
+  .toc summary { cursor: pointer; font-weight: 600; list-style-position: inside; }
+  .toc__count { font-weight: 400; color: var(--text-muted); }
+  .toc ol { margin: var(--space-3) 0 0; padding-left: 1.4rem; display: grid; gap: 0.35rem; }
+  .toc a { text-decoration-thickness: 1px; }
   .prose :global(> * + *) { margin-top: 1.1em; }
   .prose :global(h2) { margin-top: 1.8em; }
   .prose :global(h3) { margin-top: 1.5em; }

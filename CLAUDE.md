@@ -42,6 +42,7 @@ Vychází z easehealth.com – „botanický skleník na krémovém papíře“.
 - **`/zacnete-tady/`** + sekce „Co právě řešíte?“ na úvodu: `src/data/situace.ts` (ID článků v pořadí čtení; neexistující ID shodí build).
 - Stažená mléka jsou na úvodu sbalená (`<details>`), plný seznam v článku a nástroji. Počet = různé výrobky (jako `RecallBar`).
 - Karty článků na úvodu: `ArticleCards feature` (hlavní karta + 2 menší). Lístky v ilustracích „vyrostou“ při zobrazení (`.leaf`, třída `anim` na `<html>`, jen transform/opacity).
+- Obsah článku (sbalený `<details class="toc">` s kotvami H2) se v `[cluster]/[slug].astro` zobrazí automaticky u článků nad 700 slov s aspoň 5 sekcemi H2.
 - Pod nadpisem článku štítek „Ověřeno · počet zdrojů: instituce“ (zkratky z `publisher`, mapování v `[slug].astro`), odkaz na `#zdroje`.
 - `/mleka/srovnani/`: filtry (fáze, HMO, bez palmového oleje, probiotika), řazení podle ceny za 100 g prášku a porovnání 2–3 mlék v dialogu. Cena za 100 ml se neuvádí (není ověřená spotřeba prášku).
 

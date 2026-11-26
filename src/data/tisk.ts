@@ -193,4 +193,50 @@ export const prehledy: TiskPrehled[] = [
       { title: 'Types of formula milk', publisher: 'NHS', url: 'https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/bottle-feeding/types-of-formula/' },
     ],
   },
+  {
+    slug: 'prvni-prikrmy',
+    title: 'První příkrmy: čím začít a co kdy',
+    description: 'Tisknutelný přehled: kdy začít s příkrmy, čím začít, kdy přejít na hrudky a kousky, jak zavádět alergeny a co pít. Podle NHS a ESPGHAN.',
+    lead: 'Příkrmy se zavádějí kolem 6 měsíců. Orientační přehled podle NHS a ESPGHAN – každé miminko má vlastní tempo.',
+    bloky: [
+      {
+        title: 'Co a kdy',
+        table: [
+          ['Věk (orientačně)', 'Co nabízet'],
+          ['Kolem 6 měsíců', 'Jednou denně malé množství jednodruhové zeleniny nebo ovoce, uvařené do měkka, rozmačkané nebo rozmixované. Jakmile to zvládne, i měkké kousky k uchopení.'],
+          ['6–7 měsíců', 'Hrudkovitější jídlo, miminko může zkoušet i lžičku samo.'],
+          ['7–9 měsíců', 'Postupně 3 jídla denně: rozmačkané a hrudkovité jídlo a kousky k uchopení.'],
+          ['8–10 měsíců', 'Nejpozději teď by mělo jíst hrudkovité jídlo.'],
+        ],
+        note: 'Kousky k uchopení: měkké, velké asi jako váš prst. Malé kulaté plody (hroznové víno, cherry rajčata) krájejte na čtvrtky.',
+      },
+      {
+        title: 'Jak krmit',
+        items: [
+          'Nabízejte i méně sladkou zeleninu – brokolici, květák, špenát.',
+          'Řiďte se miminkem: když zavře pusu nebo se odvrátí, přestaňte. Nenuťte ho.',
+          'Nové jídlo může miminko přijmout až po 10 a více pokusech.',
+          'Při jídle buďte vždy u miminka. Dávení je normální, dušení je akutní stav.',
+          'Zařazujte potraviny bohaté na železo, například maso nebo obilniny obohacené železem.',
+        ],
+      },
+      {
+        title: 'Alergeny a pití',
+        items: [
+          'Kravské mléko, vejce, lepek, mleté ořechy a arašídy, mletá semínka, sóju, korýše a ryby zavádějte po jednom a ve velmi malém množství.',
+          'Když miminko potravinu snáší, nechte ji v jídelníčku.',
+          'Hlavním nápojem v prvním roce je mateřské nebo počáteční mléko.',
+          'K jídlu doušky vody z otevřeného hrnečku. Kravské mléko do jídla od 6 měsíců, jako nápoj až od 1 roku.',
+          'Žádné džusy ani sladké nápoje. Co dalšího nedávat: přehled Co nedávat miminku do 1 roku.',
+        ],
+      },
+    ],
+    clanek: { label: 'První příkrmy krok za krokem', href: '/prikrmy/prvni-prikrmy/' },
+    zdroje: [
+      { title: "Your baby's first solid foods", publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/babys-first-solid-foods/' },
+      { title: 'Feeding your baby from around 6 months', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/weaning/what-to-feed-your-baby/from-around-6-months/' },
+      { title: 'Feeding your baby from 7 to 9 months', publisher: 'NHS – Start for Life', url: 'https://www.nhs.uk/best-start-in-life/baby/weaning/what-to-feed-your-baby/7-to-9-months/' },
+      { title: 'Complementary Feeding: A Position Paper by the ESPGHAN Committee on Nutrition (2017)', publisher: 'ESPGHAN', url: 'https://www.espghan.org/dam/jcr%3A3d960daa-e2f3-499f-9df9-2da682976cec/2017%20Complementary_Feeding__A_Position_Paper_by_the.21.pdf' },
+    ],
+  },
 ];
