@@ -21,7 +21,7 @@ export const situace: Situace[] = [
     id: 'nedari-se-kojeni', tone: 'mint',
     title: 'Nedaří se kojení',
     text: 'Bolavé bradavky, málo mléka nebo nejistota, jestli miminko pije dost.',
-    clanky: ['prisati-a-bolave-bradavky', 'pije-miminko-dost', 'malo-mleka', 'zanet-prsu', 'kombinovane-krmeni'],
+    clanky: ['prisati-a-bolave-bradavky', 'pije-miminko-dost', 'malo-mleka', 'bolest-prsou-pri-kojeni', 'zanet-prsu', 'kombinovane-krmeni'],
   },
   {
     id: 'umele-mleko', tone: 'sage',

@@ -145,4 +145,52 @@ export const prehledy: TiskPrehled[] = [
       { title: 'Drinks and cups for babies and young children', publisher: 'NHS', url: 'https://www.nhs.uk/baby/weaning-and-feeding/drinks-and-cups-for-babies-and-young-children/' },
     ],
   },
+  {
+    slug: 'kolik-mleka-podle-veku',
+    title: 'Kolik mléka podle věku a jak často',
+    description: 'Tisknutelný přehled: kolik umělého mléka miminko vypije na jedno krmení a jak často podle věku, orientační denní množství a známky hladu a sytosti.',
+    lead: 'Orientační čísla podle AAP, CDC a NHS. Každé miminko je jiné – řiďte se tím, co vám samo ukazuje.',
+    who: true,
+    bloky: [
+      {
+        title: 'Kolik a jak často',
+        table: [
+          ['Věk', 'Na 1 krmení', 'Jak často'],
+          ['První dny', '30–60 ml', 'každé 2–3 hodiny, 8–12× za 24 h'],
+          ['Konec 1. měsíce', '90–120 ml', 'zhruba každé 3–4 hodiny'],
+          ['2.–5. měsíc', 'podle hmotnosti', 'zhruba každé 3–4 hodiny'],
+          ['Kolem 6. měsíce', '180–240 ml', '4–5× za 24 h'],
+          ['6.–12. měsíc', 'postupně méně', 'mléko a příkrmy dohromady 5–6× za 24 h'],
+        ],
+        note: 'Celkem přibližně 150–200 ml na kilogram hmotnosti za den (NHS). Většina miminek nepotřebuje víc než asi 960 ml mléka denně (AAP).',
+      },
+      {
+        title: 'Známky hladu a sytosti',
+        items: [
+          'Hlad: ručičky u pusinky, otáčí hlavičku k lahvi nebo prsu, špulí, olizuje nebo mlaská rty, sevřené pěstičky.',
+          'Pláč je pozdní signál hladu – krmte raději dřív.',
+          'Sytost: zavře pusinku, odvrátí hlavičku, uvolní ručičky.',
+          'Miminko nenuťte dopít lahev.',
+        ],
+      },
+      {
+        title: 'Na co nezapomenout',
+        items: [
+          'Počáteční mléko stačí jako hlavní nápoj až do 1 roku.',
+          'Od 1 roku může být hlavním nápojem kravské mléko; kojenecká ani batolecí mléka nejsou potřeba.',
+          'Množství vody a prášku se u jednotlivých mlék liší. Vždy připravujte podle návodu na balení.',
+          'Pokud miminko dlouhodobě chce výrazně víc nebo méně, poraďte se s pediatrem.',
+        ],
+      },
+    ],
+    clanek: { label: 'Kolik ml mléka vypije miminko a jak často', href: '/mleka/kolik-mleka-podle-veku/' },
+    zdroje: [
+      { title: 'Amount and Schedule of Baby Formula Feedings', publisher: 'AAP – HealthyChildren.org', url: 'https://healthychildren.org/English/ages-stages/baby/formula-feeding/Pages/Amount-and-Schedule-of-Formula-Feedings.aspx' },
+      { title: 'How Much and How Often to Feed Infant Formula', publisher: 'CDC', url: 'https://www.cdc.gov/infant-toddler-nutrition/formula-feeding/how-much-and-how-often.html' },
+      { title: 'Formula milk: common questions', publisher: 'NHS 111 Wales', url: 'https://111.wales.nhs.uk/livewell/pregnancy/bottleformulacommonquest/' },
+      { title: 'Signs Your Child is Hungry or Full', publisher: 'CDC', url: 'https://www.cdc.gov/infant-toddler-nutrition/mealtime/signs-your-child-is-hungry-or-full.html' },
+      { title: 'Responsive bottle feeding tips', publisher: 'UNICEF UK Baby Friendly Initiative', url: 'https://www.unicef.org.uk/babyfriendly/wp-content/uploads/sites/2/2016/08/Baby-Friendly-responsive-bottle-feeding-tips-red-book-p4.pdf' },
+      { title: 'Types of formula milk', publisher: 'NHS', url: 'https://www.nhs.uk/baby/breastfeeding-and-bottle-feeding/bottle-feeding/types-of-formula/' },
+    ],
+  },
 ];
