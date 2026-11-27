@@ -15,7 +15,7 @@ export const situace: Situace[] = [
     id: 'cekame-miminko', tone: 'keylime',
     title: 'Čekáme miminko',
     text: 'Co se hodí vědět o kojení i lahvi ještě před porodem.',
-    clanky: ['prisati-a-bolave-bradavky', 'pije-miminko-dost', 'lahev-a-savicka', 'sterilizace-lahvi', 'krmeni-a-bezpecny-spanek'],
+    clanky: ['krmeni-novorozence', 'prisati-a-bolave-bradavky', 'pije-miminko-dost', 'lahev-a-savicka', 'sterilizace-lahvi', 'krmeni-a-bezpecny-spanek'],
   },
   {
     id: 'nedari-se-kojeni', tone: 'mint',
