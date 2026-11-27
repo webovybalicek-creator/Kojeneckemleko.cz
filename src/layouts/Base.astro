@@ -160,7 +160,7 @@ const baseLd = [
               send('/api/event.php', JSON.stringify({ e: name, p: location.pathname }));
             };
             var ev = window.kmEvent;
-            var tools = '[data-recall-check],[data-growth],[data-useby],[data-allergens],[data-feeding-log],.calc';
+            var tools = '[data-recall-check],[data-growth],[data-useby],[data-allergens],[data-foodlog],[data-feeding-log],.calc';
             var onUse = function (e) {
               var t = e.target;
               if (!t || !t.closest) return;

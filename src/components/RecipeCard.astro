@@ -1,0 +1,90 @@
+---
+/**
+ * Recept v článku /prikrmy/recepty-na-prikrmy/ – data v src/data/recepty.ts.
+ * Vykreslí recept (nadpis s kotvou, suroviny, postup, tip se zdrojem) a JSON-LD Recipe.
+ * `index` = výpis odkazů na všechny recepty podle věku.
+ */
+import { recepty, vekLabel } from '../data/recepty';
+
+interface Props { id?: string; index?: boolean; image?: string }
+const { id, index = false, image } = Astro.props;
+const r = recepty.find((x) => x.id === id);
+if (!index && !r) throw new Error(`RecipeCard: neznámý recept „${id}“`);
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const ld = r && {
+  '@context': 'https://schema.org',
+  '@type': 'Recipe',
+  name: r.nazev,
+  description: r.popis,
+  url: `${pageUrl}#${r.id}`,
+  ...(image ? { image: [new URL(image, Astro.site).toString()] } : {}),
+  author: { '@type': 'Organization', name: 'Redakce kojeneckemleko.cz', url: Astro.site?.toString() },
+  recipeCategory: 'Příkrm pro miminko',
+  keywords: `příkrm ${vekLabel[r.vek]}, bez soli, bez cukru`,
+  recipeYield: r.porce,
+  totalTime: `PT${r.minuty}M`,
+  recipeIngredient: r.suroviny,
+  recipeInstructions: r.postup.map((text) => ({ '@type': 'HowToStep', text })),
+  inLanguage: 'cs-CZ',
+};
+const groups = (['6m', '7m', '10m'] as const).map((v) => ({ v, items: recepty.filter((x) => x.vek === v) }));
+---
+{index ? (
+  <nav class="rindex" aria-label="Recepty podle věku">
+    {groups.map((g) => (
+      <div>
+        <p class="eyebrow">{vekLabel[g.v]}</p>
+        <ul>{g.items.map((x) => <li><a href={`#${x.id}`}>{x.nazev}</a></li>)}</ul>
+      </div>
+    ))}
+  </nav>
+) : r && (
+  <section class="recipe" aria-labelledby={r.id}>
+    <h2 id={r.id}>{r.nazev}</h2>
+    <p class="recipe__meta">
+      <span class="tag tag--sm">{vekLabel[r.vek]}</span>
+      <span>{r.porce}</span><span aria-hidden="true">·</span><span>asi {r.minuty} min</span>
+    </p>
+    <p class="recipe__desc">
+      {r.popis}
+      {r.vzor && <sup class="cite"><a href={`#zdroj-${r.vzor}`} aria-label={`Zdroj ${r.vzor}`}>{r.vzor}</a></sup>}
+    </p>
+    <div class="recipe__grid">
+      <div class="recipe__ing panel panel--keylime">
+        <h3 class="recipe__h">Suroviny</h3>
+        <ul>{r.suroviny.map((s) => <li>{s}</li>)}</ul>
+      </div>
+      <div>
+        <h3 class="recipe__h">Postup</h3>
+        <ol>{r.postup.map((s) => <li>{s}</li>)}</ol>
+      </div>
+    </div>
+    {r.tip && (
+      <p class="recipe__tip">
+        <strong>Tip:</strong> {r.tip.text}
+        <sup class="cite">{r.tip.cite.map((n, k) => <>{k > 0 && ','}<a href={`#zdroj-${n}`} aria-label={`Zdroj ${n}`}>{n}</a></>)}</sup>
+      </p>
+    )}
+    <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  </section>
+)}
+
+<style>
+  .rindex { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--color-keylime-wash); border-radius: var(--radius-card); }
+  .rindex ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: grid; gap: 0.3rem; font-size: var(--fs-small); }
+  .rindex p { margin: 0; }
+  @media (max-width: 640px) { .rindex { grid-template-columns: 1fr; } }
+  .recipe { margin-top: 2.2em; padding-top: var(--space-4); border-top: 1px solid var(--line); }
+  .recipe h2 { margin-top: 0; scroll-margin-top: 5rem; }
+  .recipe .recipe__grid > div > :first-child { margin-top: 0; }
+  .recipe__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem; font-size: var(--fs-small); color: var(--text-muted); margin-top: 0.6em; }
+  .recipe__desc { margin-top: 0.6em; }
+  .recipe__grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: var(--space-3); margin-top: var(--space-3); align-items: start; }
+  .recipe__ing { padding: var(--space-3); }
+  .recipe .recipe__h { font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem; }
+  .recipe__grid ul, .recipe__grid ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
+  .recipe__ing ul { font-size: var(--fs-small); }
+  .recipe__tip { margin-top: var(--space-3); font-size: var(--fs-small); color: var(--color-charcoal); }
+  .recipe__tip strong { color: var(--ink); font-weight: 600; }
+  @media (max-width: 640px) { .recipe__grid { grid-template-columns: 1fr; } }
+</style>

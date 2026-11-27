@@ -1,0 +1,241 @@
+---
+/**
+ * Zápisník příkrmů – co už miminko ochutnalo a jak mu chutnalo. Skupiny a příklady potravin podle NHS
+ * (Feeding your baby from around 6 months / 7 to 9 months), vlastní potraviny lze přidat.
+ * Jen zapisuje: datum, chuť, poznámka, podezření na reakci. Nic nedoporučuje, žádný plán ani připomínky.
+ * Data jen v localStorage `km-prikrmy-v1` (při změně struktury zvýšit verzi a migrovat). Nic se neposílá na server.
+ * Alergeny mají vlastní nástroj (AllergenLog, km-alergeny-v1).
+ */
+const skupiny = [
+  { id: 'zelenina', label: 'Zelenina', foods: ['Brokolice', 'Květák', 'Špenát', 'Hrášek', 'Mrkev', 'Dýně', 'Cuketa', 'Batáty', 'Avokádo', 'Chřest'] },
+  { id: 'ovoce', label: 'Ovoce', foods: ['Jablko', 'Hruška', 'Banán', 'Mango', 'Broskev', 'Meruňka', 'Švestka', 'Borůvky'] },
+  { id: 'prilohy', label: 'Obiloviny a přílohy', foods: ['Ovesné vločky', 'Rýže', 'Brambory', 'Těstoviny', 'Pečivo / toust', 'Jáhly', 'Kuskus'] },
+  { id: 'bilkoviny', label: 'Maso, ryby, vejce, luštěniny', foods: ['Kuřecí maso', 'Hovězí maso', 'Krůtí maso', 'Ryba (bez kostí)', 'Vejce (dobře uvařené)', 'Čočka', 'Fazole', 'Cizrna', 'Tofu'] },
+  { id: 'mlecne', label: 'Mléčné výrobky', foods: ['Bílý jogurt (plnotučný)', 'Tvaroh', 'Sýr (pasterovaný)'] },
+].map((g) => ({ ...g, foods: g.foods.map((label) => ({ id: label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), label })) }));
+---
+<div class="fl" data-foodlog data-skupiny={JSON.stringify(skupiny)}>
+  <div class="fl__inner">
+    <div class="fl__head">
+      <p class="eyebrow">Zápisník · data zůstávají ve vašem zařízení</p>
+      <h2 class="heading-sm fl__title">Co už miminko ochutnalo</h2>
+      <p class="fl__sum" data-sum aria-live="polite"></p>
+    </div>
+
+    <div class="fl__groups" data-groups></div>
+
+    <form class="fl__add" data-add>
+      <label class="fl__grow"><span>Jiná potravina</span><input type="text" name="label" maxlength="40" placeholder="např. pastinák" autocomplete="off" required /></label>
+      <label><span>Skupina</span>
+        <select name="g">{skupiny.map((g) => <option value={g.id}>{g.label}</option>)}</select>
+      </label>
+      <button type="submit" class="btn btn--ghost">Přidat do seznamu</button>
+    </form>
+
+    <noscript><p class="fl__hint">Zápisník potřebuje zapnutý JavaScript.</p></noscript>
+
+    <div class="fl__tools">
+      <button type="button" class="btn btn--ghost" data-csv>Stáhnout záznamy (CSV)</button>
+      <button type="button" class="fl__link" data-clear>Smazat vše</button>
+    </div>
+    <p class="fl__confirm" data-confirm hidden>
+      Opravdu smazat všechny záznamy i vlastní potraviny? <button type="button" class="fl__link" data-clear-yes>Ano, smazat</button> <button type="button" class="fl__link" data-clear-no>Ne</button>
+    </p>
+
+    <p class="fl__foot">
+      Skupiny potravin podle <a href="https://www.nhs.uk/best-start-in-life/baby/weaning/what-to-feed-your-baby/from-around-6-months/" rel="noopener">NHS</a>.
+      Alergeny (vejce, arašídy, lepek…) si můžete zapisovat i v <a href="/nastroje/zapisnik-alergenu/">zápisníku alergenů</a>.
+      Zápisník nic nedoporučuje ani nepřipomíná. Záznamy se ukládají jen v tomto prohlížeči.
+    </p>
+  </div>
+</div>
+
+<script>
+  interface Food { id: string; label: string }
+  interface Skupina { id: string; label: string; foods: Food[] }
+  interface Vlastni { id: string; label: string; g: string }
+  /** l: 1 = chutnalo, 0 = nevím / tak napůl, -1 = nechutnalo */
+  interface Zaznam { id: number; f: string; d: string; l: 1 | 0 | -1; n: string; r: boolean }
+  interface Data { custom: Vlastni[]; items: Zaznam[] }
+  const KEY = 'km-prikrmy-v1';
+  const CHUT: Record<string, string> = { '1': 'chutnalo', '0': 'napůl', '-1': 'nechutnalo' };
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+  const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  const fmt = (iso: string) => { const [y, m, d] = iso.split('-').map(Number); return `${d}. ${m}. ${y}`; };
+
+  document.querySelectorAll<HTMLElement>('[data-foodlog]').forEach((root) => {
+    const skupiny: Skupina[] = JSON.parse(root.dataset.skupiny || '[]');
+    const groupsEl = root.querySelector<HTMLElement>('[data-groups]')!;
+    const sum = root.querySelector<HTMLElement>('[data-sum]')!;
+    const confirmEl = root.querySelector<HTMLElement>('[data-confirm]')!;
+    let data: Data = { custom: [], items: [] };
+    let open: string | null = null;
+    let storageOk = true;
+    try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (raw && Array.isArray(raw.items)) data = { custom: raw.custom ?? [], items: raw.items }; } catch { storageOk = false; }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { storageOk = false; } };
+    const foodsOf = (g: Skupina): Food[] => [...g.foods, ...data.custom.filter((c) => c.g === g.id)];
+    const allFoods = () => skupiny.flatMap(foodsOf);
+
+    function row(f: Food, custom: boolean) {
+      const rec = data.items.filter((i) => i.f === f.id).sort((x, y) => (x.d < y.d ? 1 : -1));
+      const any = rec.length > 0, reak = rec.some((r) => r.r), isOpen = open === f.id;
+      const stav = any ? `${rec.length}× · ${CHUT[String(rec[0].l)]} · ${fmt(rec[0].d)}` : '';
+      return `<li class="fl__item${any ? ' is-done' : ''}${reak ? ' is-reak' : ''}">
+        <button type="button" class="fl__row" data-open="${esc(f.id)}" aria-expanded="${isOpen}">
+          <span class="fl__check" aria-hidden="true">${any ? '✓' : ''}</span>
+          <span class="fl__name">${esc(f.label)}</span>
+          <span class="fl__stav">${stav}${reak ? ' · podezření na reakci' : ''}</span>
+        </button>
+        ${isOpen ? `<div class="fl__detail">
+          <form class="fl__form" data-form="${esc(f.id)}">
+            <label><span>Datum</span><input type="date" name="d" value="${today()}" max="${today()}" required /></label>
+            <fieldset class="fl__chut"><legend>Jak chutnalo</legend>
+              <label><input type="radio" name="l" value="1" checked /> <span>Chutnalo</span></label>
+              <label><input type="radio" name="l" value="0" /> <span>Napůl</span></label>
+              <label><input type="radio" name="l" value="-1" /> <span>Nechutnalo</span></label>
+            </fieldset>
+            <label class="fl__grow"><span>Poznámka <small>(nepovinné)</small></span><input type="text" name="n" maxlength="120" placeholder="např. rozmačkané, pár lžiček" autocomplete="off" /></label>
+            <label class="fl__cb"><input type="checkbox" name="r" /> <span>Podezření na reakci</span></label>
+            <button type="submit" class="btn">Zapsat</button>
+          </form>
+          ${rec.length ? `<ul class="fl__recs">${rec.map((r) => `<li${r.r ? ' class="is-reak"' : ''}><span>${fmt(r.d)} – ${CHUT[String(r.l)]}${r.n ? ` – ${esc(r.n)}` : ''}${r.r ? ' – podezření na reakci' : ''}</span><button type="button" class="fl__link" data-del="${r.id}">Smazat</button></li>`).join('')}</ul>` : ''}
+          ${custom && !rec.length ? `<button type="button" class="fl__link" data-remove="${esc(f.id)}">Odebrat potravinu ze seznamu</button>` : ''}
+          ${reak ? '<p class="fl__warn">Při podezření na reakci se poraďte s pediatrem. Při potížích s dýcháním nebo otoku jazyka či hrdla volejte 155.</p>' : ''}
+        </div>` : ''}
+      </li>`;
+    }
+
+    function render() {
+      const done = new Set(data.items.map((i) => i.f)).size;
+      const nechut = new Set(data.items.filter((i) => i.l === -1).map((i) => i.f)).size;
+      sum.textContent = (done ? `Ochutnáno ${done} ${done === 1 ? 'potravina' : done < 5 ? 'potraviny' : 'potravin'}${nechut ? `, z toho ${nechut} zatím nechutnalo` : ''}.` : 'Zatím nic zapsáno. Klepněte na potravinu a přidejte první záznam.')
+        + (storageOk ? '' : ' Prohlížeč neumožňuje ukládání – záznamy po zavření stránky zmizí.');
+      groupsEl.innerHTML = skupiny.map((g) => {
+        const foods = foodsOf(g);
+        const n = new Set(data.items.filter((i) => foods.some((f) => f.id === i.f)).map((i) => i.f)).size;
+        return `<section class="fl__group"><h3 class="fl__gh"><span>${esc(g.label)}</span><small>${n} z ${foods.length}</small></h3>
+          <ul class="fl__list">${foods.map((f) => row(f, f.id.startsWith('c-'))).join('')}</ul></section>`;
+      }).join('');
+    }
+
+    root.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement).closest<HTMLElement>('[data-open],[data-del],[data-remove],[data-csv],[data-clear],[data-clear-yes],[data-clear-no]');
+      if (!t) return;
+      if (t.dataset.open) open = open === t.dataset.open ? null : t.dataset.open;
+      else if (t.dataset.del) { data.items = data.items.filter((i) => String(i.id) !== t.dataset.del); save(); }
+      else if (t.dataset.remove) { data.custom = data.custom.filter((c) => c.id !== t.dataset.remove); open = null; save(); }
+      else if ('clear' in t.dataset) { confirmEl.hidden = false; return; }
+      else if ('clearNo' in t.dataset) { confirmEl.hidden = true; return; }
+      else if ('clearYes' in t.dataset) { data = { custom: [], items: [] }; open = null; save(); confirmEl.hidden = true; }
+      else if ('csv' in t.dataset) {
+        const foods = allFoods();
+        const name = (id: string) => foods.find((f) => f.id === id)?.label ?? id;
+        const group = (id: string) => skupiny.find((g) => foodsOf(g).some((f) => f.id === id))?.label ?? '';
+        const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+        const rows = [...data.items].sort((x, y) => (x.d < y.d ? -1 : 1)).map((i) => [i.d, name(i.f), group(i.f), CHUT[String(i.l)], i.n, i.r ? 'ano' : 'ne'].map(q).join(';'));
+        const blob = new Blob(['﻿' + ['"Datum";"Potravina";"Skupina";"Chuť";"Poznámka";"Podezření na reakci"', ...rows].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'zapisnik-prikrmu.csv'; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        return;
+      }
+      render();
+    });
+
+    root.addEventListener('submit', (e) => {
+      const f = e.target as HTMLFormElement;
+      e.preventDefault();
+      const fd = new FormData(f);
+      if (f.matches('[data-add]')) {
+        const label = String(fd.get('label') || '').trim().slice(0, 40);
+        const g = String(fd.get('g') || skupiny[0].id);
+        if (!label) return;
+        const existing = allFoods().find((x) => x.label.toLowerCase() === label.toLowerCase());
+        const id = existing?.id ?? `c-${Date.now()}`;
+        if (!existing) data.custom.push({ id, label, g });
+        open = id; save(); f.reset(); render();
+        return;
+      }
+      if (!f.dataset.form) return;
+      const d = String(fd.get('d') || today());
+      const l = Number(fd.get('l') ?? 1) as 1 | 0 | -1;
+      data.items.push({ id: Date.now(), f: f.dataset.form, d: d > today() ? today() : d, l, n: String(fd.get('n') || '').trim().slice(0, 120), r: fd.get('r') === 'on' });
+      save();
+      render();
+    });
+
+    render();
+  });
+</script>
+
+<style>
+  .fl { background: var(--color-keylime-wash); border-radius: var(--radius-card); padding: var(--space-3); }
+  .fl__inner { background: var(--color-cream-paper); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-3); }
+  .fl__head { display: grid; gap: 0.35rem; }
+  .fl__head > * { margin: 0; }
+  .fl__title { font-size: 1.375rem; }
+  .fl :global(p) { margin-block: 0; }
+  .fl__sum, .fl__hint { font-size: var(--fs-small); color: var(--text-muted); }
+  .fl__groups { display: grid; gap: var(--space-4); }
+  .fl__groups :global(.fl__gh) { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin: 0 0 0.5rem; font-size: 1rem; font-weight: 600; color: var(--ink); }
+  .fl__groups :global(.fl__gh small) { font-weight: 400; font-size: var(--fs-small); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .fl__groups :global(.fl__list) { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+  .fl__groups :global(.fl__item) { background: var(--color-keylime-wash); border-radius: var(--radius-card); overflow: hidden; }
+  .fl__groups :global(.fl__item.is-reak) { background: var(--color-alert-wash); box-shadow: inset 0 0 0 1px var(--color-alert-line); }
+  .fl__groups :global(.fl__row) {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem; width: 100%; min-height: 3rem;
+    padding: 0.6rem 1rem; background: none; border: 0; font: inherit; color: var(--text); text-align: left; cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .fl__groups :global(.fl__row:active) { transform: scale(0.99); }
+  .fl__groups :global(.fl__row:focus-visible) { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius-card); }
+  .fl__groups :global(.fl__check) {
+    display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; font-size: 0.85rem; font-weight: 600;
+    background: var(--color-cream-paper); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--color-sage-mist);
+  }
+  .fl__groups :global(.is-done .fl__check) { background: var(--ink); color: var(--color-cream-paper); box-shadow: none; }
+  .fl__groups :global(.fl__name) { font-weight: 600; color: var(--ink); min-width: 0; }
+  .fl__groups :global(.fl__stav) { font-size: var(--fs-small); color: var(--text-muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .fl__groups :global(.is-reak .fl__stav) { color: var(--color-alert-ink); }
+  .fl__groups :global(.fl__detail) { padding: 0 1rem 1rem; display: grid; gap: var(--space-2); justify-items: start; animation: fl-in var(--dur-base) var(--ease-out); }
+  .fl__groups :global(.fl__form) { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; width: 100%; }
+  .fl :global(label > span), .fl :global(legend) { font-size: var(--fs-small); font-weight: 600; color: var(--ink); }
+  .fl :global(.fl__form label), .fl__add label { display: grid; gap: 0.3rem; min-width: 0; }
+  .fl :global(small) { font-weight: 400; color: var(--text-muted); font-size: inherit; }
+  .fl :global(.fl__grow) { flex: 1 1 12rem; }
+  .fl :global(input[type='date']), .fl :global(input[type='text']), .fl select {
+    min-height: 2.75rem; padding: 0.5rem 0.8rem; font: inherit; font-size: 1rem; font-weight: 400; color: var(--text); width: 100%; min-width: 0;
+    border: 1px solid var(--color-sage-mist); border-radius: var(--radius-card); background: var(--color-cream-paper);
+  }
+  .fl :global(input:focus-visible), .fl select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .fl__groups :global(.fl__chut) { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; align-items: center; }
+  .fl__groups :global(.fl__chut legend) { width: 100%; margin-bottom: 0.3rem; padding: 0; }
+  .fl__groups :global(.fl__chut label) { display: flex !important; align-items: center; gap: 0.35rem; min-height: 2.75rem; cursor: pointer; }
+  .fl__groups :global(.fl__chut label span) { font-weight: 500; }
+  .fl__groups :global(.fl__chut input), .fl__groups :global(.fl__cb input) { width: 1.15rem; height: 1.15rem; accent-color: var(--color-forest-ink); }
+  .fl__groups :global(.fl__cb) { display: flex !important; align-items: center; gap: 0.5rem; min-height: 2.75rem; cursor: pointer; }
+  .fl__groups :global(.fl__cb span) { font-weight: 500; }
+  .fl__groups :global(.fl__recs) { list-style: none; padding: 0; margin: 0; display: grid; width: 100%; }
+  .fl__groups :global(.fl__recs li) { display: flex; justify-content: space-between; gap: var(--space-2); align-items: baseline; padding-block: 0.45rem; border-top: 1px solid var(--color-sage-mist); font-size: var(--fs-small); }
+  .fl__groups :global(.fl__recs .is-reak span) { color: var(--color-alert-ink); }
+  .fl__groups :global(.fl__warn) { font-size: var(--fs-small); color: var(--color-alert-ink); font-weight: 500; }
+  .fl__add { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+  .fl :global(.fl__link) { flex: none; background: none; border: 0; padding: 0.25rem 0; font: inherit; font-size: var(--fs-small); color: var(--text-muted); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+  .fl :global(.fl__link:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .fl__tools { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; }
+  .fl__confirm { font-size: var(--fs-small); display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: baseline; }
+  .fl__confirm[hidden] { display: none; }
+  .fl__foot { font-size: var(--fs-small); color: var(--text-muted); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+
+  @keyframes fl-in { from { opacity: 0; transform: translateY(-4px); } }
+  @media (max-width: 640px) {
+    .fl { padding: var(--space-1); }
+    .fl__inner { padding: var(--space-3); }
+    .fl__groups :global(.fl__row) { grid-template-columns: auto 1fr; }
+    .fl__groups :global(.fl__stav) { grid-column: 2; text-align: left; }
+    .fl__groups :global(.fl__stav:empty) { display: none; }
+    .fl__groups :global(.fl__form .btn), .fl__add .btn { width: 100%; justify-content: center; }
+    .fl__add label { flex: 1 1 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .fl__groups :global(.fl__detail) { animation: none; } .fl__groups :global(.fl__row) { transition: none; } }
+</style>

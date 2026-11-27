@@ -40,6 +40,12 @@ export const nastroje: Nastroj[] = [
     motif: 'vejce', tone: 'sage', cta: 'Otevřít zápisník',
   },
   {
+    href: '/nastroje/zapisnik-prikrmu/',
+    title: 'Zápisník příkrmů',
+    text: 'Co už miminko ochutnalo a jak mu chutnalo: zelenina, ovoce, přílohy, maso i luštěniny. Data zůstávají ve vašem telefonu.',
+    motif: 'trava', tone: 'keylime', cta: 'Otevřít zápisník',
+  },
+  {
     href: '/mleka/kolik-mleka-podle-veku/#výpočet-podle-hmotnosti',
     title: 'Kalkulačka množství mléka',
     text: 'Orientační denní množství umělého mléka podle hmotnosti miminka do 6 měsíců.',
