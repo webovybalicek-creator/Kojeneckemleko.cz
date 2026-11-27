@@ -28,6 +28,10 @@ export async function getStaticPaths() {
       },
     })),
     {
+      params: { slug: 'sk-nastroj-rastove-grafy' },
+      props: { title: 'Rastové grafy WHO', eyebrow: 'Nástroj · zadarmo, bez registrácie', motif: 'trava', tone: 'mint', lang: 'sk' },
+    },
+    {
       params: { slug: 'sk-default' },
       props: { title: 'Nezávislý sprievodca kŕmením bábätka', eyebrow: 'Overené v zdrojoch WHO, NHS a ESPGHAN', motif: 'klicky', tone: 'sage', lang: 'sk' },
     },

@@ -3,58 +3,82 @@
  * Percentil hmotnosti a délky podle WHO Child Growth Standards (0–24 měsíců).
  * Data: public/data/who-rust.json – hodnoty L, M, S po dnech z oficiálního balíčku WHO „anthro“.
  * Nástroj jen porovnává s tabulkou WHO, nic nehodnotí. Vše běží v prohlížeči, nic se neukládá ani neodesílá.
+ * Jazyk (cs/sk) podle URL, texty v objektu T.
  */
+import { langFromPath } from '../i18n/ui';
+const sk = langFromPath(Astro.url.pathname) === 'sk';
+const T = sk ? {
+  locale: 'sk-SK', eyebrow: 'Rastové štandardy WHO · 0–24 mesiacov', title: 'Percentil hmotnosti a dĺžky', sex: 'Pohlavie', f: 'Dievča', m: 'Chlapec',
+  born: 'Dátum narodenia', date: 'Dátum váženia', kg: 'Hmotnosť', cm: 'Dĺžka', opt: '(nepovinné)', ph: 'napr.',
+  fill: 'Vyplňte pohlavie, oba dátumy a hmotnosť.', order: 'Dátum váženia musí byť rovnaký alebo neskorší ako dátum narodenia.', max: 'Kalkulačka počíta s vekom od narodenia do 24 mesiacov.',
+  badKg: 'Zadajte hmotnosť v kilogramoch, napríklad 6,4.', badCm: 'Zadajte dĺžku v centimetroch, napríklad 63.', load: 'Tabuľky WHO sa nepodarilo načítať. Skúste to prosím znova.',
+  whoF: 'dievčat', whoM: 'chlapcov', chartF: 'dievčatá', chartM: 'chlapci', vahaVerb: 'váži', delkaVerb: 'meria', pct: 'percentil',
+  from100: 'Zo 100', sameAge: 'rovnakého veku v štandarde WHO ich asi', less: 'menej. Medián pre tento vek je', byAge: 'podľa veku',
+  curves: 'krivky 3., 15., 50., 85. a 97. percentilu podľa WHO a zadaná hodnota.', axis: 'vek v mesiacoch', age: 'Vek pri vážení', dayN: 'deň',
+  under: 'pod 0,1.', over: 'nad 99,9.',
+  d1: '1 deň', d24: 'dni', d5: 'dní', w24: 'týždne', w5: 'týždňov', m1: '1 mesiac', m24: 'mesiace', m5: 'mesiacov',
+  note: 'Percentil len hovorí, kde sa údaj nachádza v porovnaní so štandardom WHO. Nie je to hodnotenie zdravia. Jedno meranie veľa nepovie, dôležitý je vývoj v čase – ten sleduje pediater pri preventívnych prehliadkach.',
+  js: 'Výpočet potrebuje zapnutý JavaScript.', foot1: 'Výpočet podľa', foot2: 'rastových štandardov WHO', foot3: '(2006). Beží len vo vašom prehliadači, nič sa neukladá ani neodosiela.',
+} : {
+  locale: 'cs-CZ', eyebrow: 'Růstové standardy WHO · 0–24 měsíců', title: 'Percentil hmotnosti a délky', sex: 'Pohlaví', f: 'Dívka', m: 'Chlapec',
+  born: 'Datum narození', date: 'Datum vážení', kg: 'Hmotnost', cm: 'Délka', opt: '(nepovinné)', ph: 'např.',
+  fill: 'Vyplňte pohlaví, obě data a hmotnost.', order: 'Datum vážení musí být stejné nebo pozdější než datum narození.', max: 'Kalkulačka pracuje s věkem od narození do 24 měsíců.',
+  badKg: 'Zadejte hmotnost v kilogramech, například 6,4.', badCm: 'Zadejte délku v centimetrech, například 63.', load: 'Tabulky WHO se nepodařilo načíst. Zkuste to prosím znovu.',
+  whoF: 'dívek', whoM: 'chlapců', chartF: 'dívky', chartM: 'chlapci', vahaVerb: 'váží', delkaVerb: 'měří', pct: 'percentil',
+  from100: 'Ze 100', sameAge: 'stejného věku ve standardu WHO jich asi', less: 'méně. Medián pro tento věk je', byAge: 'podle věku',
+  curves: 'křivky 3., 15., 50., 85. a 97. percentilu podle WHO a zadaná hodnota.', axis: 'věk v měsících', age: 'Věk při vážení', dayN: 'den',
+  under: 'pod 0,1.', over: 'nad 99,9.',
+  d1: '1 den', d24: 'dny', d5: 'dní', w24: 'týdny', w5: 'týdnů', m1: '1 měsíc', m24: 'měsíce', m5: 'měsíců',
+  note: 'Percentil jen říká, kde se údaj nachází ve srovnání se standardem WHO. Není to hodnocení zdraví. Jedno měření mnoho neřekne, důležitý je vývoj v čase – ten sleduje pediatr při preventivních prohlídkách.',
+  js: 'Výpočet potřebuje zapnutý JavaScript.', foot1: 'Výpočet podle', foot2: 'růstových standardů WHO', foot3: '(2006). Běží jen ve vašem prohlížeči, nic se neukládá ani neodesílá.',
+};
 ---
-<div class="gp" data-growth>
+<div class="gp" data-growth data-t={JSON.stringify(T)}>
   <form class="gp__inner" novalidate>
     <div class="gp__head">
-      <p class="eyebrow">Růstové standardy WHO · 0–24 měsíců</p>
-      <h2 class="heading-sm gp__title">Percentil hmotnosti a délky</h2>
+      <p class="eyebrow">{T.eyebrow}</p>
+      <h2 class="heading-sm gp__title">{T.title}</h2>
     </div>
 
     <fieldset class="gp__field">
-      <legend>Pohlaví</legend>
+      <legend>{T.sex}</legend>
       <div class="chips">
-        <label class="chip"><input type="radio" name="gp-sex" value="f" /><span>Dívka</span></label>
-        <label class="chip"><input type="radio" name="gp-sex" value="m" /><span>Chlapec</span></label>
+        <label class="chip"><input type="radio" name="gp-sex" value="f" /><span>{T.f}</span></label>
+        <label class="chip"><input type="radio" name="gp-sex" value="m" /><span>{T.m}</span></label>
       </div>
     </fieldset>
 
     <div class="gp__grid">
       <label class="gp__field">
-        <span class="gp__label">Datum narození</span>
+        <span class="gp__label">{T.born}</span>
         <input type="date" name="gp-born" required />
       </label>
       <label class="gp__field">
-        <span class="gp__label">Datum vážení</span>
+        <span class="gp__label">{T.date}</span>
         <input type="date" name="gp-date" required />
       </label>
       <label class="gp__field">
-        <span class="gp__label">Hmotnost</span>
-        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-kg" placeholder="např. 6,4" autocomplete="off" /><span>kg</span></span>
+        <span class="gp__label">{T.kg}</span>
+        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-kg" placeholder={`${T.ph} 6,4`} autocomplete="off" /><span>kg</span></span>
       </label>
       <label class="gp__field">
-        <span class="gp__label">Délka <small>(nepovinné)</small></span>
-        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-cm" placeholder="např. 63" autocomplete="off" /><span>cm</span></span>
+        <span class="gp__label">{T.cm} <small>{T.opt}</small></span>
+        <span class="gp__unit"><input type="text" inputmode="decimal" name="gp-cm" placeholder={`${T.ph} 63`} autocomplete="off" /><span>cm</span></span>
       </label>
     </div>
 
-    <p class="gp__msg" data-msg role="status">Vyplňte pohlaví, obě data a hmotnost.</p>
+    <p class="gp__msg" data-msg role="status">{T.fill}</p>
 
     <div class="gp__out" data-out hidden>
       <div class="gp__cards" data-cards></div>
       <div class="gp__chart" data-chart></div>
-      <p class="gp__note">
-        Percentil jen říká, kde se údaj nachází ve srovnání se standardem WHO. Není to hodnocení zdraví.
-        Jedno měření mnoho neřekne, důležitý je vývoj v čase – ten sleduje pediatr při preventivních prohlídkách.
-      </p>
+      <p class="gp__note">{T.note}</p>
     </div>
 
-    <noscript><p class="gp__msg">Výpočet potřebuje zapnutý JavaScript.</p></noscript>
+    <noscript><p class="gp__msg">{T.js}</p></noscript>
 
     <p class="gp__foot">
-      Výpočet podle <a href="https://www.who.int/tools/child-growth-standards/standards" rel="noopener">růstových standardů WHO</a> (2006).
-      Běží jen ve vašem prohlížeči, nic se neukládá ani neodesílá.
+      {T.foot1} <a href="https://www.who.int/tools/child-growth-standards/standards" rel="noopener">{T.foot2}</a> {T.foot3}
     </p>
   </form>
 </div>
@@ -64,8 +88,9 @@
   interface Data { vaha: Record<string, LMS[]>; delka: Record<string, LMS[]> }
 
   const MAX_DAY = 730;
-  const nf1 = new Intl.NumberFormat('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const nf2 = new Intl.NumberFormat('cs-CZ', { maximumFractionDigits: 2 });
+  const T: Record<string, string> = JSON.parse(document.querySelector<HTMLElement>('[data-growth]')?.dataset.t ?? '{}');
+  const nf1 = new Intl.NumberFormat(T.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const nf2 = new Intl.NumberFormat(T.locale, { maximumFractionDigits: 2 });
 
   /** Distribuční funkce normálního rozdělení (Abramowitz–Stegun 7.1.26). */
   const phi = (z: number) => {
@@ -86,15 +111,15 @@
   };
   const pctLabel = (p: number) => {
     const v = p * 100;
-    if (v < 0.1) return 'pod 0,1.';
-    if (v > 99.9) return 'nad 99,9.';
+    if (v < 0.1) return T.under;
+    if (v > 99.9) return T.over;
     return (v < 1 || v > 99 ? nf1.format(v) : String(Math.round(v))) + '.';
   };
   const ageLabel = (days: number) => {
-    if (days < 14) return days === 1 ? '1 den' : days >= 2 && days <= 4 ? `${days} dny` : `${days} dní`;
-    if (days < 91) { const w = Math.floor(days / 7); return w >= 2 && w <= 4 ? `${w} týdny` : `${w} týdnů`; }
+    if (days < 14) return days === 1 ? T.d1 : days >= 2 && days <= 4 ? `${days} ${T.d24}` : `${days} ${T.d5}`;
+    if (days < 91) { const w = Math.floor(days / 7); return w >= 2 && w <= 4 ? `${w} ${T.w24}` : `${w} ${T.w5}`; }
     const mo = Math.floor(days / 30.4375);
-    return mo === 1 ? '1 měsíc' : mo >= 2 && mo <= 4 ? `${mo} měsíce` : `${mo} měsíců`;
+    return mo === 1 ? T.m1 : mo >= 2 && mo <= 4 ? `${mo} ${T.m24}` : `${mo} ${T.m5}`;
   };
   const parseNum = (s: string) => parseFloat(s.replace(/\s/g, '').replace(',', '.'));
   const isoToday = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
@@ -121,9 +146,9 @@
     }
     const px = x(day).toFixed(1), py = y(value).toFixed(1);
     return `<figure class="gp__fig"><figcaption>${title}</figcaption>
-      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}: křivky 3., 15., 50., 85. a 97. percentilu podle WHO a zadaná hodnota.">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}: ${T.curves}">
         ${g}${curves}
-        <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="axis">věk v měsících</text>
+        <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="axis">${T.axis}</text>
         <circle cx="${px}" cy="${py}" r="9" class="halo"/><circle cx="${px}" cy="${py}" r="5" class="dot"/>
       </svg></figure>`;
   }
@@ -152,16 +177,16 @@
       const sex = form.querySelector<HTMLInputElement>('[name="gp-sex"]:checked')?.value;
       const kg = parseNum(kgIn.value);
       const cm = parseNum(cmIn.value);
-      if (!sex || !born.value || !date.value || !kgIn.value.trim()) return fail('Vyplňte pohlaví, obě data a hmotnost.');
+      if (!sex || !born.value || !date.value || !kgIn.value.trim()) return fail(T.fill);
       const day = Math.round((Date.parse(date.value) - Date.parse(born.value)) / 864e5);
-      if (!Number.isFinite(day) || day < 0) return fail('Datum vážení musí být stejné nebo pozdější než datum narození.');
-      if (day > MAX_DAY) return fail('Kalkulačka pracuje s věkem od narození do 24 měsíců.');
-      if (!(kg >= 0.5 && kg <= 30)) return fail('Zadejte hmotnost v kilogramech, například 6,4.');
-      if (cmIn.value.trim() && !(cm >= 30 && cm <= 110)) return fail('Zadejte délku v centimetrech, například 63.');
-      try { await load(); } catch { return fail('Tabulky WHO se nepodařilo načíst. Zkuste to prosím znovu.'); }
+      if (!Number.isFinite(day) || day < 0) return fail(T.order);
+      if (day > MAX_DAY) return fail(T.max);
+      if (!(kg >= 0.5 && kg <= 30)) return fail(T.badKg);
+      if (cmIn.value.trim() && !(cm >= 30 && cm <= 110)) return fail(T.badCm);
+      try { await load(); } catch { return fail(T.load); }
       if (!data) return;
 
-      const kdo = sex === 'f' ? 'dívek' : 'chlapců';
+      const kdo = sex === 'f' ? T.whoF : T.whoM;
       const items: string[] = [];
       let charts = '';
       const add = (rows: LMS[], value: number, unit: string, name: string, verb: string, adjust: boolean) => {
@@ -169,14 +194,14 @@
         const n = Math.min(99, Math.max(1, Math.round(p * 100)));
         const med = lmsValue(rows[day], 0);
         items.push(`<div class="gp__card"><span class="gp__card-k">${name}</span>
-          <span class="gp__card-v tabular">${pctLabel(p)} percentil</span>
-          <span class="gp__card-d">Ze 100 ${kdo} stejného věku ve standardu WHO jich asi ${n} ${verb} méně. Medián pro tento věk je ${unit === 'kg' ? nf2.format(Math.round(med * 100) / 100) : nf1.format(med)} ${unit}.</span></div>`);
-        charts += chart(rows, day, value, unit, `${name} podle věku – ${sex === 'f' ? 'dívky' : 'chlapci'} (${unit})`);
+          <span class="gp__card-v tabular">${pctLabel(p)} ${T.pct}</span>
+          <span class="gp__card-d">${T.from100} ${kdo} ${T.sameAge} ${n} ${verb} ${T.less} ${unit === 'kg' ? nf2.format(Math.round(med * 100) / 100) : nf1.format(med)} ${unit}.</span></div>`);
+        charts += chart(rows, day, value, unit, `${name} ${T.byAge} – ${sex === 'f' ? T.chartF : T.chartM} (${unit})`);
       };
-      add(data.vaha[sex], kg, 'kg', 'Hmotnost', 'váží', true);
-      if (cmIn.value.trim()) add(data.delka[sex], cm, 'cm', 'Délka', 'měří', false);
+      add(data.vaha[sex], kg, 'kg', T.kg, T.vahaVerb, true);
+      if (cmIn.value.trim()) add(data.delka[sex], cm, 'cm', T.cm, T.delkaVerb, false);
 
-      cards.innerHTML = `<p class="gp__age">Věk při vážení: <strong>${ageLabel(day)}</strong> (${day}. den)</p>${items.join('')}`;
+      cards.innerHTML = `<p class="gp__age">${T.age}: <strong>${ageLabel(day)}</strong> (${day}. ${T.dayN})</p>${items.join('')}`;
       chartEl.innerHTML = charts;
       msg.hidden = true;
       out.hidden = false;

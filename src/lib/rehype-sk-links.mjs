@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const SK_CLUSTER = { mleka: 'mlieka', krmeni: 'krmenie', prikrmy: 'prikrmy', batole: 'batolata' };
-const PAGES = { '/': '/sk/', '/jak-tvorime-obsah/': '/sk/ako-tvorime-obsah/', '/ochrana-soukromi/': '/sk/ochrana-sukromia/' };
+const PAGES = { '/': '/sk/', '/jak-tvorime-obsah/': '/sk/ako-tvorime-obsah/', '/ochrana-soukromi/': '/sk/ochrana-sukromia/', '/nastroje/rustove-grafy/': '/sk/nastroje/rastove-grafy/' };
 
 const loadMap = () => {
   const dir = path.resolve('src/content/sk-clanky');

@@ -83,7 +83,7 @@ Rozhodnutí 27. 11. 2026: slovenština na podadresáři `/sk/` (doménu .sk neku
 - V SK článcích: žádné české tooltipy (rehype-terms je přeskočí), interní odkazy na české články se přepíší na slovenské verze, pokud existují (`src/lib/rehype-sk-links.mjs`), jinak zůstanou české s `hreflang="cs"`. Bez komentářů a bez pruhu stažených mlék (data jsou pro ČR).
 - Reklama: SK rubrika Mlieka a její články také `ads={false}` (stejná šablona).
 - OG obrázky: `/og/sk-<slug>/` → `public/images/og/sk-<slug>.png`, výchozí `sk-default.png`.
-- Nástroje a srovnávací tabulka zatím jen česky. Doporučeno nechat prvních 5 SK článků zkontrolovat rodilým mluvčím.
+- Nástroje: SK má **Rastové grafy WHO** `/sk/nastroje/rastove-grafy/` (stejná komponenta `GrowthPercentile.astro`, texty v objektu `T` podle jazyka URL) a kalkulačku v článku Koľko mlieka. Ostatní nástroje a srovnávací tabulka zatím jen česky. Doporučeno nechat prvních 5 SK článků zkontrolovat rodilým mluvčím.
 
 ## Přehledy k vytištění (`/tisk/`)
 Data v `src/data/tisk.ts`, šablona `src/pages/tisk/[slug].astro` (tiskové styly A4), PDF v `public/tisk/<slug>.pdf`. Obsah jen z ověřených článků; po změně článku upravit přehled a PDF vygenerovat znovu (Playwright `page.pdf()` z náhledu, `emulateMedia('print')`).
