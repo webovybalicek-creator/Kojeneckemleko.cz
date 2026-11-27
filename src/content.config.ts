@@ -24,7 +24,7 @@ const source = z.object({
 /** Tematické klastry webu – pořadí odpovídá obsahové strategii. */
 export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak', 'kvet', 'hruska', 'lzicka', 'miska', 'mesic', 'vejce', 'brokolice', 'hrnec', 'lupa', 'trava', 'pirko', 'sklenice', 'vlocka', 'kufrik'] as const;
 
-export const clusters = ['mleka', 'krmeni', 'prikrmy'] as const;
+export const clusters = ['mleka', 'krmeni', 'prikrmy', 'batole'] as const;
 
 const clanky = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/clanky' }),

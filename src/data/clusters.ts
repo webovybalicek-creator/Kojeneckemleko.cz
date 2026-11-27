@@ -6,7 +6,7 @@ export const clusterMeta: Record<Cluster, {
   title: string;
   description: string;
   lead: string;
-  tone: 'sage' | 'mint' | 'keylime';
+  tone: 'sage' | 'mint' | 'keylime' | 'slate';
   planned: string[];
 }> = {
   mleka: {
@@ -28,6 +28,13 @@ export const clusterMeta: Record<Cluster, {
     description: 'Kdy začít s příkrmy, BLW nebo kaše, zavádění alergenů a jídelníček podle věku miminka.',
     lead: 'Kdy začít, jak na to a co zařadit v jakém věku.',
     tone: 'keylime',
+    planned: [],
+  },
+  batole: {
+    title: 'Batole',
+    description: 'Jídelníček a pití batolete od 1 do 3 let, vybíravost, vitaminy, železo a odstavení od lahve. Podle NHS a WHO.',
+    lead: 'Po prvních narozeninách jí dítě s rodinou – co, kolik a co pít od 1 do 3 let.',
+    tone: 'slate',
     planned: [],
   },
 };

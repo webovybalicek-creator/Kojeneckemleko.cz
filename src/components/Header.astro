@@ -3,6 +3,7 @@ const nav = [
   { href: '/mleka/', label: 'Kojenecká mléka' },
   { href: '/krmeni/', label: 'Krmení' },
   { href: '/prikrmy/', label: 'Příkrmy' },
+  { href: '/batole/', label: 'Batole' },
   { href: '/nastroje/', label: 'Nástroje' },
   { href: '/slovnicek/', label: 'Slovníček' },
   { href: '/jak-tvorime-obsah/', label: 'Jak tvoříme obsah' },
@@ -84,7 +85,7 @@ const isActive = (href: string) => path.startsWith(href);
 
   .mobile-nav { display: none; }
 
-  @media (max-width: 960px) {
+  @media (max-width: 1140px) {
     .nav, .header-cta { display: none; }
     .mobile-nav { display: block; }
     .mobile-nav summary {

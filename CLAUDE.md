@@ -10,7 +10,7 @@ Astro 7 (statický výstup), MDX, @astrojs/sitemap. Fonty: Newsreader Variable (
 
 - Články: `src/content/clanky/*.mdx` → URL `/<cluster>/<slug>/`. Šablona `_sablona-clanku.mdx`.
 - Mléka: `src/content/mleka/*.json` → tabulka `/mleka/srovnani/`. Schéma v `src/content.config.ts`.
-- Klastry (`mleka`, `krmeni`, `prikrmy`) a jejich hub stránky: `src/data/clusters.ts`.
+- Klastry (`mleka`, `krmeni`, `prikrmy`, `batole`) a jejich hub stránky: `src/data/clusters.ts`. Batole (1–3 roky, od 27. 11. 2026) má kresby jako Krmení, hub používá ilustraci `sprig`.
 - Komponenty: `/styleguide/` (noindex).
 
 ## Design

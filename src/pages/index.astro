@@ -23,7 +23,7 @@ const specialChips = ['HA', 'AR', 'Comfort', 'Kozí'];
 // Nejnovější články po rubrikách – každý řádek jednotný (Příkrmy fotky, ostatní kresby)
 const allArticles = (await getCollection('clanky', ({ data }) => import.meta.env.DEV || !data.draft))
   .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf() || b.data.updated.valueOf() - a.data.updated.valueOf());
-const latestByCluster = (['mleka', 'krmeni', 'prikrmy'] as const).map((c) => ({
+const latestByCluster = (['mleka', 'krmeni', 'prikrmy', 'batole'] as const).map((c) => ({
   cluster: c,
   articles: allArticles.filter((a) => a.data.cluster === c).slice(0, 3),
 })).filter((g) => g.articles.length > 0);
@@ -45,6 +45,12 @@ const topics = [
     href: '/prikrmy/', tone: 'keylime', eyebrow: 'Klastr 3', illu: 'prikrmy' as const,
     title: 'Příkrmy',
     text: 'Kdy začít, jak na to a co zařadit v jakém věku.',
+    ready: true,
+  },
+  {
+    href: '/batole/', tone: 'slate', eyebrow: 'Klastr 4', illu: 'sprig' as const,
+    title: 'Batole',
+    text: 'Jídelníček, pití a vybíravost od 1 do 3 let.',
     ready: true,
   },
 ];
@@ -175,7 +181,7 @@ const faqLd = {
   <section class="container section" aria-labelledby="temata">
     <div class="section-head">
       <p class="eyebrow">Témata</p>
-      <h2 id="temata">Od prvního mléka po první lžičku</h2>
+      <h2 id="temata">Od prvního mléka po rodinný stůl</h2>
     </div>
     <div class="topics">
       {topics.map((t) => (
@@ -366,7 +372,8 @@ const faqLd = {
   @media (hover: hover) and (pointer: fine) { .tool:hover .tool__more :global(svg) { transform: translateX(4px); } .tool:hover h3 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; } }
   @media (max-width: 960px) { .tools__list { grid-template-columns: 1fr; } }
 
-  .topics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+  .topics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+  @media (max-width: 1100px) { .topics { grid-template-columns: repeat(2, 1fr); } }
   .topic {
     display: flex; flex-direction: column; gap: var(--space-2);
     text-decoration: none; color: var(--text); min-height: 17rem;
