@@ -65,10 +65,25 @@ Zdarma, bez registrace, vše běží v prohlížeči. Seznam karet: `src/data/na
 - **Růstové grafy WHO** `/nastroje/rustove-grafy/` – `GrowthPercentile.astro`: percentil hmotnosti a délky 0–24 měsíců + graf. Data `public/data/who-rust.json` (L, M, S po dnech z oficiálního balíčku WHO `anthro`, neupravovat ručně). Nic neukládá. Jen poloha v tabulce, žádné hodnocení růstu.
 - **Do kdy spotřebovat** `/nastroje/do-kdy-spotrebovat/` – `UseByTimer.astro`: odpočet lhůt pro připravené umělé a odstříkané mateřské mléko. Lhůty musí odpovídat článkům `jak-dlouho-vydrzi-umele-mleko` a `skladovani-materskeho-mleka` (WHO, CDC, NHS); kde se instituce liší, ukázat obě. localStorage `km-spotreba-v1`, žádná upozornění.
 - **Zápisník alergenů** `/nastroje/zapisnik-alergenu/` – `AllergenLog.astro`: 12 alergenů podle NHS (shodně s článkem `alergeny`), u každého záznamy s datem, poznámkou a podezřením na reakci, CSV. localStorage `km-alergeny-v1`. Jen eviduje – žádný plán zavádění, žádný kalendář ani připomínky.
+- **Zápisník příkrmů** `/nastroje/zapisnik-prikrmu/` – `FoodLog.astro`: skupiny a příklady potravin podle NHS (od 6 a 7–9 měsíců), vlastní potraviny, „chutnalo / napůl / nechutnalo“, poznámka, podezření na reakci, CSV. localStorage `km-prikrmy-v1` ({custom, items}). Jen eviduje – žádný plán, pořadí zavádění ani připomínky. Alergeny zůstávají v zápisníku alergenů.
 - Úvodní stránka ukazuje první 3 karty z `nastroje.ts`, rozcestník všechny.
 - OG obrázky nástrojů: šablony `/og/nastroj-<slug>/` a `/og/nastroje/` se berou z `nastroje.ts`; nový nástroj = vygenerovat PNG a nastavit `ogImage` na stránce.
 - Deník jde přidat na plochu: `public/denik-manifest.json` + ikony `public/images/ikona-*.png`, manifest se linkuje jen na stránce deníku (slot `head` v `Base.astro`).
 - Nástroje nic nedoporučují (žádné „kdy krmit“, žádné připomínky krmení) – jen zapisují a porovnávají s oficiálním seznamem.
+
+## Recepty na příkrmy
+Článek `/prikrmy/recepty-na-prikrmy/`, data v `src/data/recepty.ts`, komponenta `RecipeCard.astro` (recept + JSON-LD Recipe; `<RecipeCard index />` = rozcestník podle věku). Vlastní recepty z potravin, které NHS uvádí pro daný věk; vždy bez soli, bujonu, cukru a medu, vejce propečená, ryby bez kostí. Tip u receptu musí mít `cite` (čísla zdrojů článku), recept podle vzoru NHS má `vzor`.
+
+## Slovenská verze (`/sk/`)
+Rozhodnutí 27. 11. 2026: slovenština na podadresáři `/sk/` (doménu .sk nekupujeme), EN ne.
+- Články: kolekce `skClanky` v `src/content/sk-clanky/*.mdx` – překlad ověřeného českého článku se **stejnými zdroji**, pole `cs` = ID českého originálu (hreflang + přepínač jazyka), vlastní slovenský slug. Lokální fakta upravit (155/112, bez SZPI, bez cen a značek z ČR).
+- URL: `/sk/<rubrika>/<slug>/`, rubriky `mlieka`, `krmenie`, `prikrmy`, `batolata` (mapování a slovenské texty rubrik v `src/i18n/ui.ts`). Šablona článku je společná: `src/layouts/Article.astro` (CZ route `[cluster]/[slug].astro`, SK route `sk/[cluster]/[slug].astro`).
+- UI řetězce: `src/i18n/ui.ts` (`langFromPath`, `t(lang)`); Header, Footer, SourceList, ArticleCards a MilkCalculator berou jazyk z URL.
+- `Base.astro` prop `alternates={{ cs, sk }}` → hreflang cs-CZ / sk-SK / x-default (= cs) a odkaz „Slovensky / Česky“ v patičce. Párové stránky: úvod, rubriky, články s překladem, metodika (`/sk/ako-tvorime-obsah/`), ochrana soukromí (`/sk/ochrana-sukromia/`).
+- V SK článcích: žádné české tooltipy (rehype-terms je přeskočí), interní odkazy na české články se přepíší na slovenské verze, pokud existují (`src/lib/rehype-sk-links.mjs`), jinak zůstanou české s `hreflang="cs"`. Bez komentářů a bez pruhu stažených mlék (data jsou pro ČR).
+- Reklama: SK rubrika Mlieka a její články také `ads={false}` (stejná šablona).
+- OG obrázky: `/og/sk-<slug>/` → `public/images/og/sk-<slug>.png`, výchozí `sk-default.png`.
+- Nástroje a srovnávací tabulka zatím jen česky. Doporučeno nechat prvních 5 SK článků zkontrolovat rodilým mluvčím.
 
 ## Přehledy k vytištění (`/tisk/`)
 Data v `src/data/tisk.ts`, šablona `src/pages/tisk/[slug].astro` (tiskové styly A4), PDF v `public/tisk/<slug>.pdf`. Obsah jen z ověřených článků; po změně článku upravit přehled a PDF vygenerovat znovu (Playwright `page.pdf()` z náhledu, `emulateMedia('print')`).
