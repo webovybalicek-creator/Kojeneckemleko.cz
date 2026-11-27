@@ -1,0 +1,210 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import Illustration from '../../components/Illustration.astro';
+import ArticleCards from '../../components/ArticleCards.astro';
+import Marquee from '../../components/Marquee.astro';
+import { getCollection } from 'astro:content';
+import { clusterMeta } from '../../data/clusters';
+import { skClusterMeta, clusterPath } from '../../i18n/ui';
+
+const all = (await getCollection('skClanky', ({ data }) => import.meta.env.DEV || !data.draft))
+  .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf() || b.data.updated.valueOf() - a.data.updated.valueOf());
+const groups = (['mleka', 'krmeni', 'prikrmy', 'batole'] as const)
+  .map((c) => ({ cluster: c, articles: all.filter((a) => a.data.cluster === c).slice(0, 3) }))
+  .filter((g) => g.articles.length > 0);
+
+const topics = [
+  { c: 'mleka' as const, illu: 'mleka' as const, text: 'Počiatočné a následné mlieka, príprava, trvanlivosť a množstvo podľa veku.' },
+  { c: 'krmeni' as const, illu: 'krmeni' as const, text: 'Dojčenie, odsávanie, uchovávanie mlieka a bežné ťažkosti.' },
+  { c: 'prikrmy' as const, illu: 'prikrmy' as const, text: 'Kedy začať, ako na to a čo zaradiť v akom veku.' },
+  { c: 'batole' as const, illu: 'sprig' as const, text: 'Jedálniček a pitie od 1 do 3 rokov.' },
+];
+
+const sources = [
+  { label: 'Svetová zdravotnícka organizácia', href: 'https://www.who.int/' },
+  { label: 'UNICEF', href: 'https://www.unicef.org/' },
+  { label: 'ESPGHAN', href: 'https://www.espghan.org/' },
+  { label: 'EFSA', href: 'https://www.efsa.europa.eu/' },
+  { label: 'NHS', href: 'https://www.nhs.uk/' },
+  { label: 'American Academy of Pediatrics', href: 'https://www.healthychildren.org/' },
+  { label: 'CDC', href: 'https://www.cdc.gov/' },
+  { label: 'Cochrane', href: 'https://www.cochranelibrary.com/' },
+];
+
+const principles = [
+  'Každé tvrdenie má číslovaný odkaz na zdroj.',
+  'Pri štúdiách uvádzame autorov, časopis a DOI.',
+  'Nehovoríme, ktoré mlieko je „najlepšie“, a nepropagujeme značky.',
+];
+
+const faq = [
+  { q: 'Odkiaľ beriete informácie?', a: 'Predovšetkým z medzinárodných odborných inštitúcií a prehľadových štúdií – WHO, ESPGHAN, EFSA, britskej NHS, americkej CDC a pediatrickej akadémie AAP alebo Cochrane. Každý článok má na konci zoznam zdrojov.' },
+  { q: 'Odporúčate konkrétne značky?', a: 'Nie. Vysvetľujeme, čím sa druhy mliek líšia, aby sa rodičia mohli rozhodnúť sami – ideálne spolu s pediatrom.' },
+  { q: 'Nahrádza web lekára?', a: 'Nie. Pomáha zorientovať sa a položiť lekárovi správne otázky. Pri akýchkoľvek ťažkostiach dieťaťa sa vždy obráťte na pediatra, v núdzi volajte 155 alebo 112.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base
+  alternates={{ cs: '/', sk: '/sk/' }}
+  title="Dojčenské mlieko"
+  description="Nezávislý sprievodca dojčenskými mliekami a kŕmením bábätka. Príprava mlieka, dojčenie, príkrmy a jedálniček batoľaťa podľa WHO, NHS a CDC."
+  jsonLd={[faqLd]}
+>
+  <section class="container hero">
+    <div class="hero__copy panel panel--keylime">
+      <p class="eyebrow">Sprievodca kŕmením bábätka</p>
+      <h1 class="display">Dojčenské mlieko bez zmätku.</h1>
+      <p class="lead">
+        Zrozumiteľne o mliekach, dojčení a príkrmoch. Opierame sa o medzinárodné odborné zdroje, nie o reklamu.
+      </p>
+      <div class="hero__actions">
+        <a href="/sk/mlieka/" class="btn btn--lg">Začať pri mliekach <Arrow /></a>
+        <a href="/sk/krmenie/" class="btn btn--ghost btn--lg">Dojčenie a kŕmenie</a>
+      </div>
+      <Illustration name="sprig" class="hero__sprig" />
+    </div>
+    <div class="hero__note panel panel--sage">
+      <p class="eyebrow">Odporúčanie WHO</p>
+      <p class="hero__who">
+        Svetová zdravotnícka organizácia odporúča výlučné dojčenie počas prvých 6 mesiacov a potom dojčenie spolu s príkrmami do 2 rokov a dlhšie.
+        Informácie o dojčenských mliekach sú pre rodičov, ktorí ich potrebujú alebo sa pre ne rozhodli.
+      </p>
+      <a href="https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding" rel="noopener" class="hero__link">WHO – Infant and young child feeding <Arrow /></a>
+    </div>
+  </section>
+
+  <section class="sources-strip" aria-labelledby="zdroje-pas">
+    <p class="eyebrow container" id="zdroje-pas">Vychádzame z odporúčaní a výskumu</p>
+    <Marquee items={sources} label="Inštitúcie, z ktorých odporúčaní vychádzame" />
+  </section>
+
+  <section class="container section" aria-labelledby="temy">
+    <div class="section-head">
+      <p class="eyebrow">Témy</p>
+      <h2 id="temy">Od prvého mlieka po rodinný stôl</h2>
+    </div>
+    <div class="topics">
+      {topics.map((tp) => (
+        <a href={clusterPath('sk', tp.c)} class:list={['topic', 'panel', `panel--${clusterMeta[tp.c].tone}`]}>
+          <h3 class="serif">{skClusterMeta[tp.c].title}</h3>
+          <p>{tp.text}</p>
+          <Illustration name={tp.illu} bg="cream" class="topic__illu" />
+          <span class="topic__more">Prejsť <Arrow /></span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="najnovsie">
+    <div class="section-head">
+      <p class="eyebrow">Najnovšie články</p>
+      <h2 id="najnovsie">Overené v zdrojoch</h2>
+    </div>
+    {groups.map((g) => (
+      <div class="latest-group">
+        <div class="latest-group__head">
+          <h3 class="heading-sm"><span class:list={['latest-group__dot', `panel--${clusterMeta[g.cluster].tone}`]} aria-hidden="true"></span>{skClusterMeta[g.cluster].title}</h3>
+          <a href={clusterPath('sk', g.cluster)} class="latest-group__all">Všetky články <Arrow /></a>
+        </div>
+        <ArticleCards articles={g.articles} showCluster={false} feature />
+      </div>
+    ))}
+  </section>
+
+  <section class="container section method" aria-labelledby="metodika">
+    <div class="method__grid">
+      <div class="stack">
+        <Illustration name="zdroje" class="method__illu" />
+        <p class="eyebrow">Ako pracujeme</p>
+        <h2 id="metodika">Každé tvrdenie má svoj zdroj.</h2>
+        <p class="lead">Čerpáme z odporúčaní medzinárodných zdravotníckych inštitúcií a z prehľadových štúdií.</p>
+        <a href="/sk/ako-tvorime-obsah/" class="btn">Naša metodika <Arrow /></a>
+      </div>
+      <div class="panel panel--sage">
+        <p class="eyebrow">Na čom si zakladáme</p>
+        <ul class="principles">{principles.map((p) => <li>{p}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="faq">
+    <p class="eyebrow">Časté otázky</p>
+    <h2 id="faq" class="visually-hidden">Časté otázky</h2>
+    <dl class="faq">
+      {faq.map((f) => (
+        <div class="faq__row">
+          <dt><h3 class="serif">{f.q}</h3></dt>
+          <dd><p>{f.a}</p></dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+</Base>
+
+<style>
+  .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: var(--space-2); padding-top: var(--space-4); }
+  .hero__copy { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: var(--space-3); padding-block: var(--space-6); }
+  .hero__copy h1 { max-width: 11ch; }
+  .hero__copy .lead { max-width: 34ch; }
+  .hero__copy > :not(:global(.hero__sprig)) { position: relative; z-index: 1; }
+  .hero__copy :global(.hero__sprig) { position: absolute; right: -1.25rem; bottom: -0.75rem; width: 10.5rem; pointer-events: none; animation: sprig-in 700ms var(--ease-out) both 150ms; }
+  @keyframes sprig-in { from { opacity: 0; transform: translateY(12px); } }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+  .hero__note { display: grid; align-content: center; gap: var(--space-3); padding: var(--space-5); }
+  .hero__who { font-size: 1.125rem; line-height: 1.55; color: var(--ink); }
+  .hero__link { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
+  .hero__link :global(svg) { width: 1em; }
+
+  .section-head { margin-bottom: var(--space-5); }
+  .section-head h2 { margin-top: var(--space-1); max-width: 20ch; }
+  .sources-strip { padding-top: var(--space-6); }
+  .sources-strip .eyebrow { display: block; text-align: center; }
+
+  .topics { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+  @media (max-width: 1100px) { .topics { grid-template-columns: repeat(2, 1fr); } }
+  .topic { display: flex; flex-direction: column; gap: var(--space-2); text-decoration: none; color: var(--text); min-height: 16rem; transition: transform var(--dur-base) var(--ease-out); }
+  .topic h3 { font-size: var(--fs-h2); line-height: 1.15; }
+  .topic :global(.topic__illu) { width: 9.5rem; align-self: flex-end; margin-top: auto; margin-bottom: calc(-1 * var(--space-4)); transition: transform var(--dur-base) var(--ease-out); }
+  .topic__more { margin-top: -1.5rem; display: inline-flex; align-items: center; gap: 0.4em; color: var(--ink); font-size: var(--fs-small); }
+  .topic__more :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  .topic:active { transform: scale(0.99); }
+  @media (hover: hover) and (pointer: fine) {
+    .topic:hover .topic__more :global(svg) { transform: translateX(4px); }
+    .topic:hover :global(.topic__illu) { transform: translateY(-4px); }
+  }
+
+  .latest-group + .latest-group { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+  .latest-group__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+  .latest-group__head h3 { margin: 0; font-size: var(--fs-h3); color: var(--ink); display: inline-flex; align-items: center; gap: 0.6rem; }
+  .latest-group__dot { width: 0.9rem; height: 0.9rem; border-radius: 50%; border: 1.5px solid var(--color-forest-ink); }
+  .latest-group__all { display: inline-flex; align-items: center; gap: 0.4em; font-size: var(--fs-small); font-weight: 500; color: var(--ink); }
+  .latest-group__all :global(svg) { width: 1em; transition: transform var(--dur-base) var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) { .latest-group__all:hover :global(svg) { transform: translateX(4px); } }
+
+  .method__grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-5); align-items: center; }
+  .method :global(.method__illu) { width: 7.5rem; margin-left: -0.75rem; }
+  .principles { list-style: none; padding: 0; margin-top: var(--space-3); display: grid; gap: var(--space-2); }
+  .principles li { font-weight: 500; font-size: 1.0625rem; line-height: 1.4; color: var(--ink); padding-top: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); }
+  .principles li:first-child { border-top: 0; padding-top: 0; }
+
+  .faq { margin-top: var(--space-3); border-top: 1px solid var(--line); }
+  .faq__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); padding-block: var(--space-5); border-bottom: 1px solid var(--line); }
+  .faq h3 { font-size: var(--fs-h2); line-height: 1.2; }
+  .faq dd p { color: var(--color-charcoal); }
+
+  @media (max-width: 960px) {
+    .hero, .method__grid { grid-template-columns: 1fr; }
+    .hero__copy { padding-block: var(--space-4); gap: var(--space-2); }
+    .hero__copy :global(.hero__sprig) { width: 6rem; right: -1rem; top: -0.5rem; bottom: auto; opacity: 0.6; transform: scaleY(-1); animation: none; }
+    .topics { grid-template-columns: 1fr; }
+    .topic { min-height: 0; }
+    .hero__note { padding: var(--space-4); }
+    .faq__row { grid-template-columns: 1fr; gap: var(--space-2); padding-block: var(--space-4); }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero__copy :global(.hero__sprig) { animation: none; } .topic, .topic :global(.topic__illu) { transition: none; } }
+</style>

@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const sources = [
+  { name: 'Svetová zdravotnícka organizácia (WHO)', url: 'https://www.who.int/', what: 'Globálne odporúčania k výžive dojčiat a malých detí.' },
+  { name: 'UNICEF', url: 'https://www.unicef.org/', what: 'Podpora dojčenia a výživa v ranom detstve.' },
+  { name: 'ESPGHAN', url: 'https://www.espghan.org/', what: 'Európska spoločnosť pre detskú gastroenterológiu, hepatológiu a výživu – odborné stanoviská k zloženiu mliek a príkrmom.' },
+  { name: 'EFSA', url: 'https://www.efsa.europa.eu/', what: 'Európsky úrad pre bezpečnosť potravín – vedecké posudky k zloženiu dojčenskej výživy.' },
+  { name: 'NHS (Spojené kráľovstvo)', url: 'https://www.nhs.uk/', what: 'Praktické pokyny pre rodičov – príprava mlieka, kŕmenie, príkrmy.' },
+  { name: 'American Academy of Pediatrics (HealthyChildren.org)', url: 'https://www.healthychildren.org/', what: 'Odporúčania americkej pediatrickej akadémie pre rodičov.' },
+  { name: 'CDC', url: 'https://www.cdc.gov/', what: 'Americké centrá pre kontrolu a prevenciu chorôb – dojčenie, uchovávanie mlieka, hygiena.' },
+  { name: 'Cochrane', url: 'https://www.cochranelibrary.com/', what: 'Systematické prehľady štúdií.' },
+];
+---
+<Base
+  alternates={{ cs: '/jak-tvorime-obsah/', sk: '/sk/ako-tvorime-obsah/' }}
+  title="O nás a ako tvoríme obsah"
+  description="Kto stojí za slovenskou verziou kojeneckemleko.cz, prečo sme nezávislí, z akých zdrojov čerpáme a ako opravujeme chyby."
+>
+  <article class="container page">
+    <header class="stack">
+      <p class="eyebrow">O nás a metodika</p>
+      <h1>Ako tvoríme obsah</h1>
+      <p class="lead">
+        Kŕmenie bábätka je téma, kde na presnosti záleží. Preto u nás neplatí „počula som, že…“ –
+        každé tvrdenie stojí na doložiteľnom zdroji.
+      </p>
+    </header>
+
+    <section class="stack block" id="o-nas">
+      <h2>O nás</h2>
+      <p>
+        Kojeneckemleko.cz je nezávislý sprievodca kŕmením bábätka. Vznikol v češtine a slovenská verzia
+        prináša preklady overených článkov. Chceme na jednom mieste ponúknuť zrozumiteľné informácie, ktoré stoja
+        na odporúčaniach odborných inštitúcií, nie na reklame.
+      </p>
+      <p>
+        Články píše a pravidelne kontroluje <strong>redakcia kojeneckemleko.cz</strong>. Slovenské články sú preklady
+        českých originálov s rovnakými zdrojmi; miestne údaje (tiesňové linky, úrady) upravujeme pre Slovensko.
+        Prevádzkovateľa webu nájdete na stránke <a href="/sk/ochrana-sukromia/">Ochrana súkromia</a>.
+      </p>
+    </section>
+
+    <section class="stack block" id="nezavislost">
+      <h2>Nezávislosť a financovanie</h2>
+      <ul class="principles">
+        <li><strong>Žiadna reklama na dojčenské mlieka</strong>, žiadne provízne (affiliate) odkazy, zľavové kupóny ani vzorky.</li>
+        <li><strong>Žiadna spolupráca s výrobcami ani predajcami</strong> mliek.</li>
+        <li><strong>Bez sledovacích nástrojov tretích strán.</strong> Návštevnosť meriame vlastným počítadlom bez cookies.</li>
+      </ul>
+      <p class="muted">Propagáciu počiatočnej dojčenskej výživy obmedzuje nariadenie EÚ 2016/127 a na Slovensku aj zákon o reklame. Aj preto v článkoch nemenujeme značky.</p>
+    </section>
+
+    <section class="stack block">
+      <h2>Naše zásady</h2>
+      <ol class="principles">
+        <li><strong>Medzinárodné zdroje na prvom mieste.</strong> Vychádzame z odporúčaní odborných inštitúcií a prehľadových štúdií, nie z marketingových materiálov výrobcov.</li>
+        <li><strong>Každý článok má zoznam zdrojov</strong> a dátum poslednej kontroly.</li>
+        <li><strong>Nevyhlasujeme „najlepšie mlieko“.</strong> Vysvetľujeme fakty a čo z nich vyplýva.</li>
+        <li><strong>Dojčenie rešpektujeme ako odporúčanú voľbu.</strong> Informácie o mliekach sú pre rodičov, ktorí ich potrebujú alebo sa pre ne rozhodli – bez hodnotenia.</li>
+        <li><strong>Nedávame individuálne zdravotné rady.</strong> Pri zdravotných ťažkostiach vždy odkazujeme na pediatra.</li>
+      </ol>
+    </section>
+
+    <section class="stack block" id="zdroje">
+      <h2>Zdroje, z ktorých čerpáme</h2>
+      <ul class="sources">
+        {sources.map((s) => (
+          <li class="panel panel--keylime">
+            <a href={s.url} rel="noopener" class="heading-sm">{s.name}</a>
+            <p class="muted">{s.what}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="stack block">
+      <h2>Aktualizácie a opravy</h2>
+      <p>Články pravidelne kontrolujeme oproti novým odporúčaniam. Pri každom článku je dátum poslednej aktualizácie.</p>
+      <p>Ak nájdete chybu – vecnú alebo jazykovú –, napíšte nám na kontaktnú adresu uvedenú na stránke <a href="/sk/ochrana-sukromia/">Ochrana súkromia</a>. Opravu urobíme a uvedieme nový dátum aktualizácie.</p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-6); }
+  .block { margin-top: var(--space-6); }
+  .principles { padding-left: 1.25rem; display: grid; gap: var(--space-2); }
+  .principles strong { font-weight: 600; color: var(--ink); }
+  .sources { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+  .sources li { padding: var(--space-4); display: grid; gap: var(--space-1); align-content: start; }
+  .sources a { text-decoration: none; }
+  .sources p { font-size: var(--fs-small); }
+  @media (hover: hover) and (pointer: fine) { .sources a:hover { text-decoration: underline; } }
+  @media (max-width: 640px) { .sources { grid-template-columns: 1fr; } }
+</style>

@@ -8,9 +8,10 @@ import type { CollectionEntry } from 'astro:content';
 import ArticleCover from './ArticleCover.astro';
 import Arrow from './Arrow.astro';
 import { clusterMeta } from '../data/clusters';
+import { langFromPath, t, articlePath, skClusterMeta } from '../i18n/ui';
 
 interface Props {
-  articles: CollectionEntry<'clanky'>[];
+  articles: (CollectionEntry<'clanky'> | CollectionEntry<'skClanky'>)[];
   /** Zobrazit název klastru v eyebrow (na úvodu ano, v rozcestníku ne) */
   showCluster?: boolean;
   headingLevel?: 'h2' | 'h3';
@@ -19,12 +20,15 @@ interface Props {
 }
 const { articles, showCluster = true, headingLevel = 'h3', feature = false } = Astro.props;
 const Heading = headingLevel;
-const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' });
+const lang = langFromPath(Astro.url.pathname);
+const L = t(lang);
+const clusterTitle = (c: keyof typeof clusterMeta) => (lang === 'sk' ? skClusterMeta[c].title : clusterMeta[c].title);
+const dateFmt = new Intl.DateTimeFormat(L.bcp47, { day: 'numeric', month: 'numeric', year: 'numeric' });
 ---
 <ul class:list={['cards', { 'cards--feature': feature && articles.length >= 3 }]}>
   {articles.map((a, i) => (
     <li style={`--i:${i}`} class:list={{ 'is-lead': i === 0 }}>
-      <a href={`/${a.data.cluster}/${a.id}/`} class="card">
+      <a href={articlePath(lang, a.data.cluster, a.id)} class="card">
         {a.data.cover?.photo ? (
           <span class="card__cover card__cover--photo">
             <img src={a.data.cover.photo} alt={a.data.cover.alt} width="1200" height="750" loading="lazy" decoding="async" class="card__photo" />
@@ -36,12 +40,12 @@ const dateFmt = new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numer
         )}
         <span class="card__body">
           <span class="eyebrow card__meta">
-            {showCluster && <>{clusterMeta[a.data.cluster].title} · </>}
+            {showCluster && <>{clusterTitle(a.data.cluster)} · </>}
             <time datetime={a.data.updated.toISOString()}>{dateFmt.format(a.data.updated)}</time>
           </span>
           <Heading class="heading-sm card__title">{a.data.title}</Heading>
           <span class="card__desc">{a.data.description}</span>
-          <span class="card__more">Číst článek <Arrow /></span>
+          <span class="card__more">{L.readMore} <Arrow /></span>
         </span>
       </a>
     </li>

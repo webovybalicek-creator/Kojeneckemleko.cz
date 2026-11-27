@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Article from '../../../layouts/Article.astro';
+import { articlePath, skCluster } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('skClanky', ({ data }) => import.meta.env.DEV || !data.draft);
+  const cs = await getCollection('clanky');
+  const byDate = [...articles].sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
+  return articles.map((entry) => {
+    const original = cs.find((c) => c.id === entry.data.cs);
+    if (!original) throw new Error(`SK článek ${entry.id}: neexistuje český originál „${entry.data.cs}“`);
+    const related = byDate.filter((a) => a.id !== entry.id && a.data.cluster === entry.data.cluster).slice(0, 3);
+    const alternates = { cs: articlePath('cs', original.data.cluster, original.id), sk: articlePath('sk', entry.data.cluster, entry.id) };
+    return { params: { cluster: skCluster[entry.data.cluster], slug: entry.id }, props: { entry, related, alternates } };
+  });
+}
+
+const { entry, related, alternates } = Astro.props;
+---
+<Article entry={entry} related={related} lang="sk" alternates={alternates} />

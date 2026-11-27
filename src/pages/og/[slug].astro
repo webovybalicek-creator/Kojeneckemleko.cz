@@ -9,10 +9,28 @@ import '../../styles/global.css';
 import ArticleCover from '../../components/ArticleCover.astro';
 import { clusterMeta } from '../../data/clusters';
 import { nastroje } from '../../data/nastroje';
+import { skClusterMeta } from '../../i18n/ui';
 
 export async function getStaticPaths() {
   const articles = await getCollection('clanky', ({ data }) => !data.draft);
+  const sk = await getCollection('skClanky', ({ data }) => !data.draft);
   return [
+    // Slovenské články: /og/sk-<slug>/ → public/images/og/sk-<slug>.png
+    ...sk.map((a) => ({
+      params: { slug: `sk-${a.id}` },
+      props: {
+        title: a.data.title,
+        eyebrow: skClusterMeta[a.data.cluster].title,
+        motif: a.data.cover?.motif ?? 'kvet',
+        tone: a.data.cover?.tone ?? 'sage',
+        photo: a.data.cover?.photo,
+        lang: 'sk',
+      },
+    })),
+    {
+      params: { slug: 'sk-default' },
+      props: { title: 'Nezávislý sprievodca kŕmením bábätka', eyebrow: 'Overené v zdrojoch WHO, NHS a ESPGHAN', motif: 'klicky', tone: 'sage', lang: 'sk' },
+    },
     ...articles.map((a) => ({
       params: { slug: a.id },
       props: {
@@ -43,10 +61,10 @@ export async function getStaticPaths() {
   ];
 }
 
-const { title, eyebrow, motif, tone, photo } = Astro.props as { title: string; eyebrow: string; motif: any; tone: string; photo?: string };
+const { title, eyebrow, motif, tone, photo, lang = 'cs' } = Astro.props as { title: string; eyebrow: string; motif: any; tone: string; photo?: string; lang?: string };
 ---
 <!doctype html>
-<html lang="cs">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="robots" content="noindex, nofollow" />

@@ -26,9 +26,7 @@ export const coverMotifs = ['lahev', 'kapka', 'hodiny', 'stit', 'klicky', 'oblak
 
 export const clusters = ['mleka', 'krmeni', 'prikrmy', 'batole'] as const;
 
-const clanky = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/clanky' }),
-  schema: z.object({
+const clankySchema = z.object({
     title: z.string().max(70),
     description: z.string().max(160),
     cluster: z.enum(clusters),
@@ -48,7 +46,20 @@ const clanky = defineCollection({
       photo: z.string().optional(),
       alt: z.string().optional(),
     }).refine((c) => !c.photo || c.alt, { message: 'Fotka potřebuje alt' }).optional(),
-  }),
+});
+
+const clanky = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/clanky' }),
+  schema: clankySchema,
+});
+
+/**
+ * Slovenská verze (/sk/). Překlad ověřeného českého článku se stejnými zdroji;
+ * `cs` = ID českého originálu (hreflang, přepínač jazyka). Lokální fakta (tísňová linka, úřady) slovenská.
+ */
+const skClanky = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/sk-clanky' }),
+  schema: clankySchema.extend({ cs: z.string(), author: z.string().default('Redakcia kojeneckemleko.cz') }),
 });
 
 /**
@@ -82,4 +93,4 @@ const mleka = defineCollection({
   }),
 });
 
-export const collections = { clanky, mleka };
+export const collections = { clanky, skClanky, mleka };

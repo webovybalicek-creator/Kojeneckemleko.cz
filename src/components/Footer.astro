@@ -1,6 +1,49 @@
 ---
+import { langFromPath, t } from '../i18n/ui';
+interface Props { /** URL stejné stránky v druhém jazyce (jinak úvod druhé verze) */ altUrl?: string }
+const lang = langFromPath(Astro.url.pathname);
+const L = t(lang);
+const altUrl = Astro.props.altUrl ?? (lang === 'sk' ? '/' : '/sk/');
 const year = new Date().getFullYear();
 ---
+{lang === 'sk' ? (
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="stack">
+        <p class="heading-sm footer-claim">Nezávislý sprievodca kŕmením bábätka, postavený na overených zdrojoch.</p>
+        <p class="muted small">
+          Dojčenie je podľa <a href="https://www.who.int/westernpacific/health-topics/infant-nutrition" rel="noopener">Svetovej zdravotníckej organizácie</a> odporúčaným spôsobom výživy dojčiat.
+          Informácie o dojčenských mliekach sú pre rodičov, ktorí ich potrebujú alebo sa pre ne rozhodli.
+        </p>
+      </div>
+      <nav aria-label="Pätička">
+        <p class="eyebrow">Témy</p>
+        <ul>
+          <li><a href="/sk/mlieka/">Dojčenské mlieka</a></li>
+          <li><a href="/sk/krmenie/">Kŕmenie</a></li>
+          <li><a href="/sk/prikrmy/">Príkrmy</a></li>
+          <li><a href="/sk/batolata/">Batoľa</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="O webe">
+        <p class="eyebrow">O webe</p>
+        <ul>
+          <li><a href="/sk/ako-tvorime-obsah/#o-nas">O nás</a></li>
+          <li><a href="/sk/ako-tvorime-obsah/">Ako tvoríme obsah</a></li>
+          <li><a href="/sk/ochrana-sukromia/">Ochrana súkromia</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p class="small muted">
+        Obsah webu má informatívny charakter a nenahrádza konzultáciu s pediatrom, pôrodnou asistentkou ani laktačnou poradkyňou.
+      </p>
+      <p class="small muted"><a href={altUrl} hreflang="cs" lang="cs" class="lang-switch">Česky</a> · © {year} kojeneckemleko.cz</p>
+    </div>
+  </div>
+</footer>
+) : (
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
@@ -40,10 +83,11 @@ const year = new Date().getFullYear();
       <p class="small muted">
         Obsah webu má informativní charakter a nenahrazuje konzultaci s pediatrem, porodní asistentkou ani laktační poradkyní.
       </p>
-      <p class="small muted">© {year} kojeneckemleko.cz</p>
+      <p class="small muted"><a href={altUrl} hreflang="sk" lang="sk" class="lang-switch">Slovensky</a> · © {year} kojeneckemleko.cz</p>
     </div>
   </div>
 </footer>
+)}
 
 <style>
   .site-footer { border-top: 1px solid var(--line); padding-block: var(--space-6) var(--space-4); margin-top: var(--section-gap); }
@@ -54,5 +98,6 @@ const year = new Date().getFullYear();
   @media (hover: hover) and (pointer: fine) { .footer-grid a:hover { color: var(--ink); text-decoration: underline; } }
   .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--line); }
   .small { font-size: var(--fs-small); }
+  .lang-switch { color: var(--color-charcoal); }
   @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr 1fr; } .footer-grid > :first-child { grid-column: 1 / -1; } }
 </style>

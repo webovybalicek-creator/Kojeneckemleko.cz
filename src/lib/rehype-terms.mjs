@@ -5,7 +5,9 @@ import { terms, termRegex } from '../data/terms.mjs';
 const SKIP = new Set(['a', 'abbr', 'code', 'pre', 'h1', 'h2', 'h3', 'h4', 'th', 'script', 'style']);
 
 export default function rehypeTerms() {
-  return (tree) => {
+  return (tree, file) => {
+    // Tooltipy jsou česky – slovenské články (src/content/sk-clanky) je nedostávají
+    if (String(file?.path ?? '').includes('/sk-clanky/')) return;
     const seen = new Set();
 
     const walk = (node) => {

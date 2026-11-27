@@ -1,5 +1,8 @@
 ---
-const nav = [
+import { langFromPath, t } from '../i18n/ui';
+const lang = langFromPath(Astro.url.pathname);
+const L = t(lang);
+const navCs = [
   { href: '/mleka/', label: 'Kojenecká mléka' },
   { href: '/krmeni/', label: 'Krmení' },
   { href: '/prikrmy/', label: 'Příkrmy' },
@@ -8,16 +11,25 @@ const nav = [
   { href: '/slovnicek/', label: 'Slovníček' },
   { href: '/jak-tvorime-obsah/', label: 'Jak tvoříme obsah' },
 ];
+const navSk = [
+  { href: '/sk/mlieka/', label: 'Dojčenské mlieka' },
+  { href: '/sk/krmenie/', label: 'Kŕmenie' },
+  { href: '/sk/prikrmy/', label: 'Príkrmy' },
+  { href: '/sk/batolata/', label: 'Batoľa' },
+  { href: '/sk/ako-tvorime-obsah/', label: 'Ako tvoríme obsah' },
+];
+const nav = lang === 'sk' ? navSk : navCs;
+const home = lang === 'sk' ? '/sk/' : '/';
 const path = Astro.url.pathname;
 const isActive = (href: string) => path.startsWith(href);
 ---
 <header class="site-header">
   <div class="container site-header__inner">
-    <a href="/" class="logo" aria-label="kojeneckemleko.cz – úvod">
+    <a href={home} class="logo" aria-label={`kojeneckemleko.cz – ${L.home.toLowerCase()}`}>
       <span class="logo__name">kojeneckemleko</span><span class="logo__tld">.cz</span>
     </a>
 
-    <nav class="nav" aria-label="Hlavní navigace">
+    <nav class="nav" aria-label={L.mainNav}>
       <ul>
         {nav.map((item) => (
           <li><a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>{item.label}</a></li>
@@ -25,18 +37,18 @@ const isActive = (href: string) => path.startsWith(href);
       </ul>
     </nav>
 
-    <a href="/mleka/srovnani/" class="btn header-cta">Srovnání mlék</a>
+    {lang === 'cs' && <a href="/mleka/srovnani/" class="btn header-cta">Srovnání mlék</a>}
 
     <details class="mobile-nav">
-      <summary aria-label="Menu">
+      <summary aria-label={L.menu}>
         <span class="burger" aria-hidden="true"><span></span><span></span></span>
       </summary>
       <div class="mobile-nav__panel">
         <ul>
-          <li><a href="/zacnete-tady/">Začněte tady</a></li>
-          <li><a href="/prvni-rok/">První rok krmení</a></li>
+          {lang === 'cs' && <li><a href="/zacnete-tady/">Začněte tady</a></li>}
+          {lang === 'cs' && <li><a href="/prvni-rok/">První rok krmení</a></li>}
           {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
-          <li><a href="/mleka/srovnani/" class="btn">Srovnání mlék</a></li>
+          {lang === 'cs' && <li><a href="/mleka/srovnani/" class="btn">Srovnání mlék</a></li>}
         </ul>
       </div>
     </details>

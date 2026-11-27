@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base
+  alternates={{ cs: '/ochrana-soukromi/', sk: '/sk/ochrana-sukromia/' }}
+  title="Ochrana súkromia"
+  description="Ako kojeneckemleko.cz meria návštevnosť – bez cookies, bez sledovania a bez zdieľania dát s tretími stranami."
+>
+  <article class="container page stack">
+    <p class="eyebrow">Súkromie</p>
+    <h1>Ochrana súkromia</h1>
+    <p class="lead">Web nepoužíva cookies, reklamné ani sledovacie nástroje tretích strán.</p>
+
+    <h2>Meranie návštevnosti</h2>
+    <p>Aby sme vedeli, ktoré články sú užitočné, počítame návštevnosť vlastným jednoduchým nástrojom na našom serveri. Ukladáme len:</p>
+    <ul>
+      <li>ktorú stránku ste otvorili (adresa bez parametrov),</li>
+      <li>z akého webu ste prišli (len názov domény, napr. google.com),</li>
+      <li>súhrnné počty zobrazení a návštevníkov za deň,</li>
+      <li>súhrnné počty niekoľkých akcií na stránke – napríklad koľkokrát bol článok dočítaný alebo rozbalená častá otázka. Ukladáme len počet za deň a adresu stránky, nie to, kto akciu urobil.</li>
+    </ul>
+    <p>
+      Aby sme toho istého návštevníka počas dňa nepočítali viackrát, vytvoríme z IP adresy a typu prehliadača jednosmerný odtlačok
+      s náhodnou soľou, ktorá sa každý deň mení. IP adresu ani odtlačok trvalo neukladáme – odtlačky a soľ sa zmažú najneskôr pri prvej návšteve nasledujúceho dňa,
+      zostávajú len súhrnné čísla. Z dát nie je možné spätne zistiť, kto ste.
+    </p>
+    <p>Ak máte v prehliadači zapnuté „Do Not Track“ alebo Global Privacy Control, návštevu vôbec nezapočítame.</p>
+    <p>Jediná výnimka sa týka prevádzkovateľa webu: aby sa do štatistík nepočítali jeho vlastné návštevy, ukladáme jednosmerný odtlačok jeho IP adresy. Návštevníkov sa to netýka.</p>
+    <p>Nástroje a komentáre zatiaľ fungujú len v <a href="/ochrana-soukromi/" hreflang="cs">českej verzii webu</a>, kde je opísané aj to, ako s nimi narábame.</p>
+
+    <h3 id="prevadzkovatel" class="operator-title">Prevádzkovateľ webu</h3>
+    <p class="operator">
+      Vladimír Fischer, IČ: 03051820<br />
+      so sídlom Nerudova 765/10, 251 01 Říčany, Česká republika<br />
+      zapísaný v živnostenskom registri vedenom Mestským úradom Říčany 538728, CZ0209 – Praha-východ<br />
+      Kontaktná adresa: Vladimír Fischer, Nerudova 765/10, Říčany
+    </p>
+  </article>
+</Base>
+
+<style>
+  .page { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-6); }
+  .page h2 { margin-top: var(--space-5); }
+  .operator-title { margin-top: var(--space-6); font-size: var(--fs-small); color: var(--text-muted); }
+  .operator { margin-top: var(--space-1); color: var(--text-muted); font-size: var(--fs-small); line-height: 1.7; }
+  .page ul { padding-left: 1.25rem; display: grid; gap: var(--space-1); }
+</style>

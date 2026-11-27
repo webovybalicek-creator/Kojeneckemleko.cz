@@ -1,0 +1,221 @@
+---
+/**
+ * Šablona článku – společná pro češtinu (/<rubrika>/<slug>/) i slovenštinu (/sk/<rubrika>/<slug>/).
+ */
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import Base from './Base.astro';
+import SourceList from '../components/SourceList.astro';
+import { clusterMeta } from '../data/clusters';
+import { annotate } from '../data/terms.mjs';
+import ArticleCards from '../components/ArticleCards.astro';
+import ArticleCover from '../components/ArticleCover.astro';
+import Comments from '../components/Comments.astro';
+import { t, clusterPath, skClusterMeta, type Lang } from '../i18n/ui';
+
+type Entry = CollectionEntry<'clanky'> | CollectionEntry<'skClanky'>;
+interface Props { entry: Entry; related: Entry[]; lang: Lang; alternates?: { cs: string; sk: string } }
+
+const { entry, related, lang, alternates } = Astro.props;
+const L = t(lang);
+const { Content, headings } = await render(entry);
+// Obsah článku (kotvy) jen u delších článků: nad 700 slov a aspoň 5 sekcí H2.
+const wordCount = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+const toc = headings.filter((h) => h.depth === 2);
+const showToc = wordCount > 700 && toc.length >= 5;
+const { data } = entry;
+const meta = lang === 'sk' ? skClusterMeta[data.cluster] : clusterMeta[data.cluster];
+const hubUrl = clusterPath(lang, data.cluster);
+const homeUrl = lang === 'sk' ? '/sk/' : '/';
+const url = new URL(Astro.url.pathname, Astro.site).toString();
+const dateFmt = new Intl.DateTimeFormat(L.bcp47, { day: 'numeric', month: 'long', year: 'numeric' });
+// Obrázek pro sdílení: slovenské články mají vlastní /images/og/sk-<slug>.png
+const ogId = lang === 'sk' ? `sk-${entry.id}` : entry.id;
+const lead = lang === 'sk' ? data.description : annotate(data.description);
+// Štítek „Ověřeno“ pod nadpisem: počet zdrojů a hlavní instituce (zkratky z pole publisher)
+const INSTITUCE: [RegExp, string][] = [
+  [/\bWHO\b|Světová zdravotnická/, 'WHO'], [/UNICEF/, 'UNICEF'], [/ESPGHAN/, 'ESPGHAN'], [/EFSA/, 'EFSA'],
+  [/\bNHS\b/, 'NHS'], [/\bNICE\b/, 'NICE'], [/American Academy of Pediatrics|\bAAP\b/, 'AAP'], [/\bCDC\b|Centers for Disease/, 'CDC'],
+  [/\bFDA\b/, 'FDA'], [/Cochrane/, 'Cochrane'], [/First Steps/, 'First Steps'], [/\bBfR\b/, 'BfR'], [/EAACI/, 'EAACI'],
+  [/SZPI/, 'SZPI'], [/\bSZÚ\b|Státní zdravotní ústav/, 'SZÚ'], [/Ministerstvo zdravotnictví/, 'MZd'],
+];
+const instituce = [...new Set(data.sources.flatMap((s) => {
+  const hit = INSTITUCE.find(([re]) => re.test(s.publisher));
+  return hit && s.kind !== 'studie' ? [hit[1]] : [];
+}))];
+const pocetStudii = data.sources.filter((s) => s.kind === 'studie').length;
+const zdrojuSlovo = L.sourceWord;
+const studiiSlovo = L.studyWord;
+const shrnuti = [instituce.slice(0, 4).join(', '), pocetStudii ? `${pocetStudii} ${studiiSlovo(pocetStudii)}` : ''].filter(Boolean).join(' + ');
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: data.title,
+  description: data.description,
+  datePublished: data.published.toISOString(),
+  dateModified: data.updated.toISOString(),
+  author: data.author.startsWith('Redakce')
+    ? { '@type': 'Organization', name: data.author, url: Astro.site?.toString() }
+    : { '@type': 'Person', name: data.author },
+  publisher: { '@id': new URL('/#organizace', Astro.site).toString() },
+  inLanguage: L.bcp47,
+  mainEntityOfPage: url,
+  image: [new URL(`/images/og/${ogId}.png`, Astro.site).toString(), ...(data.cover?.photo ? [new URL(data.cover.photo, Astro.site).toString()] : [])],
+  citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url, publisher: s.publisher })),
+};
+const faqLd = data.faq.length
+  ? [{
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: data.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    }]
+  : [];
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: L.home, item: new URL(homeUrl, Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: meta.title, item: new URL(hubUrl, Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: data.title, item: url },
+  ],
+};
+---
+<Base title={data.title} description={data.description} ogType="article" ogImage={`/images/og/${ogId}.png`} jsonLd={[articleLd, breadcrumbs, ...faqLd]} noindex={data.draft} ads={data.cluster !== 'mleka'} alternates={alternates}>
+  <article class="container article">
+    <header class="article__head">
+      <nav class="crumbs" aria-label={L.crumbs}>
+        <a href={homeUrl}>{L.home}</a> <span aria-hidden="true">/</span> <a href={hubUrl}>{meta.title}</a>
+      </nav>
+      <h1>{data.title}</h1>
+      <a href="#zdroje" class="verified">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>{L.verified} <time datetime={data.updated.toISOString()}>{dateFmt.format(data.updated)}</time></span>
+        <span class="verified__sep" aria-hidden="true">·</span>
+        <span>{data.sources.length} {zdrojuSlovo(data.sources.length)}{shrnuti && <span class="verified__list">: {shrnuti}</span>}</span>
+      </a>
+      <p class="lead" set:html={lead} />
+      <p class="byline muted">
+        {data.author} · {L.published} <time datetime={data.published.toISOString()}>{dateFmt.format(data.published)}</time>
+        · <a href={L.howWeWorkUrl}>{L.howWeWork}</a>
+      </p>
+      {data.cover?.photo ? (
+        <figure class="article__cover article__cover--photo">
+          <img src={data.cover.photo} alt={data.cover.alt} width="1200" height="750" loading="eager" fetchpriority="high" decoding="async" />
+        </figure>
+      ) : data.cover ? (
+        <figure class:list={['article__cover', `panel--${data.cover.tone}`]} aria-hidden="true">
+          <ArticleCover motif={data.cover.motif} class="article__illu" />
+        </figure>
+      ) : null}
+    </header>
+
+    {showToc && (
+      <details class="toc">
+        <summary>{L.toc} <span class="toc__count">({toc.length} {L.tocParts})</span></summary>
+        <ol>
+          {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+        </ol>
+      </details>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {data.faq.length > 0 && (
+      <section class="faq" aria-labelledby="caste-otazky">
+        <h2 id="caste-otazky">{L.faq}</h2>
+        {data.faq.map((f) => (
+          <details class="faq__item">
+            <summary>{f.q}</summary>
+            <p>
+              {f.a}
+              {f.cite.length > 0 && (
+                <sup class="cite">{f.cite.map((n, k) => <>{k > 0 && ','}<a href={`#zdroj-${n}`} aria-label={`${L.source} ${n}`}>{n}</a></>)}</sup>
+              )}
+            </p>
+          </details>
+        ))}
+      </section>
+    )}
+
+    <SourceList sources={data.sources} updated={data.updated} />
+
+    <p class="disclaimer muted">{L.disclaimer}</p>
+
+    {lang === 'cs' && <Comments path={Astro.url.pathname} />}
+  </article>
+
+  {related.length > 0 && (
+    <section class="container related" aria-labelledby="souvisejici">
+      <h2 id="souvisejici">{L.related}</h2>
+      <ArticleCards articles={related} />
+    </section>
+  )}
+</Base>
+
+<style>
+  .article { max-width: calc(46rem + 2 * var(--gutter)); padding-top: var(--space-5); }
+  .article__cover { margin: var(--space-2) 0 0; border-radius: var(--radius-card); overflow: hidden; aspect-ratio: 16 / 9; display: grid; place-items: center; }
+  .article__cover--photo { background: var(--color-keylime-wash); }
+  .article__cover--photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.9); }
+  .article__cover :global(.article__illu) { width: min(52%, 22rem); height: auto; }
+  .article__head { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); }
+  .crumbs, .byline { font-size: var(--fs-small); }
+  .verified {
+    justify-self: start; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.45rem;
+    padding: 0.4rem 0.85rem; border-radius: var(--radius-pill); background: var(--color-keylime-wash);
+    font-size: var(--fs-small); font-weight: 500; color: var(--ink); text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .verified svg { flex: none; }
+  .verified__list { font-weight: 400; color: var(--color-charcoal); }
+  .verified__sep { color: var(--text-muted); }
+  .verified:active { transform: scale(0.97); }
+  @media (hover: hover) and (pointer: fine) { .verified:hover { background: var(--color-mint-veil); } }
+  @media (prefers-reduced-motion: reduce) { .verified { transition: none; } }
+  .crumbs a { color: var(--text-muted); }
+
+  .prose { margin-bottom: var(--space-5); }
+  .prose :global(h2), .prose :global(h3) { scroll-margin-top: 5rem; }
+  .toc { margin-bottom: var(--space-5); padding: var(--space-3) var(--space-4); background: var(--color-keylime-wash); border-radius: var(--radius-card); font-size: var(--fs-small); }
+  .toc summary { cursor: pointer; font-weight: 600; list-style-position: inside; }
+  .toc__count { font-weight: 400; color: var(--text-muted); }
+  .toc ol { margin: var(--space-3) 0 0; padding-left: 1.4rem; display: grid; gap: 0.35rem; }
+  .toc a { text-decoration-thickness: 1px; }
+  .prose :global(> * + *) { margin-top: 1.1em; }
+  .prose :global(h2) { margin-top: 1.8em; }
+  .prose :global(h3) { margin-top: 1.5em; }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.25rem; }
+  .prose :global(li + li) { margin-top: 0.35em; }
+  .prose :global(table) { width: 100%; border-collapse: collapse; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+  .prose :global(th), .prose :global(td) { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--line); }
+  @media (max-width: 640px) {
+    .prose :global(table) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .prose :global(th), .prose :global(td) { padding: 0.6rem 0.5rem; min-width: 7.5rem; }
+    .prose :global(th:first-child), .prose :global(td:first-child) { min-width: 5.5rem; }
+  }
+  .prose :global(blockquote) { border-left: 2px solid var(--color-sage-mist); padding-left: var(--space-3); color: var(--text-muted); }
+
+  .disclaimer { font-size: var(--fs-small); margin-top: var(--space-4); }
+  .faq { margin-bottom: var(--space-5); }
+  .faq h2 { margin-bottom: var(--space-3); }
+  .faq__item { border-bottom: 1px solid var(--line); }
+  .faq__item:first-of-type { border-top: 1px solid var(--line); }
+  .faq__item summary {
+    cursor: pointer; list-style: none; padding: var(--space-2) 2rem var(--space-2) 0; position: relative;
+    font-weight: 600; color: var(--ink);
+  }
+  .faq__item summary::-webkit-details-marker { display: none; }
+  .faq__item summary::after {
+    content: ''; position: absolute; right: 0.25rem; top: 50%; width: 0.55rem; height: 0.55rem;
+    border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+    transform: translateY(-70%) rotate(45deg); transition: transform var(--dur-base) var(--ease-out);
+  }
+  .faq__item[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+  .faq__item p { padding: 0 0 var(--space-3); color: var(--text); }
+  @media (prefers-reduced-motion: reduce) { .faq__item summary::after { transition: none; } }
+  .related { padding-top: var(--space-6); padding-bottom: var(--space-6); border-top: 1px solid var(--line); margin-top: var(--space-6); }
+  .related h2 { margin-bottom: var(--space-4); }
+</style>

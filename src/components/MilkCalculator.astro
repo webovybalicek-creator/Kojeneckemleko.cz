@@ -1,19 +1,28 @@
 ---
 // Orientační výpočet denního množství pro kojence do 6 měsíců:
 // NHS: 150–200 ml/kg/den; AAP: nejvýše cca 960 ml/den.
+import { langFromPath } from '../i18n/ui';
+const sk = langFromPath(Astro.url.pathname) === 'sk';
+const T = sk
+  ? { eyebrow: 'Orientačný výpočet · 0–6 mesiacov', label: 'Hmotnosť bábätka', ph: 'napr. 4,5', hint: 'Výpočet podľa NHS: 150–200 ml na kilogram za deň.', start: 'Zadajte hmotnosť v kilogramoch.',
+      range: 'Zadajte hmotnosť medzi 2 a 10 kg.', day: 'ml za deň', max: 'Americká pediatrická akadémia uvádza ako obvyklé maximum asi 960 ml denne. Ak bábätko dlhodobo chce viac, poraďte sa s pediatrom.',
+      avg: 'Ide o priemer. Bábätko môže jeden deň piť viac a iný deň menej – riaďte sa jeho signálmi.', locale: 'sk-SK' }
+  : { eyebrow: 'Orientační výpočet · 0–6 měsíců', label: 'Hmotnost miminka', ph: 'např. 4,5', hint: 'Výpočet podle NHS: 150–200 ml na kilogram za den.', start: 'Zadejte hmotnost v kilogramech.',
+      range: 'Zadejte hmotnost mezi 2 a 10 kg.', day: 'ml za den', max: 'Americká pediatrická akademie uvádí jako obvyklé maximum asi 960 ml denně. Pokud miminko dlouhodobě chce víc, poraďte se s pediatrem.',
+      avg: 'Jde o průměr. Miminko může jeden den pít víc a jiný den méně – řiďte se jeho signály.', locale: 'cs-CZ' };
 ---
-<div class="calc panel panel--slate">
+<div class="calc panel panel--slate" data-t={JSON.stringify(T)}>
   <div class="calc__inner panel panel--cream">
-    <p class="eyebrow">Orientační výpočet · 0–6 měsíců</p>
-    <label for="calc-weight" class="calc__label">Hmotnost miminka</label>
+    <p class="eyebrow">{T.eyebrow}</p>
+    <label for="calc-weight" class="calc__label">{T.label}</label>
     <div class="calc__input">
-      <input id="calc-weight" type="number" inputmode="decimal" min="2" max="10" step="0.1" placeholder="např. 4,5" aria-describedby="calc-hint" />
+      <input id="calc-weight" type="number" inputmode="decimal" min="2" max="10" step="0.1" placeholder={T.ph} aria-describedby="calc-hint" />
       <span>kg</span>
     </div>
-    <p id="calc-hint" class="muted small">Výpočet podle NHS: 150–200 ml na kilogram za den.</p>
+    <p id="calc-hint" class="muted small">{T.hint}</p>
     <output for="calc-weight" class="calc__out" aria-live="polite">
       <span class="calc__value tabular" data-value>–</span>
-      <span class="muted small" data-note>Zadejte hmotnost v kilogramech.</span>
+      <span class="muted small" data-note>{T.start}</span>
     </output>
   </div>
 </div>
@@ -22,7 +31,8 @@
   const input = document.querySelector<HTMLInputElement>('#calc-weight');
   const value = document.querySelector<HTMLElement>('[data-value]');
   const note = document.querySelector<HTMLElement>('[data-note]');
-  const fmt = new Intl.NumberFormat('cs-CZ');
+  const T = JSON.parse(document.querySelector<HTMLElement>('.calc')?.dataset.t ?? '{}');
+  const fmt = new Intl.NumberFormat(T.locale);
   const round10 = (n: number) => Math.round(n / 10) * 10;
 
   input?.addEventListener('input', () => {
@@ -30,15 +40,15 @@
     if (!value || !note) return;
     if (!kg || kg < 2 || kg > 10) {
       value.textContent = '–';
-      note.textContent = 'Zadejte hmotnost mezi 2 a 10 kg.';
+      note.textContent = T.range;
       return;
     }
     const lo = round10(kg * 150);
     const hi = round10(kg * 200);
-    value.textContent = `${fmt.format(lo)}–${fmt.format(hi)} ml za den`;
+    value.textContent = `${fmt.format(lo)}–${fmt.format(hi)} ${T.day}`;
     note.textContent = hi > 960
-      ? 'Americká pediatrická akademie uvádí jako obvyklé maximum asi 960 ml denně. Pokud miminko dlouhodobě chce víc, poraďte se s pediatrem.'
-      : 'Jde o průměr. Miminko může jeden den pít víc a jiný den méně – řiďte se jeho signály.';
+      ? T.max
+      : T.avg;
   });
 </script>
 

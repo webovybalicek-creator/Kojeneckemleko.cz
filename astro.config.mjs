@@ -4,11 +4,12 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeTerms from './src/lib/rehype-terms.mjs';
 import rehypeCite from './src/lib/rehype-cite.mjs';
+import rehypeSkLinks from './src/lib/rehype-sk-links.mjs';
 
 export default defineConfig({
   site: 'https://kojeneckemleko.cz',
   trailingSlash: 'always',
-  markdown: { rehypePlugins: [rehypeCite, rehypeTerms] },
+  markdown: { rehypePlugins: [rehypeCite, rehypeTerms, rehypeSkLinks] },
   integrations: [
     mdx(),
     sitemap({

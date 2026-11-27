@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import RecallBar from '../components/RecallBar.astro';
 import Footer from '../components/Footer.astro';
+import { langFromPath, t } from '../i18n/ui';
 
 interface Props {
   title: string;
@@ -19,12 +20,19 @@ interface Props {
    * Reklamní skript se smí vykreslit jen pod podmínkou `ads`.
    */
   ads?: boolean;
+  /** Jazykové verze stejné stránky (hreflang + přepínač v patičce), cesty od kořene */
+  alternates?: { cs: string; sk: string };
 }
 
-const { title, description, jsonLd = [], noindex = false, ogType = 'website', ogImage = '/images/og/default.png', ads = true } = Astro.props;
+const { title, description, jsonLd = [], noindex = false, ogType = 'website', ogImage: ogImageProp, ads = true, alternates } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const L = t(lang);
+const ogImage = ogImageProp ?? (lang === 'sk' ? '/images/og/sk-default.png' : '/images/og/default.png');
 const ogImageUrl = new URL(ogImage, Astro.site).toString();
-const siteName = 'Kojenecké mléko';
-const fullTitle = title === siteName ? `${siteName} – průvodce krmením miminka` : `${title} | ${siteName}`;
+const siteName = L.siteName;
+const fullTitle = title === siteName ? `${siteName} – ${L.siteTagline}` : `${title} | ${siteName}`;
+const altUrl = alternates ? (lang === 'sk' ? alternates.cs : alternates.sk) : undefined;
+const homeUrl = new URL(lang === 'sk' ? '/sk/' : '/', Astro.site).toString();
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
 const baseLd = [
@@ -32,8 +40,8 @@ const baseLd = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: siteName,
-    url: Astro.site?.toString(),
-    inLanguage: 'cs-CZ',
+    url: homeUrl,
+    inLanguage: L.bcp47,
     publisher: { '@id': new URL('/#organizace', Astro.site).toString() },
   },
   {
@@ -42,20 +50,29 @@ const baseLd = [
     '@id': new URL('/#organizace', Astro.site).toString(),
     name: 'kojeneckemleko.cz',
     url: Astro.site?.toString(),
-    description: 'Nezávislý průvodce krmením miminka pro rodiče v ČR. Bez reklamy na kojenecká mléka a bez provizí.',
-    publishingPrinciples: new URL('/jak-tvorime-obsah/', Astro.site).toString(),
+    description: lang === 'sk'
+      ? 'Nezávislý sprievodca kŕmením bábätka. Bez reklamy na dojčenské mlieka a bez provízií.'
+      : 'Nezávislý průvodce krmením miminka pro rodiče v ČR. Bez reklamy na kojenecká mléka a bez provizí.',
+    publishingPrinciples: new URL(L.howWeWorkUrl, Astro.site).toString(),
   },
   ...jsonLd,
 ];
 ---
 <!doctype html>
-<html lang="cs">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates && !noindex && (
+      <>
+        <link rel="alternate" hreflang="cs-CZ" href={new URL(alternates.cs, Astro.site)} />
+        <link rel="alternate" hreflang="sk-SK" href={new URL(alternates.sk, Astro.site)} />
+        <link rel="alternate" hreflang="x-default" href={new URL(alternates.cs, Astro.site)} />
+      </>
+    )}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     {!ads && <meta name="km-reklama" content="ne" />}
     <meta name="theme-color" content="#fffefc" />
@@ -69,7 +86,7 @@ const baseLd = [
     </script>
 
     <meta property="og:type" content={ogType} />
-    <meta property="og:locale" content="cs_CZ" />
+    <meta property="og:locale" content={L.locale} />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -83,13 +100,13 @@ const baseLd = [
     {baseLd.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
   </head>
   <body>
-    <a class="skip-link" href="#obsah">Přeskočit na obsah</a>
-    <RecallBar />
+    <a class="skip-link" href="#obsah">{L.skip}</a>
+    {lang === 'cs' && <RecallBar />}
     <Header />
     <main id="obsah">
       <slot />
     </main>
-    <Footer />
+    <Footer altUrl={altUrl} />
     <script is:inline>
       // Posun tooltipu .term, aby se vešel do šířky okna
       (function () {
